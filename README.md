@@ -33,7 +33,7 @@
     │   ├── exception
     │   ├── response
     │   └── ...
-    └── ServerApplication
+    └── ApiApplication
 ```
 
 <!--
