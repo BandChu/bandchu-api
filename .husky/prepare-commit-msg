@@ -1,0 +1,28 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/husky.sh"
+
+COMMIT_MSG_FILE="$1"
+
+echo "--- DEBUG: All skip checks passed. Attempting JIRA prefix. ---"
+
+BRANCH_NAME=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")
+FIRST_LINE=$(head -n1 "$COMMIT_MSG_FILE")
+
+if echo "$BRANCH_NAME" | grep -Eq '^(main|develop)$'; then
+  echo "Skipping Jira prefix on branch: $BRANCH_NAME"
+  exit 0
+fi
+
+if echo "$FIRST_LINE" | grep -Eq '^(Merge|Revert|Amend|Reset|Rebase|Tag)'; then
+  echo "Skipping Jira prefix for auto commit ($FIRST_LINE)"
+  exit 0
+fi
+
+if grep -Eq '^\[[A-Z]+-[0-9]+\]' "$COMMIT_MSG_FILE"; then
+  echo "Jira prefix already exists. Skipping auto-prefix."
+  exit 0
+fi
+
+npx --no-install jira-prepare-commit-msg "$COMMIT_MSG_FILE"
+
+echo "--- DEBUG: JIRA prefix command finished. ---"
