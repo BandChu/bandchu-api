@@ -6,6 +6,6 @@
 		"jira-prepare-commit-msg": "^1.7.2"
 	},
     "scripts": {
-      "prepare": "huskyㅋ"
+      "prepare": "husky"
     }
 }
