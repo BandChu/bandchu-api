@@ -36,25 +36,25 @@ graph TD;
 
 ### 1. 이슈 생성
 
-![task-1](./assets/task-1.png)
+<div align="center"><img src="./assets/task-1.png" width="80%" alt="task-1" /></div>
 
 - 작업을 시작하기 전, 이슈 템플릿을 기반으로 GitHub Issue를 생성합니다.
 - 브랜치 이름은 영문 소문자와 하이픈을 사용하는 것을 권장합니다.
 
 ### 2. Jira 브랜치 생성
 
-![task-2](./assets/task-2.png)
+<div align="center"><img src="./assets/task-2.png" width="70%" alt="task-2" /></div>
 
 - [GitHub Actions Workflow](https://github.com/BandChu/bandchu-api/blob/develop/.github/workflows/create-jira-issue.yml)가 이슈 생성 이벤트를 감지하여 Jira Task를 생성합니다.
 
-![task-3](./assets/task-3.png)
+<div align="center"><img src="./assets/task-3.png" width="70%" alt="task-3" /></div>
 
 - 생성된 Jira Task의 티켓 번호가 이슈 제목 앞에 자동으로 태그되며, 동일한 키를 포함한 브랜치가 자동으로 생성됩니다.  
   (예: `feature/BC-23-member-register`)
 
 ### 3. 생성된 브랜치에서 작업
 
-![task-4](./assets/task-4.png)
+<div align="center"<img src="./assets/task-4.png" width="70%" alt="task-4" /></div>
 
 ```bash
 git fetch origin
@@ -70,7 +70,7 @@ git pull origin develop
 
 ### 4. PR(Pull Request) 생성
 
-![task-5](./assets/task-5.png)
+<div align="center"><img src="./assets/task-5.png" width="70%" alt="task-5" /></div>
 
 - 작업이 완료되면, `develop`에 작업 브랜치를 병합하기 위한 PR을 생성합니다.
 - **PR 제목에도 Jira 티켓 번호를 포함**시켜 이력 추적성을 유지하도록 합니다. (예: [BC-16] 회원 가입 기능 구현)
@@ -81,7 +81,7 @@ git pull origin develop
 
 ### 6. 이슈 자동 종료
 
-![task-6](./assets/task-6.png)
+<div align="center"><img src="./assets/task-6.png" width="70%" alt="task-6" /></div>
 
 - GitHub Issue가 닫히면, 연결된 **Jira Task의 상태도 자동으로 Done으로 변경**됩니다.
 
@@ -112,7 +112,7 @@ npm install
 
 ### 사용 예시
 
-![commit](./assets/commit.png)
+<div align="center"><img src="./assets/commit.png" width="70%" alt="commit" /></div>
 
 - 커밋 컨벤션에 어긋난 커밋을 작성할 시 위와 같이 커밋이 거부됩니다.
 - main, develop 이 아닌 브랜치에서는 Jira 티켓 넘버 태그가 자동으로 커밋 맨 앞에 추가됩니다.
