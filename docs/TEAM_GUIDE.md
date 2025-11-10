@@ -34,50 +34,93 @@ graph TD;
 
 <br>
 
-1. **이슈 생성**
+### 1. 이슈 생성
 
-    - 작업을 시작하기 전, GitHub Issue를 생성합니다.
-    - 제목과 브랜치 정보를 입력하면, 자동으로 Jira Task가 생성됩니다.
+![task-1](./assets/task-1.png)
 
-2. **Jira 브랜치 생성**
+- 작업을 시작하기 전, 이슈 템플릿을 기반으로 GitHub Issue를 생성합니다.
+- 브랜치 이름은 영문 소문자와 하이픈을 사용하는 것을 권장합니다.
 
-    - GitHub Actions가 이슈 생성 이벤트를 감지하여 Jira Task를 생성합니다.
-    - 해당 티켓 번호(JIRA_KEY)가 이슈 제목 앞에 자동으로 태그되며, 동일한 키를 포함한 브랜치가 자동으로 생성됩니다.  
-      (예: `feature/BC-23-member-register`)
+### 2. Jira 브랜치 생성
 
-3. **생성된 브랜치에서 작업**
+![task-2](./assets/task-2.png)
 
-    - 자동으로 생성된 브랜치에서 기능 구현, 버그 수정, 리팩토링 등 이슈 관련 작업을 진행합니다.
+- [GitHub Actions Workflow](https://github.com/BandChu/bandchu-api/blob/develop/.github/workflows/create-jira-issue.yml)가 이슈 생성 이벤트를 감지하여 Jira Task를 생성합니다.
 
-4. **PR(Pull Request) 생성**
+![task-3](./assets/task-3.png)
 
-    - 작업 완료 후 PR을 생성합니다.
-    - **PR 제목에도 Jira 티켓 번호를 포함**시켜 이력 추적성을 유지하도록 합니다. (예: [BC-23] 회원 가입 기능 구현)
+- 생성된 Jira Task의 티켓 번호가 이슈 제목 앞에 자동으로 태그되며, 동일한 키를 포함한 브랜치가 자동으로 생성됩니다.  
+  (예: `feature/BC-23-member-register`)
 
-5. **리뷰 및 머지(Merge)**
+### 3. 생성된 브랜치에서 작업
 
-    - 코드 리뷰 또는 검토 과정을 거친 후 develop 브랜치로 머지합니다.
+![task-4](./assets/task-4.png)
 
-6. **이슈 자동 종료**
+```bash
+git fetch origin
+git checkout {생성된-브랜치-이름}
+```
 
-    - GitHub Issue가 닫히면, 연결된 Jira Task의 상태도 자동으로 Done으로 변경됩니다.
+- 자동으로 생성된 브랜치에서 기능 구현, 버그 수정, 리팩토링 등 이슈 관련 작업을 진행합니다.
 
-7. **브랜치 정리**
+```bash
+git pull origin develop
+```
+- 작업 중에는 주기적으로 위 명령어로 팀의 최신 `develop` 브랜치 변경사항을 반영해주세요!
 
-    - 머지된 브랜치는 삭제합니다.
-    - 이후 동일 티켓에 추가 작업이 필요할 경우, 동일 브랜치를 다시 열어 작업 후 PR을 새로 생성할 수 있습니다.
+### 4. PR(Pull Request) 생성
+
+![task-5](./assets/task-5.png)
+
+- 작업이 완료되면, `develop`에 작업 브랜치를 병합하기 위한 PR을 생성합니다.
+- **PR 제목에도 Jira 티켓 번호를 포함**시켜 이력 추적성을 유지하도록 합니다. (예: [BC-16] 회원 가입 기능 구현)
+
+### 5. 리뷰 및 머지(Merge)
+
+- 코드 리뷰 또는 검토 과정을 거친 후 `develop` 브랜치로 머지합니다.
+
+### 6. 이슈 자동 종료
+
+![task-6](./assets/task-6.png)
+
+- GitHub Issue가 닫히면, 연결된 **Jira Task의 상태도 자동으로 Done으로 변경**됩니다.
+
+### 7. 브랜치 정리
+
+- 머지된 브랜치는 삭제합니다.
+- 이후 동일 티켓에 추가 작업이 필요할 경우, 동일 브랜치를 다시 열어 작업 후 PR을 새로 생성할 수 있습니다.
 
 <br>
 
 # ✨ Commit Convention
 
-- Angular 9의 Commit Message Format을 참고하여 **일관된 형식의 커밋 메시지를 작성**합니다.
-- **Husky** Hook을 통해, **Jira의 티켓 넘버가 자동으로 커밋 메시지 헤더 앞에 추가**됩니다.
-- **Commitlint**를 통해, 커밋 메시지가 컨벤션 규칙에 맞지 않을 경우 커밋이 거부됩니다.
+Angular 9의 Commit Message Format을 참고하여 **일관된 형식의 커밋 메시지를 작성**합니다.
 
 <br>
 
-## 메시지 구조
+## Husky&Commitlint 사용 방법
+
+- **Husky** Hook을 통해, **Jira의 티켓 넘버가 자동으로 커밋 메시지 헤더 앞에 추가**됩니다.
+- **Commitlint**를 통해, 커밋 메시지가 컨벤션 규칙에 맞지 않을 경우 커밋이 거부됩니다.
+
+### 설치
+
+```bash
+npm install
+```
+- `git clone` 후 최초 1회 `npm install`을 실행하면, Jira 태그 자동화와 커밋 컨벤션 검증을 위한 **개발 의존성(Husky, Commitlint 등)** 이 설치됩니다.
+
+### 사용 예시
+
+![commit](./assets/commit.png)
+
+- 커밋 컨벤션에 어긋난 커밋을 작성할 시 위와 같이 커밋이 거부됩니다.
+- main, develop 이 아닌 브랜치에서는 Jira 티켓 넘버 태그가 자동으로 커밋 맨 앞에 추가됩니다.
+- 콘솔 출력을 통해 어떤 훅이 실행되었는지, 성공 또는 실패했는지 확인할 수 있습니다.
+
+<br>
+
+## 커밋 메시지 구조
 
 ```
 <type>(<optional scope>): <short summary>
