@@ -13,7 +13,7 @@ graph TD;
 ### main
 
 - 운영 서버에서 실행될 코드로, 항상 배포 가능한 상태를 유지합니다.
-- `main` 브랜치에서 `develop` 브랜치를 merge하여 배포합니다.
+- PR(Pull Request)을 통해, `main` 브랜치에 `develop` 브랜치를 merge하여 배포합니다.
 
 ### develop
 
@@ -27,9 +27,53 @@ graph TD;
 
 <br>
 
+## 📌 작업 프로세스
+
+팀 협업은 **GitHub**와 **Jira**를 기반으로 진행합니다.  
+**GitHub Issue** 생성 시, 자동으로 **Jira Task**가 만들어지고 해당 **티켓 번호 기반 브랜치**가 생성됩니다.
+
+<br>
+
+1. **이슈 생성**
+
+    - 작업을 시작하기 전, GitHub Issue를 생성합니다.
+    - 제목과 브랜치 정보를 입력하면, 자동으로 Jira Task가 생성됩니다.
+
+2. **Jira 브랜치 생성**
+
+    - GitHub Actions가 이슈 생성 이벤트를 감지하여 Jira Task를 생성합니다.
+    - 해당 티켓 번호(JIRA_KEY)가 이슈 제목 앞에 자동으로 태그되며, 동일한 키를 포함한 브랜치가 자동으로 생성됩니다.  
+      (예: `feature/BC-23-member-register`)
+
+3. **생성된 브랜치에서 작업**
+
+    - 자동으로 생성된 브랜치에서 기능 구현, 버그 수정, 리팩토링 등 이슈 관련 작업을 진행합니다.
+
+4. **PR(Pull Request) 생성**
+
+    - 작업 완료 후 PR을 생성합니다.
+    - **PR 제목에도 Jira 티켓 번호를 포함**시켜 이력 추적성을 유지하도록 합니다. (예: [BC-23] 회원 가입 기능 구현)
+
+5. **리뷰 및 머지(Merge)**
+
+    - 코드 리뷰 또는 검토 과정을 거친 후 develop 브랜치로 머지합니다.
+
+6. **이슈 자동 종료**
+
+    - GitHub Issue가 닫히면, 연결된 Jira Task의 상태도 자동으로 Done으로 변경됩니다.
+
+7. **브랜치 정리**
+
+    - 머지된 브랜치는 삭제합니다.
+    - 이후 동일 티켓에 추가 작업이 필요할 경우, 동일 브랜치를 다시 열어 작업 후 PR을 새로 생성할 수 있습니다.
+
+<br>
+
 # ✨ Commit Convention
 
 - Angular 9의 Commit Message Format을 참고하여 **일관된 형식의 커밋 메시지를 작성**합니다.
+- **Husky** Hook을 통해, **Jira의 티켓 넘버가 자동으로 커밋 메시지 헤더 앞에 추가**됩니다.
+- **Commitlint**를 통해, 커밋 메시지가 컨벤션 규칙에 맞지 않을 경우 커밋이 거부됩니다.
 
 <br>
 
@@ -85,3 +129,14 @@ Add a new endpoint to handle user registration request.
 #1
 ```
 - 위와 같은 형태로 커밋 메시지를 작성합니다.
+
+<br>
+
+```
+[BC-12] feat: implement user registration API
+
+Add a new endpoint to handle user registration request.
+
+#1
+```
+- 실제 커밋 이후에는 위와 같은 형태로 포맷됩니다.
