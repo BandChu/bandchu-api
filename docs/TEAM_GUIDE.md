@@ -34,14 +34,14 @@ graph TD;
 
 <br>
 
-### 1. 이슈 생성
+### 1. Github 이슈 생성
 
 <div align="center"><img src="./assets/task-1.png" width="80%" alt="task-1" /></div>
 
 - 작업을 시작하기 전, 이슈 템플릿을 기반으로 GitHub Issue를 생성합니다.
 - 브랜치 이름은 영문 소문자와 하이픈을 사용하는 것을 권장합니다.
 
-### 2. Jira 브랜치 생성
+### 2. Jira 이슈 생성 및 자동 브랜치 생성
 
 <div align="center"><img src="./assets/task-2.png" width="70%" alt="task-2" /></div>
 
@@ -83,7 +83,7 @@ git pull origin develop
 
 <div align="center"><img src="./assets/task-6.png" width="70%" alt="task-6" /></div>
 
-- GitHub Issue가 닫히면, 연결된 **Jira Task의 상태도 자동으로 Done으로 변경**됩니다.
+- GitHub Issue가 닫히면, [GitHub Actions Workflow](https://github.com/BandChu/bandchu-api/blob/develop/.github/workflows/close-jira-issue.yml)가 이슈 닫힘 이벤트를 감지하여 연결된 **Jira Task의 상태를 Done으로 변경**합니다. 
 
 ### 7. 브랜치 정리
 
@@ -98,7 +98,7 @@ Angular 9의 Commit Message Format을 참고하여 **일관된 형식의 커밋 
 
 <br>
 
-## Husky&Commitlint 사용 방법
+## Husky & Commitlint 사용 방법
 
 - **Husky** Hook을 통해, **Jira의 티켓 넘버가 자동으로 커밋 메시지 헤더 앞에 추가**됩니다.
 - **Commitlint**를 통해, 커밋 메시지가 컨벤션 규칙에 맞지 않을 경우 커밋이 거부됩니다.
