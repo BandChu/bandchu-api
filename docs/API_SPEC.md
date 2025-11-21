@@ -53,9 +53,9 @@
   "title": "{HTTP Reason Phrase}",
   "status": 400,
   "detail": "{상황별 상세 설명}",
+  "instance": "/api/...",
   "code": "{ERROR_CODE}",
-  "timestamp": "{ISO-8601 UTC}",
-  "path": "/api/..."
+  "timestamp": "{ISO-8601 UTC}"
 }
 ```
 
@@ -78,9 +78,9 @@
   "title": "Conflict",
   "status": 409,
   "detail": "이미 사용 중인 이메일입니다.",
+  "instance": "/api/users/signup",
   "code": "USER_EMAIL_DUPLICATED",
-  "timestamp": "2025-11-20T03:21:00.123Z",
-  "path": "/api/users/signup"
+  "timestamp": "2025-11-20T03:21:00.123Z"
 }
 ```
 
@@ -138,9 +138,9 @@ _(필요한 경우 작성, 없으면 제거)_
   "title": "Conflict",
   "status": 409,
   "detail": "이미 사용 중인 이메일입니다.",
+  "instance": "/api/signup",
   "code": "USER_EMAIL_DUPLICATED",
-  "timestamp": "2025-11-20T03:21:00.123Z",
-  "path": "/api/signup"
+  "timestamp": "2025-11-20T03:21:00.123Z"
 }
 ```
 
@@ -317,7 +317,7 @@ Authorization: Bearer {token}
 
 `PATCH /api/artists/{artistId}`
 
-아티스트가 프로필 상세 정보를 수정합니다. (MVP에서는 기능 보류?)
+아티스트가 프로필 상세 정보를 수정합니다.
 
 #### 요청 헤더
 ```
@@ -386,9 +386,9 @@ Authorization: Bearer {token}
   "title": "Forbidden",
   "status": 403,
   "detail": "해당 아티프로필에 대한 접근 권한이 없습니다.",
+  "instance": "/api/artists/{artistId}",
   "code": "ARTIST_ACCESS_DENIED",
-  "timestamp": "2025-11-20T03:21:00.123Z",
-  "path": "/api/artists/{artistId}"
+  "timestamp": "2025-11-20T03:21:00.123Z"
 }
 ```
 
@@ -466,9 +466,9 @@ Authorization: Bearer {token}
   "title": "Forbidden",
   "status": 403,
   "detail": "아티스트만 앨범을 등록할 수 있습니다.",
+  "instance": "/api/albums",
   "code": "ALBUM_ACCESS_DENIED",
-  "timestamp": "2025-11-20T03:21:00.123Z",
-  "path": "/api/albums"
+  "timestamp": "2025-11-20T03:21:00.123Z"
 }
 ```
 
@@ -536,9 +536,9 @@ Authorization: Bearer {token}
   "title": "Forbidden",
   "status": 403,
   "detail": "해당 앨범에 대한 접근 권한이 없습니다.",
+  "instance": "/api/albums/{albumId}",
   "code": "ALBUM_ACCESS_DENIED",
-  "timestamp": "2025-11-20T03:21:00.123Z",
-  "path": "/api/albums/{albumId}"
+  "timestamp": "2025-11-20T03:21:00.123Z"
 }
 ```
 
@@ -612,9 +612,9 @@ Authorization: Bearer {token}
   "title": "Forbidden",
   "status": 403,
   "detail": "아티스트만 공연을 등록할 수 있습니다.",
+  "instance": "/api/concerts",
   "code": "CONCERT_ACCESS_DENIED",
-  "timestamp": "2025-11-20T03:21:00.123Z",
-  "path": "/api/concerts"
+  "timestamp": "2025-11-20T03:21:00.123Z"
 }
 ```
 
@@ -710,9 +710,9 @@ Authorization: Bearer {token}
   "title": "Forbidden",
   "status": 403,
   "detail": "해당 공연에 대한 접근 권한이 없습니다.",
+  "instance": "/api/concerts/{concertId}",
   "code": "CONCERT_ACCESS_DENIED",
-  "timestamp": "2025-11-20T03:21:00.123Z",
-  "path": "/api/concerts/{concertId}"
+  "timestamp": "2025-11-20T03:21:00.123Z"
 }
 ```
 
@@ -744,8 +744,8 @@ Authorization: Bearer {token}
   "title": "Forbidden",
   "status": 403,
   "detail": "해당 공연에 대한 접근 권한이 없습니다.",
+  "instance": "/api/concerts/{concertId}",
   "code": "CONCERT_ACCESS_DENIED",
-  "timestamp": "2025-11-20T03:21:00.123Z",
-  "path": "/api/concerts/{concertId}"
+  "timestamp": "2025-11-20T03:21:00.123Z"
 }
 ```
