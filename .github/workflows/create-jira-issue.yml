@@ -34,6 +34,7 @@ jobs:
         run: |
           echo "branchType = ${{ steps.issue-parser.outputs.issueparser_branchType }}"
           echo "branchName = ${{ steps.issue-parser.outputs.issueparser_branchName }}"
+          echo "epicKey = ${{ steps.issue-parser.outputs.issueparser_epicKey }}"
           echo "description = ${{ steps.issue-parser.outputs.issueparser_description }}"
           echo "tasks = ${{ steps.issue-parser.outputs.issueparser_tasks }}"
           echo "json = ${{ steps.issue-parser.outputs.jsonString }}"
@@ -49,8 +50,21 @@ jobs:
             ${{ github.event.issue.body }}
           mode: md2jira
 
+      - name: Create Issue (with Epic parent)
+        id: create-with-parent
+        if: ${{ steps.issue-parser.outputs.issueparser_epicKey != '' }}
+        uses: atlassian/gajira-create@v3
+        with:
+          project: BC
+          issuetype: Task
+          summary: '${{ github.event.issue.title }}'
+          description: '${{ steps.md2jira.outputs.output-text }}'
+          fields: >-
+            {"parent":{"key":"${{ steps.issue-parser.outputs.issueparser_epicKey }}" }}
+
       - name: Create Issue
         id: create
+        if: ${{ steps.issue-parser.outputs.issueparser_epicKey == '' }}
         uses: atlassian/gajira-create@v3
         with:
           project: BC
@@ -58,12 +72,21 @@ jobs:
           summary: '${{ github.event.issue.title }}'
           description: '${{ steps.md2jira.outputs.output-text }}'
 
+      - name: Resolve created issue key
+        id: resolve-issue-key
+        run: |
+          if [ -n "${{ steps.create-with-parent.outputs.issue }}" ]; then
+            echo "ISSUE_KEY=${{ steps.create-with-parent.outputs.issue }}" >> $GITHUB_OUTPUT
+          else
+            echo "ISSUE_KEY=${{ steps.create.outputs.issue }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Log created issue
-        run: echo "Jira Issue ${{ steps.create.outputs.issue }} was created"
+        run: echo "Jira Issue ${{ steps.resolve-issue-key.outputs.ISSUE_KEY }} was created"
 
       - name: Create branch with Ticket number
         run: |
-          ISSUE_NUMBER="${{ steps.create.outputs.issue }}"
+          ISSUE_NUMBER="${{ steps.resolve-issue-key.outputs.ISSUE_KEY }}"
           BRANCH_TYPE="${{ steps.issue-parser.outputs.issueparser_branchType }}"
           BRANCH_NAME_RAW="${{ steps.issue-parser.outputs.issueparser_branchName }}"
 
@@ -84,9 +107,9 @@ jobs:
           actions: 'update-issue'
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
-          title: '[${{ steps.create.outputs.issue }}] ${{ github.event.issue.title }}'
+          title: '[${{ steps.resolve-issue-key.outputs.ISSUE_KEY }}] ${{ github.event.issue.title }}'
           body: |
             ${{ github.event.issue.body }}
             
             ### 연결된 Jira 이슈 (Related Jira Issue)
-            [${{ steps.create.outputs.issue }}](${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.create.outputs.issue }})
+            [${{ steps.resolve-issue-key.outputs.ISSUE_KEY }}](${{ secrets.JIRA_BASE_URL }}/browse/${{ steps.resolve-issue-key.outputs.ISSUE_KEY }})
