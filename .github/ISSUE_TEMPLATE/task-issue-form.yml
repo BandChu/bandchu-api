@@ -30,7 +30,7 @@ body:
       description: '부모 에픽 키를 입력하세요. 비워두면 에픽에 연결하지 않습니다.'
       placeholder: 'BC-123'
 
-  - type: input
+  - type: textarea
     id: description
     attributes:
       label: '이슈 내용 (Description)'
