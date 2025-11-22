@@ -13,9 +13,8 @@ open class DatabaseConfig {
 
     @Bean
     open fun initDatabase(): Database {
-        val dotenv = Dotenv.configure()
-            .directory("/Users/sonhyeonbin/Downloads/bandchu")
-            .load()
+        val dotenv = Dotenv.load()
+
 
         val url = dotenv["DB_URL"] ?: error("DB_URL missing")
         val username = dotenv["DB_USERNAME"] ?: error("DB_USERNAME missing")
