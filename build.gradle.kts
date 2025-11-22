@@ -39,6 +39,10 @@ dependencies {
     testImplementation("io.kotest:kotest-extensions-spring:6.0.4")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    implementation("org.postgresql:postgresql:42.7.1")
+    implementation("io.github.cdimascio:java-dotenv:5.2.2")
+
 }
 
 kotlin {
