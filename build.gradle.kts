@@ -41,7 +41,8 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     implementation("org.postgresql:postgresql:42.7.1")
-    implementation("io.github.cdimascio:java-dotenv:5.2.2")
+
+    implementation("org.springframework.boot:spring-boot-starter-jdbc")
 
 }
 
