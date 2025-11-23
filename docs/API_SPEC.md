@@ -20,6 +20,12 @@
   - [공연 상세 조회](#공연-상세-조회)
   - [공연 수정](#공연-수정)
   - [공연 삭제](#공연-삭제)
+- [채팅 API](#채팅-api)
+    - [채팅방 생성](#채팅방-생성)
+    - [메시지 보내기](#메시지-보내기)
+    - [채팅방 목록 조회](#채팅방-목록-조회)
+    - [메시지 목록 조회](#메시지-목록-조회)
+    - [메시지 읽음 처리](#메시지-읽음-처리)
 
 <br>
 
@@ -747,5 +753,224 @@ Authorization: Bearer {token}
   "instance": "/api/concerts/{concertId}",
   "code": "CONCERT_ACCESS_DENIED",
   "timestamp": "2025-11-20T03:21:00.123Z"
+}
+```
+
+<br>
+
+---
+
+## 채팅 API
+
+채팅 관련 작업을 수행하는 API입니다.
+
+### 채팅방 생성
+
+` POST /api/chatrooms `
+
+1:1 또는 그룹 채팅방을 생성합니다.
+
+#### 요청 헤더
+` Authorization: Bearer {token} `
+
+#### 요청 본문
+```
+{
+  "roomType": "DIRECT", 
+  "name": "알고리즘 스터디", 
+  "memberIds": [2, 3] 
+}
+```
+
+#### 응답 (성공 - 201 Created)
+```json
+{
+  "success": true,
+  "data": {
+    "roomId": 10,
+    "roomType": "GROUP",
+    "name": "알고리즘 스터디",
+    "createdAt": "2025-11-21T12:00:00Z"
+  },
+  "message": "요청이 성공적으로 처리되었습니다."
+}
+```
+
+#### 에러 응답 예시
+```json
+{
+  "type": "https://api.bandchu.com/errors/chatroom-duplicate-direct",
+  "title": "Conflict",
+  "status": 409,
+  "detail": "이미 두 사용자 간의 1:1 채팅방이 존재합니다.",
+  "instance": "/api/chatrooms",
+  "code": "CHATROOM_DUPLICATE_DIRECT",
+  "timestamp": "2025-11-21T03:21:00.123Z"
+}
+```
+
+### 메시지 보내기
+
+` POST /api/chatrooms/{roomId}/messages `
+
+텍스트 또는 이미지 메시지를 전송합니다.
+
+#### 요청 헤더
+` Authorization: Bearer {token} `
+
+#### 요청 본문 (TEXT)
+```json
+{
+  "messageType": "TEXT",
+  "content": "안녕하세요!"
+} 
+```
+
+#### 요청 본문 (IMAGE)
+```json
+{
+  "messageType": "IMAGE",
+  "fileUrl": "https://s3.ap-northeast-2.amazonaws.com/xxx/yyy.png"
+}
+```
+
+#### 응답 (성공 - 201 Created)
+```json
+{
+  "success": true,
+  "data": {
+    "messageId": 112,
+    "roomId": 10,
+    "senderId": 1,
+    "messageType": "TEXT",
+    "content": "안녕하세요!",
+    "fileUrl": null,
+    "createdAt": "2025-11-21T12:10:00Z"
+  },
+  "message": "요청이 성공적으로 처리되었습니다."
+}
+```
+
+#### 에러 응답 예시
+```json
+{
+  "type": "https://api.bandchu.com/errors/chatroom-not-found",
+  "title": "Not Found",
+  "status": 404,
+  "detail": "해당 채팅방을 찾을 수 없습니다.",
+  "instance": "/api/chatrooms/10/messages",
+  "code": "CHATROOM_NOT_FOUND",
+  "timestamp": "2025-11-21T03:21:00.123Z"
+}
+```
+
+### 채팅방 목록 조회
+` GET /api/chatrooms `
+
+사용자가 속한 모든 채팅방을 조회합니다.
+
+#### 요청 헤더
+` Authorization: Bearer {token} `
+
+#### 응답 (성공 - 200 OK)
+```json
+{
+  "success": true,
+  "data": {
+    "rooms": [
+      {
+        "roomId": 10,
+        "roomType": "GROUP",
+        "name": "알고리즘 스터디",
+        "lastMessage": "내일 회의는?",
+        "unreadCount": 3,
+        "updatedAt": "2025-11-21T12:10:00Z"
+      }
+    ]
+  },
+  "message": "요청이 성공적으로 처리되었습니다."
+}
+```
+
+### 메시지 목록 조회
+
+` GET /api/chatrooms/{roomId}/messages?cursor={messageId}&size=30 `
+
+특정 채팅방의 메시지를 페이징 형태로 조회합니다.
+
+#### 요청 헤더
+` Authorization: Bearer {token} `
+
+#### 쿼리 파라미터
+- cursor:	마지막으로 받은 메시지 ID (기본: 최신)
+- size:	한번에 받을 메시지 수 (기본: 30)
+
+#### 응답 (성공 - 200 OK)
+```json
+{
+  "success": true,
+  "data": {
+    "messages": [
+      {
+        "messageId": 111,
+        "senderId": 2,
+        "messageType": "TEXT",
+        "content": "사진 보내줘!",
+        "fileUrl": null,
+        "createdAt": "2025-11-21T12:05:00Z"
+      },
+      {
+        "messageId": 112,
+        "senderId": 1,
+        "messageType": "IMAGE",
+        "content": null,
+        "fileUrl": "https://s3.../img.png",
+        "createdAt": "2025-11-21T12:06:00Z"
+      }
+    ],
+    "nextCursor": 110
+  },
+  "message": "요청이 성공적으로 처리되었습니다."
+}
+```
+
+### 메시지 읽음 처리
+
+` PATCH /api/chatrooms/{roomId}/read `
+
+사용자가 특정 메시지까지 읽었음을 기록합니다.
+
+#### 요청 헤더
+` Authorization: Bearer {token} `
+
+#### 요청 본문
+```
+{
+  "lastReadMessageId": 112
+}
+```
+
+#### 응답 (성공 - 200 OK)
+```json
+{
+  "success": true,
+  "data": {
+    "roomId": 10,
+    "lastReadMessageId": 112
+  },
+  "message": "요청이 성공적으로 처리되었습니다."
+}
+```
+
+#### 에러 응답 예시
+```json
+{
+  "type": "https://api.bandchu.com/errors/not-chatroom-member",
+  "title": "Forbidden",
+  "status": 403,
+  "detail": "해당 채팅방의 참여자가 아닙니다.",
+  "instance": "/api/chatrooms/10/read",
+  "code": "NOT_CHATROOM_MEMBER",
+  "timestamp": "2025-11-21T03:21:00.123Z"
 }
 ```
