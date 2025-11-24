@@ -3,11 +3,14 @@ package com.bandchu.api.domain.chat.repository
 import com.bandchu.api.chat.dto.ChatMessageResponse
 import com.bandchu.api.chat.dto.SendMessageRequest
 import com.bandchu.api.domain.chat.table.ChatMessageTable
+import com.bandchu.api.domain.chat.table.MemberChatRoomTable
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.springframework.stereotype.Repository
@@ -38,10 +41,8 @@ class ChatMessageRepository{
     }
 
     fun isRoomMember(roomId: Long, memberId: Long): Boolean {
-        //채팅방 아이디와 멤버 아이디로 채팅방에 속해있는지 검증
-//       ChatRoomMembers.select {
-//            (ChatRoomMembers.room eq roomId) and (ChatRoomMembers.member eq memberId)
-//        }.any()
-        return true
+        return MemberChatRoomTable.selectAll()
+            .where{(MemberChatRoomTable.roomId eq roomId) and  (MemberChatRoomTable.memberId eq memberId) }
+            .any()
     }
 }
