@@ -1,9 +1,9 @@
 package com.bandchu.api.chat.service
 
-import com.bandchu.api.chat.persistence.table.MessageType
+import com.bandchu.api.domain.chat.table.MessageType
 import com.bandchu.api.chat.dto.ChatMessageResponse
 import com.bandchu.api.chat.dto.SendMessageRequest
-import com.bandchu.api.chat.persistence.repository.ChatMessageRepository
+import com.bandchu.api.domain.chat.repository.ChatMessageRepository
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe

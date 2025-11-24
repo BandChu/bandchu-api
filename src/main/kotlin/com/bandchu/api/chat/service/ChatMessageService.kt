@@ -2,7 +2,7 @@ package com.bandchu.api.chat.service
 
 import com.bandchu.api.chat.dto.ChatMessageResponse
 import com.bandchu.api.chat.dto.SendMessageRequest
-import com.bandchu.api.chat.persistence.repository.ChatMessageRepository
+import com.bandchu.api.domain.chat.repository.ChatMessageRepository
 import org.springframework.http.HttpStatus
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service

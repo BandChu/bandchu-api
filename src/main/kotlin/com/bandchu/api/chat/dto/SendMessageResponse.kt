@@ -1,7 +1,7 @@
 package com.bandchu.api.chat.dto
 
-import com.bandchu.api.chat.persistence.table.MessageType
-import com.bandchu.api.chat.persistence.table.ChatMessages
+import com.bandchu.api.domain.chat.table.MessageType
+import com.bandchu.api.domain.chat.table.ChatMessageTable
 import org.jetbrains.exposed.v1.core.ResultRow
 
 data class ChatMessageResponse(
@@ -16,13 +16,13 @@ data class ChatMessageResponse(
     companion object {
         fun from(row: ResultRow): ChatMessageResponse {
             return ChatMessageResponse(
-                messageId = row[ChatMessages.id],
-                roomId = row[ChatMessages.room],
-                senderId = row[ChatMessages.sender],
-                messageType = row[ChatMessages.messageType],
-                content = row[ChatMessages.content],
-                fileUrl = row[ChatMessages.fileUrl],
-                createdAt = row[ChatMessages.createdAt]
+                messageId = row[ChatMessageTable.id],
+                roomId = row[ChatMessageTable.room],
+                senderId = row[ChatMessageTable.sender],
+                messageType = row[ChatMessageTable.messageType],
+                content = row[ChatMessageTable.content],
+                fileUrl = row[ChatMessageTable.fileUrl],
+                createdAt = row[ChatMessageTable.createdAt]
             )
         }
     }

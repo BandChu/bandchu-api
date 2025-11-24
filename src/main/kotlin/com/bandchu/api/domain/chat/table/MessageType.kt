@@ -1,4 +1,4 @@
-package com.bandchu.api.chat.persistence.table
+package com.bandchu.api.domain.chat.table
 
 enum class MessageType {
     TEXT,
