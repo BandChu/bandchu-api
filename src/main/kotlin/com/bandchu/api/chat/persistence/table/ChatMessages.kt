@@ -1,6 +1,5 @@
 package com.bandchu.api.chat.persistence.table
 
-import com.bandchu.api.chat.domain.MessageType
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.datetime.datetime
 

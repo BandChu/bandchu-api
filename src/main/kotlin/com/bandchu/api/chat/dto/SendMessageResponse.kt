@@ -1,6 +1,6 @@
 package com.bandchu.api.chat.dto
 
-import com.bandchu.api.chat.domain.MessageType
+import com.bandchu.api.chat.persistence.table.MessageType
 import com.bandchu.api.chat.persistence.table.ChatMessages
 import org.jetbrains.exposed.v1.core.ResultRow
 

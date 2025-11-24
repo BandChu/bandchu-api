@@ -1,6 +1,5 @@
 package com.bandchu.api.chat.controller
 
-import com.bandchu.api.chat.domain.ChatMessage
 import com.bandchu.api.chat.dto.ChatMessageResponse
 import com.bandchu.api.chat.dto.SendMessageRequest
 import com.bandchu.api.chat.service.ChatMessageService

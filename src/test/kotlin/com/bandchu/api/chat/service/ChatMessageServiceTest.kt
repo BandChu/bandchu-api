@@ -1,6 +1,6 @@
 package com.bandchu.api.chat.service
 
-import com.bandchu.api.chat.domain.MessageType
+import com.bandchu.api.chat.persistence.table.MessageType
 import com.bandchu.api.chat.dto.ChatMessageResponse
 import com.bandchu.api.chat.dto.SendMessageRequest
 import com.bandchu.api.chat.persistence.repository.ChatMessageRepository
