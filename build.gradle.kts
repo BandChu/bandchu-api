@@ -21,6 +21,7 @@ repositories {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation ("org.springframework.boot:spring-boot-starter-websocket")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
@@ -39,6 +40,7 @@ dependencies {
     testImplementation("io.kotest:kotest-extensions-spring:6.0.4")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("io.mockk:mockk:1.13.5")
 
     implementation("org.postgresql:postgresql:42.7.1")
     implementation("io.github.cdimascio:java-dotenv:5.2.2")

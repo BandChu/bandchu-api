@@ -1,8 +1,8 @@
 package com.bandchu.api.chat.dto
 
-import com.bandchu.api.chat.domain.ChatMessage
 import com.bandchu.api.chat.domain.MessageType
-import java.time.LocalDateTime
+import com.bandchu.api.chat.persistence.table.ChatMessages
+import org.jetbrains.exposed.v1.core.ResultRow
 
 data class ChatMessageResponse(
     val messageId: Long,
@@ -11,18 +11,18 @@ data class ChatMessageResponse(
     val messageType: MessageType,
     val content: String?,
     val fileUrl: String?,
-    val createdAt: LocalDateTime
+    val createdAt: kotlinx.datetime.LocalDateTime
 ) {
     companion object {
-        fun from(message: ChatMessage){
-            ChatMessageResponse(
-                messageId = message.id,
-                roomId = message.roomId,
-                senderId = message.senderId,
-                messageType = message.messageType,
-                content = message.content,
-                fileUrl = message.fileUrl,
-                createdAt = message.createdAt
+        fun from(row: ResultRow): ChatMessageResponse {
+            return ChatMessageResponse(
+                messageId = row[ChatMessages.id],
+                roomId = row[ChatMessages.room],
+                senderId = row[ChatMessages.sender],
+                messageType = row[ChatMessages.messageType],
+                content = row[ChatMessages.content],
+                fileUrl = row[ChatMessages.fileUrl],
+                createdAt = row[ChatMessages.createdAt]
             )
         }
     }
