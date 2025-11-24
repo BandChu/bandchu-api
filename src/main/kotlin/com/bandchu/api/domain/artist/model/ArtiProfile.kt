@@ -1,6 +1,6 @@
 package com.bandchu.api.domain.artist.model
 
-import kotlinx.datetime.LocalDateTime
+import java.time.OffsetDateTime
 
 data class ArtiProfile (
     val id: Long,
@@ -8,7 +8,7 @@ data class ArtiProfile (
     val genre: List<String>,
     val description: String,
     val profileImageUrl: String,
-    val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime,
+    val createdAt: OffsetDateTime,
+    val updatedAt: OffsetDateTime,
     val memberId: Long,
 )

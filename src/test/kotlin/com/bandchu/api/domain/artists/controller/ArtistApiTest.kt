@@ -26,6 +26,7 @@ class ArtistApiTest (
 
                 val apiResponseJson = objectMapper.readTree(result.response.contentAsString)
                 apiResponseJson.get("data").get("artists").isArray shouldBe true
+                println(apiResponseJson.get("data").get("artists"))
             }
         }
     }

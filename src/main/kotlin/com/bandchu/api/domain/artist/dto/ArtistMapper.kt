@@ -8,7 +8,7 @@ fun ArtiProfile.toArtistListItemDto(): ArtistListItemDto =
         artistId = id,
         name = artistName,
         profileImageUrl = profileImageUrl,
-        createdAt = createdAt,
+        createdAt = createdAt.toString(),
     )
 
 fun List<ArtiProfile>.toArtistListResponse(): ArtistListResponse =
