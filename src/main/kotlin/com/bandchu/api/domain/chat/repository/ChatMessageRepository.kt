@@ -63,6 +63,6 @@ class ChatMessageRepository{
                 .orderBy(ChatMessageTable.id, SortOrder.DESC)
                 .limit(size)
         return query.map { ChatMessageResponse.from(it) }
-            .reversed() //시간 순으로 반환
+            .reversed() //시간 순으로
     }
 }

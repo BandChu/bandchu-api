@@ -1,6 +1,7 @@
 package com.bandchu.api.chat.service
 
 import com.bandchu.api.chat.dto.ChatMessageResponse
+import com.bandchu.api.chat.dto.MessagePageResponse
 import com.bandchu.api.chat.dto.SendMessageRequest
 import com.bandchu.api.domain.chat.repository.ChatMessageRepository
 import org.springframework.http.HttpStatus
@@ -29,5 +30,22 @@ class ChatMessageService(
         )
 
         return message
+    }
+
+    fun fetchMessages(roomId: Long, cursor: Long?, size: Int): MessagePageResponse {
+        //레포지토리에서 List<SendMessageResponse>를 가져옴 -> 시간 순으로 정렬되어 있음
+        val messages = chatMessageRepository.fetchMessages(roomId, cursor, size)
+
+        //nextCursor 값 지정
+        val nextCursor = if (messages.isNotEmpty()) {
+            messages.first().messageId - 1
+        } else {
+            null
+        }
+
+        return MessagePageResponse(
+            messages = messages,
+            nextCursor = nextCursor
+        )
     }
 }
