@@ -10,12 +10,11 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.springframework.http.HttpStatus
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.web.server.ResponseStatusException
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 class ChatMessageServiceTest : FunSpec({
     val chatMessageRepository = mockk<ChatMessageRepository>()
@@ -47,7 +46,7 @@ class ChatMessageServiceTest : FunSpec({
             messageType = MessageType.TEXT,
             content = "메시지 내용",
             fileUrl = null,
-            createdAt = Clock.System.now().toLocalDateTime(TimeZone.UTC)
+            createdAt = OffsetDateTime.now(ZoneOffset.UTC)
         )
 
         every { chatMessageRepository.saveMessage(1L, 100L, req) } returns savedMessage

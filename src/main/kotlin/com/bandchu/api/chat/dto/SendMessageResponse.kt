@@ -3,6 +3,7 @@ package com.bandchu.api.chat.dto
 import com.bandchu.api.domain.chat.table.MessageType
 import com.bandchu.api.domain.chat.table.ChatMessageTable
 import org.jetbrains.exposed.v1.core.ResultRow
+import java.time.OffsetDateTime
 
 data class ChatMessageResponse(
     val messageId: Long,
@@ -11,7 +12,7 @@ data class ChatMessageResponse(
     val messageType: MessageType,
     val content: String?,
     val fileUrl: String?,
-    val createdAt: kotlinx.datetime.LocalDateTime
+    val createdAt: OffsetDateTime?
 ) {
     companion object {
         fun from(row: ResultRow): ChatMessageResponse {
