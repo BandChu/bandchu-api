@@ -8,8 +8,11 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.ZoneOffset
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.less
+import org.jetbrains.exposed.v1.jdbc.andWhere
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
@@ -46,5 +49,20 @@ class ChatMessageRepository{
         return MemberChatRoomTable.selectAll()
             .where{(MemberChatRoomTable.roomId eq roomId) and  (MemberChatRoomTable.memberId eq memberId) }
             .any()
+    }
+
+    fun fetchMessages(roomId: Long, cursor: Long?, size: Int): List<ChatMessageResponse> {
+            val query = ChatMessageTable
+                .selectAll()
+                .where { ChatMessageTable.roomId eq roomId }
+                .apply {
+                    if (cursor != null) {
+                        andWhere { ChatMessageTable.id less cursor }
+                    }
+                }
+                .orderBy(ChatMessageTable.id, SortOrder.DESC)
+                .limit(size)
+        return query.map { ChatMessageResponse.from(it) }
+            .reversed() //시간 순으로 반환
     }
 }
