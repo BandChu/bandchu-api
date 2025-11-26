@@ -3,6 +3,7 @@ package com.bandchu.api.domain.artist.repository
 import com.bandchu.api.domain.artist.model.ArtiProfile
 import com.bandchu.api.domain.artist.model.Genre
 import com.bandchu.api.domain.artist.model.SnsLink
+import com.bandchu.api.domain.artist.service.dto.UpdateArtistDetailCommand
 import com.bandchu.api.domain.artist.table.ArtiProfileTable
 import com.bandchu.api.domain.artist.table.SnsLinkTable
 import com.bandchu.api.domain.concert.model.Concert
@@ -15,6 +16,7 @@ import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.jdbc.update
 import org.springframework.stereotype.Repository
 import java.net.URI
 
@@ -100,5 +102,14 @@ class ArtiProfileRepository {
             .map { it.toSnsLinkDomain() }
 
         artistRow.toDomain(snsLinks = snsLinks)
+    }
+
+    fun updateArtist(command: UpdateArtistDetailCommand) {
+        ArtiProfileTable.update({ ArtiProfileTable.id eq command.artistId}) {
+            it[artistName] = command.name
+            it[profileImageUrl] = command.profileImageUrl
+            it[description] = command.description
+            it[genre] = command.genre.map { it.name }
+        }
     }
 }
