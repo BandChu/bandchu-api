@@ -30,4 +30,25 @@ class ArtistApiTest (
             }
         }
     }
+
+    describe("아티스트 및 공연 검색") {
+        context("검색 키워드를 포함한 유효한 요청인 경우") {
+            it("성공(200)과 지정한 응답 포맷을 반환한다") {
+                val result = mockMvcTester
+                    .get()
+                    .uri("/api/artists/search?keyword=리도어")
+                    .exchange()
+
+                result.response.status shouldBe 200
+
+                val apiResponseJson = objectMapper.readTree(result.response.contentAsString)
+                val dataNode = apiResponseJson.get("data")
+                dataNode.has("artists") shouldBe true
+                dataNode.get("artists").isArray shouldBe true
+                dataNode.has("concerts") shouldBe true
+                dataNode.get("concerts").isArray shouldBe true
+                println(apiResponseJson.get("data").get("artists"))
+            }
+        }
+    }
 })
