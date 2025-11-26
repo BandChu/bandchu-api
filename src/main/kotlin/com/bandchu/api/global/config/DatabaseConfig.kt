@@ -1,6 +1,7 @@
 package com.bandchu.api.global.config
 
 
+import com.bandchu.api.domain.member.table.MemberTable
 import com.bandchu.api.domain.posts.table.CommentTable
 import com.bandchu.api.domain.posts.table.MediaTable
 import com.bandchu.api.domain.posts.table.PostTable
@@ -25,7 +26,7 @@ class DatabaseConfig(private val dataSource: DataSource) {
         Database.connect(dataSource)
 
         transaction {
-            SchemaUtils.create(PostTable, CommentTable, MediaTable, ReportTable)
+            SchemaUtils.create(MemberTable, PostTable, CommentTable, MediaTable, ReportTable)
         }
 
         println(" Exposed + Spring Boot 연결 성공")
