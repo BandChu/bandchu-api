@@ -8,8 +8,8 @@ import org.jetbrains.exposed.v1.datetime.timestampWithTimeZone
 object ArtiProfileTable : LongIdTable("arti_profiles") {
     val artistName = varchar("artist_name", 20)
     val genre = array<String>("genre")
-    val description = text("description")
-    val profileImageUrl = varchar("profile_image_url", 255)
+    val description = text("description").nullable()
+    val profileImageUrl = varchar("profile_image_url", 255).nullable()
     val createdAt = timestampWithTimeZone("created_at")
     val updatedAt = timestampWithTimeZone("updated_at")
 
