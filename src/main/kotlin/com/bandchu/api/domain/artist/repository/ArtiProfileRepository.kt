@@ -1,11 +1,15 @@
 package com.bandchu.api.domain.artist.repository
 
 import com.bandchu.api.domain.artist.model.ArtiProfile
+import com.bandchu.api.domain.artist.model.Genre
+import com.bandchu.api.domain.artist.model.SnsLink
 import com.bandchu.api.domain.artist.table.ArtiProfileTable
+import com.bandchu.api.domain.artist.table.SnsLinkTable
 import com.bandchu.api.domain.concert.model.Concert
 import com.bandchu.api.domain.concert.table.ConcertTable
 import org.jetbrains.exposed.v1.core.JoinType
 import org.jetbrains.exposed.v1.core.ResultRow
+import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.like
 import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.select
@@ -17,15 +21,18 @@ import java.net.URI
 @Repository
 class ArtiProfileRepository {
 
-    private fun ResultRow.toDomain(): ArtiProfile = ArtiProfile(
+    private fun ResultRow.toDomain(
+        snsLinks: List<SnsLink> = emptyList()
+    ): ArtiProfile = ArtiProfile(
         id = this[ArtiProfileTable.id].value,
         artistName = this[ArtiProfileTable.artistName],
-        genre = this[ArtiProfileTable.genre],
+        genre = this[ArtiProfileTable.genre].map { Genre.valueOf(it) },
         description = this[ArtiProfileTable.description],
         profileImageUrl = this[ArtiProfileTable.profileImageUrl]?.let { URI(it) },
         createdAt = this[ArtiProfileTable.createdAt],
         updatedAt = this[ArtiProfileTable.updatedAt],
-        memberId = this[ArtiProfileTable.member]
+        memberId = this[ArtiProfileTable.member],
+        snsLinks = snsLinks
     )
 
     private fun ResultRow.toConcertDomain(): Concert =
@@ -38,6 +45,13 @@ class ArtiProfileRepository {
             bookingUrl = this[ConcertTable.bookingUrl]?.let { URI(it) },
             bookingSchedule = this[ConcertTable.bookingSchedule],
             createdAt = this[ConcertTable.createdAt]
+        )
+
+    private fun ResultRow.toSnsLinkDomain(): SnsLink =
+        SnsLink(
+            id = this[SnsLinkTable.id].value,
+            platform = this[SnsLinkTable.platform],
+            url = URI(this[SnsLinkTable.url])
         )
 
     fun findAll(): List<ArtiProfile> = transaction {
@@ -68,5 +82,23 @@ class ArtiProfileRepository {
             .map { it.toConcertDomain() }
 
         artists to concerts
+    }
+
+    fun findById(id: Long): ArtiProfile? = transaction {
+        val artistRow = ArtiProfileTable
+            .selectAll()
+            .where { ArtiProfileTable.id eq id }
+            .singleOrNull()
+
+        if (artistRow == null) {
+            return@transaction null
+        }
+
+        val snsLinks = SnsLinkTable
+            .selectAll()
+            .where { SnsLinkTable.artiProfile eq id }
+            .map { it.toSnsLinkDomain() }
+
+        artistRow.toDomain(snsLinks = snsLinks)
     }
 }

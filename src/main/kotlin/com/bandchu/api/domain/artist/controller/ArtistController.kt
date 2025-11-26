@@ -1,8 +1,10 @@
 package com.bandchu.api.domain.artist.controller
 
 import com.bandchu.api.domain.artist.dto.request.ArtistSearchCondition
+import com.bandchu.api.domain.artist.dto.response.ArtistDetailResponse
 import com.bandchu.api.domain.artist.dto.response.ArtistListResponse
 import com.bandchu.api.domain.artist.dto.response.ArtistSearchResponse
+import com.bandchu.api.domain.artist.dto.toArtistDetailResponse
 import com.bandchu.api.domain.artist.dto.toArtistListResponse
 import com.bandchu.api.domain.artist.dto.toSearchResponse
 import com.bandchu.api.domain.artist.service.ArtistService
@@ -11,6 +13,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -39,4 +42,16 @@ class ArtistController(
             .status(HttpStatus.OK)
             .body(ApiResponse.success(searchResults.toSearchResponse()))
     }
+
+    @GetMapping("/{artistId}")
+    fun getDetail(
+        @PathVariable artistId: Long
+    ): ResponseEntity<ApiResponse<ArtistDetailResponse>> {
+        val artist = artistService.getDetail(artistId)
+
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(ApiResponse.success(artist.toArtistDetailResponse()))
+    }
+
 }
