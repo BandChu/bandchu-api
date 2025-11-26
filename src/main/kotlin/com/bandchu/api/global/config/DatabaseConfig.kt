@@ -2,6 +2,7 @@ package com.bandchu.api.global.config
 
 
 import com.bandchu.api.domain.artist.table.ArtiProfileTable
+import com.bandchu.api.domain.concert.table.ConcertTable
 import com.bandchu.api.domain.posts.table.CommentTable
 import com.bandchu.api.domain.posts.table.MediaTable
 import com.bandchu.api.domain.posts.table.PostTable
@@ -22,7 +23,7 @@ class DatabaseConfig(private val dataSource: DataSource) {
         Database.connect(dataSource)
 
         transaction {
-            SchemaUtils.create(ArtiProfileTable, PostTable, CommentTable, MediaTable, ReportTable)
+            SchemaUtils.create(ConcertTable, ArtiProfileTable, PostTable, CommentTable, MediaTable, ReportTable)
         }
 
         println(" Exposed + Spring Boot 연결 성공")
