@@ -25,8 +25,7 @@ class ArtistApiTest (
                 result.response.status shouldBe 200
 
                 val apiResponseJson = objectMapper.readTree(result.response.contentAsString)
-                apiResponseJson.get("data").get("artists").isArray shouldBe true
-                println(apiResponseJson.get("data").get("artists"))
+                apiResponseJson["data"]["artists"].isArray shouldBe true
             }
         }
     }
@@ -44,10 +43,45 @@ class ArtistApiTest (
                 val apiResponseJson = objectMapper.readTree(result.response.contentAsString)
                 val dataNode = apiResponseJson.get("data")
                 dataNode.has("artists") shouldBe true
-                dataNode.get("artists").isArray shouldBe true
+                dataNode["artists"].isArray shouldBe true
                 dataNode.has("concerts") shouldBe true
-                dataNode.get("concerts").isArray shouldBe true
-                println(apiResponseJson.get("data").get("artists"))
+                dataNode["concerts"].isArray shouldBe true
+            }
+        }
+    }
+
+    describe("아티프로필 상세 조회") {
+        context("존재하는 아티 프로필에 대한 요청인 경우") {
+            it("성공(200)과 지정한 응답 포맷을 반환한다") {
+//                val result = mockMvcTester
+//                    .get()
+//                    .uri("/api/artists/1")
+//                    .exchange()
+//
+//                result.response.status shouldBe 200
+//
+//                val apiResponseJson = objectMapper.readTree(result.response.contentAsString)
+//                val dataNode = apiResponseJson.get("data")
+//                dataNode.get("artistId") shouldBe 1L
+//                dataNode.get("name") shouldBe "아티스트 1"
+            }
+        }
+    }
+
+    describe("아티프로필 상세 조회") {
+        context("존재하지 않는 아티 프로필에 대한 요청인 경우") {
+            it("요청한 리소스를 찾을 수 없음(404)와 지정한 에러 포맷을 반환한다") {
+                val result = mockMvcTester
+                    .get()
+                    .uri("/api/artists/1")
+                    .exchange()
+
+                result.response.status shouldBe 404
+
+                val apiResponseJson = objectMapper.readTree(result.response.contentAsString)
+                apiResponseJson["title"].asText() shouldBe "Not Found"
+                apiResponseJson["detail"].asText() shouldBe "요청한 아티 프로필을 찾을 수 없습니다."
+                apiResponseJson["code"].asText() shouldBe "ARTIST_NOT_FOUND"
             }
         }
     }
