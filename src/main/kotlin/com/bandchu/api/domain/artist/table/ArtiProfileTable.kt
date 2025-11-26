@@ -13,5 +13,5 @@ object ArtiProfileTable : LongIdTable("arti_profiles") {
     val createdAt = timestampWithTimeZone("created_at")
     val updatedAt = timestampWithTimeZone("updated_at")
 
-    val member = reference("members", MemberTable.id, onDelete = ReferenceOption.CASCADE)
+    val member = reference("member", MemberTable.id, onDelete = ReferenceOption.CASCADE)
 }

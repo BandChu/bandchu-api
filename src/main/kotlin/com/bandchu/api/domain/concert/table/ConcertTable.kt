@@ -14,5 +14,5 @@ object ConcertTable : LongIdTable("concerts") {
     val bookingSchedule = timestampWithTimeZone("booking_date").nullable()
     val createdAt = timestampWithTimeZone("created_at")
 
-    val arti_profile = reference("arti_profiles", ArtiProfileTable.id, onDelete = ReferenceOption.CASCADE)
+    val arti_profile = reference("arti_profile", ArtiProfileTable.id, onDelete = ReferenceOption.CASCADE)
 }
