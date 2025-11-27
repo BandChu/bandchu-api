@@ -6,8 +6,6 @@ import com.bandchu.api.domain.posts.table.CommentTable
 import com.bandchu.api.domain.posts.table.MediaTable
 import com.bandchu.api.domain.posts.table.PostTable
 import com.bandchu.api.domain.posts.table.ReportTable
-import com.zaxxer.hikari.HikariDataSource
-import org.jetbrains.exposed.v1.datetime.Minute
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 import org.jetbrains.exposed.v1.jdbc.Database

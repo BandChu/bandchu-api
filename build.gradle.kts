@@ -27,9 +27,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("org.jetbrains.exposed:exposed-core:1.0.0-rc-2")
-    implementation("org.jetbrains.exposed:exposed-jdbc:1.0.0-rc-2")
-    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:1.0.0-rc-2")
+    implementation("org.jetbrains.exposed:exposed-core:1.0.0-rc-3")
+    implementation("org.jetbrains.exposed:exposed-jdbc:1.0.0-rc-3")
+    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:1.0.0-rc-3")
     
     // JWT
     implementation("io.jsonwebtoken:jjwt-api:0.12.3")
@@ -55,6 +55,7 @@ dependencies {
 kotlin {
     compilerOptions {
         freeCompilerArgs.addAll("-Xjsr305=strict")
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
     }
 }
 

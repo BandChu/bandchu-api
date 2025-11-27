@@ -1,25 +1,25 @@
 package com.bandchu.api.domain.member.controller
 
 import com.bandchu.api.domain.member.dto.SignupRequest
-import com.bandchu.api.domain.member.dto.SignupResponse
+import com.bandchu.api.domain.member.model.Member
 import com.bandchu.api.domain.member.model.Role
+import com.bandchu.api.domain.member.service.LoginResult
 import com.bandchu.api.domain.member.service.MemberService
+import com.bandchu.api.domain.member.service.TokenPair
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.kotest.core.spec.style.DescribeSpec
-import io.kotest.extensions.spring.SpringExtension
 import io.mockk.every
 import io.mockk.mockk
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
-import java.time.OffsetDateTime
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.Month
 
 @TestConfiguration
 class MemberControllerTestConfig {
@@ -29,11 +29,10 @@ class MemberControllerTestConfig {
 
 @WebMvcTest(MemberController::class)
 @ContextConfiguration(classes = [MemberControllerTestConfig::class])
-@Import(SpringExtension::class)
 class MemberControllerTest(
-    @Autowired private val mockMvc: MockMvc,
-    @Autowired private val objectMapper: ObjectMapper,
-    @Autowired private val memberService: MemberService
+    private val mockMvc: MockMvc,
+    private val objectMapper: ObjectMapper,
+    private val memberService: MemberService
 ) : DescribeSpec({
 
     describe("POST /api/members/signup") {
@@ -47,15 +46,24 @@ class MemberControllerTest(
                     role = Role.FAN
                 )
 
-                val response = SignupResponse(
-                    memberId = 1L,
+                val savedMember = Member(
+                    id = 1L,
                     email = "example@domain.com",
+                    password = "password123",
                     nickname = "홍길동",
                     role = Role.FAN,
-                    createdAt = OffsetDateTime.now()
+                    createdAt = LocalDateTime(
+                        year = 2024,
+                        month = Month.JANUARY,
+                        dayOfMonth = 1,
+                        hour = 0,
+                        minute = 0,
+                        second = 0,
+                        nanosecond = 0
+                    )
                 )
 
-                every { memberService.signup(request) } returns response
+                every { memberService.signup(request) } returns savedMember
 
                 // when & then
                 mockMvc.perform(
@@ -110,14 +118,14 @@ class MemberControllerTest(
                     password = "password123"
                 )
 
-                val response = com.bandchu.api.domain.member.dto.LoginResponse(
+                val loginResult = LoginResult(
                     accessToken = "jwt-token",
                     refreshToken = "refresh-token",
                     memberId = 1L,
                     nickname = "홍길동"
                 )
 
-                every { memberService.login(request) } returns response
+                every { memberService.login(request) } returns loginResult
 
                 // when & then
                 mockMvc.perform(
@@ -206,12 +214,12 @@ class MemberControllerTest(
                     refreshToken = "valid-refresh-token"
                 )
 
-                val response = com.bandchu.api.domain.member.dto.RefreshTokenResponse(
+                val tokenPair = TokenPair(
                     accessToken = "new-access-token",
                     refreshToken = "new-refresh-token"
                 )
 
-                every { memberService.refreshToken(request.refreshToken) } returns response
+                every { memberService.refreshToken(request.refreshToken) } returns tokenPair
 
                 // when & then
                 mockMvc.perform(
