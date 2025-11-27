@@ -1,7 +1,13 @@
 package com.bandchu.api.domain.member.controller
 
+import com.bandchu.api.domain.member.dto.GoogleOAuthRequest
+import com.bandchu.api.domain.member.dto.GoogleOAuthResponse
 import com.bandchu.api.domain.member.dto.LoginRequest
 import com.bandchu.api.domain.member.dto.LoginResponse
+import com.bandchu.api.domain.member.dto.OAuthLinkRequest
+import com.bandchu.api.domain.member.dto.OAuthLinkResponse
+import com.bandchu.api.domain.member.dto.OAuthVerifyRequest
+import com.bandchu.api.domain.member.dto.OAuthVerifyResponse
 import com.bandchu.api.domain.member.dto.RefreshTokenRequest
 import com.bandchu.api.domain.member.dto.RefreshTokenResponse
 import com.bandchu.api.domain.member.dto.SignupRequest
@@ -11,6 +17,8 @@ import com.bandchu.api.global.response.ApiResponse
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
@@ -86,6 +94,56 @@ class MemberController(
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(ApiResponse.success(response, "토큰이 성공적으로 재발급되었습니다."))
+    }
+
+    @PostMapping("/oauth/google")
+    fun googleLogin(@Valid @RequestBody request: GoogleOAuthRequest): ResponseEntity<ApiResponse<GoogleOAuthResponse>> {
+        val googleOAuthResult = memberService.googleLogin(request.idToken)
+        
+        val response = GoogleOAuthResponse(
+            accessToken = googleOAuthResult.accessToken,
+            refreshToken = googleOAuthResult.refreshToken,
+            isNewMember = googleOAuthResult.isNewMember,
+            memberId = googleOAuthResult.memberId,
+            nickname = googleOAuthResult.nickname
+        )
+        
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(ApiResponse.success(response, "구글 로그인에 성공했습니다."))
+    }
+
+    @PostMapping("/oauth/verify")
+    fun verifyOAuth(@Valid @RequestBody request: OAuthVerifyRequest): ResponseEntity<ApiResponse<OAuthVerifyResponse>> {
+        val oauthVerifyResult = memberService.verifyOAuth(request.provider, request.token)
+        
+        val response = OAuthVerifyResponse(
+            accessToken = oauthVerifyResult.accessToken,
+            refreshToken = oauthVerifyResult.refreshToken,
+            memberId = oauthVerifyResult.memberId
+        )
+        
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(ApiResponse.success(response, "소셜 인증 검증에 성공했습니다."))
+    }
+
+    @PostMapping("/me/oauth/link")
+    fun linkOAuth(@Valid @RequestBody request: OAuthLinkRequest): ResponseEntity<ApiResponse<OAuthLinkResponse>> {
+        // SecurityContext에서 인증된 회원 ID 가져오기
+        val authentication: Authentication = SecurityContextHolder.getContext().authentication
+            ?: throw IllegalStateException("인증 정보가 없습니다.")
+        val memberId = authentication.principal as Long
+
+        val oauthLinkResult = memberService.linkOAuth(memberId, request.provider, request.token)
+        
+        val response = OAuthLinkResponse(
+            linkedProvider = oauthLinkResult.linkedProvider
+        )
+        
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(ApiResponse.success(response, "소셜 계정이 연결되었습니다."))
     }
 }
 

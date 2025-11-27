@@ -7,7 +7,6 @@ import com.bandchu.api.domain.posts.table.MediaTable
 import com.bandchu.api.domain.posts.table.PostTable
 import com.bandchu.api.domain.posts.table.ReportTable
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
-
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.springframework.context.annotation.Bean

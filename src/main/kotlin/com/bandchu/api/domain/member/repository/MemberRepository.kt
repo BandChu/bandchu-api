@@ -7,6 +7,7 @@ import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.jdbc.update
 import org.springframework.stereotype.Repository
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
@@ -25,6 +26,7 @@ class MemberRepository {
                 it[password] = member.password
                 it[nickname] = member.nickname
                 it[role] = member.role
+                it[googleId] = member.googleId
                 it[createdAt] = OffsetDateTime.now(ZoneOffset.UTC)
             }
 
@@ -65,6 +67,30 @@ class MemberRepository {
         }
     }
 
+    fun findByGoogleId(googleId: String): Member? {
+        return transaction {
+            MemberTable
+                .selectAll()
+                .where { MemberTable.googleId eq googleId }
+                .firstOrNull()
+                ?.let { toMember(it) }
+        }
+    }
+
+    fun updateGoogleId(memberId: Long, googleId: String): Member {
+        return transaction {
+            MemberTable.update({ MemberTable.id eq memberId }) {
+                it[MemberTable.googleId] = googleId
+            }
+            
+            MemberTable
+                .selectAll()
+                .where { MemberTable.id eq memberId }
+                .single()
+                .let { toMember(it) }
+        }
+    }
+
     private fun toMember(row: ResultRow): Member {
         val offsetDateTime = row[MemberTable.createdAt]
         val javaLocalDateTime = offsetDateTime.toLocalDateTime()
@@ -84,6 +110,7 @@ class MemberRepository {
             password = row[MemberTable.password],
             nickname = row[MemberTable.nickname],
             role = row[MemberTable.role],
+            googleId = row[MemberTable.googleId],
             createdAt = localDateTime
         )
     }
