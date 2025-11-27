@@ -17,8 +17,8 @@ data class ChatMessageResponse(
         fun from(row: ResultRow): ChatMessageResponse {
             return ChatMessageResponse(
                 messageId = row[ChatMessageTable.id],
-                roomId = row[ChatMessageTable.room],
-                senderId = row[ChatMessageTable.sender],
+                roomId = row[ChatMessageTable.roomId],
+                senderId = row[ChatMessageTable.senderId],
                 messageType = row[ChatMessageTable.messageType],
                 content = row[ChatMessageTable.content],
                 fileUrl = row[ChatMessageTable.fileUrl],

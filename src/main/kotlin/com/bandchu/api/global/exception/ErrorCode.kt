@@ -22,8 +22,11 @@ enum class ErrorCode(
 
     /* 도메인별 에러 코드 관리*/
 
-    // user
-    USER_INVALID_CREDENTIAL("user-invalid-credential", HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다.");
+    // member
+    USER_EMAIL_DUPLICATED("user-email-duplicated", HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
+    USER_INVALID_CREDENTIAL("user-invalid-credential", HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다."),
+    INVALID_TOKEN("invalid-token", HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
+    INVALID_REFRESH_TOKEN("invalid-refresh-token", HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다.");
 
     val code: String
         get() = name

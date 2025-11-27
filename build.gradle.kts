@@ -27,9 +27,14 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("org.jetbrains.exposed:exposed-core:1.0.0-rc-2")
-    implementation("org.jetbrains.exposed:exposed-jdbc:1.0.0-rc-2")
-    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:1.0.0-rc-2")
+    implementation("org.jetbrains.exposed:exposed-core:1.0.0-rc-3")
+    implementation("org.jetbrains.exposed:exposed-jdbc:1.0.0-rc-3")
+    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:1.0.0-rc-3")
+    
+    // JWT
+    implementation("io.jsonwebtoken:jjwt-api:0.12.3")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.3")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.3")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
@@ -45,12 +50,12 @@ dependencies {
     implementation("org.postgresql:postgresql:42.7.1")
 
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
-
 }
 
 kotlin {
     compilerOptions {
         freeCompilerArgs.addAll("-Xjsr305=strict")
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
     }
 }
 
