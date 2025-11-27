@@ -22,10 +22,17 @@ enum class ErrorCode(
 
     /* 도메인별 에러 코드 관리*/
 
-    // user
+    // member
+    USER_EMAIL_DUPLICATED("user-email-duplicated", HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
     USER_INVALID_CREDENTIAL("user-invalid-credential", HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다."),
+    INVALID_TOKEN("invalid-token", HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
+    INVALID_REFRESH_TOKEN("invalid-refresh-token", HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다."),
+
+    // artist
     ARTIST_NOT_FOUND("artist-not-found", HttpStatus.NOT_FOUND, "요청한 아티 프로필을 찾을 수 없습니다."),
-    ARTIST_FORBIDDEN("artist-forbidden", HttpStatus.FORBIDDEN, "해당 아티프로필에 대한 접근 권한이 없습니다.");
+    ARTIST_FORBIDDEN("artist-forbidden", HttpStatus.FORBIDDEN, "해당 아티프로필에 대한 접근 권한이 없습니다."),
+
+    ;
 
     val code: String
         get() = name
