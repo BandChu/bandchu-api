@@ -1,0 +1,38 @@
+### 환경 설정
+@baseUrl = http://localhost:8080
+@userId = 1
+
+### 1. 채팅방 생성 (DIRECT)
+POST {{baseUrl}}/api/chatrooms
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "roomType": "DIRECT",
+  "name": null,
+  "memberIds": [2]
+}
+
+### 2. 채팅방 생성 (GROUP)
+POST {{baseUrl}}/api/chatrooms
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "roomType": "GROUP",
+  "name": "알고리즘 스터디",
+  "memberIds": [2, 3]
+}
+
+### 3. 채팅방 목록 조회
+GET {{baseUrl}}/api/chatrooms
+X-User-Id: {{userId}}
+
+### 4. 읽음 처리
+PATCH {{baseUrl}}/api/chatrooms/1/read
+Content-Type: application/json
+X-User-Id: {{userId}}
+
+{
+  "lastReadMessageId": 10
+}
