@@ -13,6 +13,7 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
@@ -21,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.transaction.annotation.Transactional
 
+@TestConfiguration
 class ArtistApiTestConfig {
     @Bean
     fun authFixture(
@@ -40,6 +42,15 @@ class ArtistApiTestConfig {
         )
     }
 }
+
+/**
+ * Artist API 통합 테스트
+ *
+ * - MockMvc 기반으로 Controller–Service–Repository 흐름을 검증한다.
+ * - 실제 JWT 검증은 수행하지 않으며,
+ *   SecurityMockMvcRequestPostProcessors.user()를 사용해
+ *   SecurityContext에 인증 정보를 직접 주입하여 인증/인가를 테스트한다.
+ */
 
 @SpringBootTest
 @Transactional
