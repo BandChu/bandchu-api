@@ -12,10 +12,7 @@ import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.springframework.stereotype.Repository
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.LocalTime
-import kotlinx.datetime.Month
+import com.bandchu.api.global.util.toKotlinLocalDateTime
 
 @Repository
 class SubscriptionRepository {
@@ -65,16 +62,7 @@ class SubscriptionRepository {
 
     private fun toSubscription(row: ResultRow): Subscription {
         val offsetDateTime = row[SubscriptionTable.createdAt]
-        val javaLocalDateTime = offsetDateTime.toLocalDateTime()
-        val month = Month.values()[javaLocalDateTime.monthValue - 1]
-        val localDate = LocalDate(javaLocalDateTime.year, month, javaLocalDateTime.dayOfMonth)
-        val localTime = LocalTime(
-            javaLocalDateTime.hour,
-            javaLocalDateTime.minute,
-            javaLocalDateTime.second,
-            javaLocalDateTime.nano
-        )
-        val localDateTime = LocalDateTime(localDate, localTime)
+        val localDateTime = offsetDateTime.toKotlinLocalDateTime()
         
         return Subscription(
             id = row[SubscriptionTable.id],

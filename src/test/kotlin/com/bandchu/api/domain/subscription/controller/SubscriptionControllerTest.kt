@@ -130,7 +130,7 @@ class SubscriptionControllerTest(
                 val request = SubscriptionRequest(artProfileId = artProfileId)
 
                 every { subscriptionService.subscribe(memberId, artProfileId) } throws com.bandchu.api.global.exception.BusinessException(
-                    com.bandchu.api.global.exception.ErrorCode.INVALID_ROLE
+                    com.bandchu.api.global.exception.ErrorCode.SUBSCRIPTION_INSUFFICIENT_ROLE
                 )
 
                 // when & then
@@ -142,7 +142,39 @@ class SubscriptionControllerTest(
                 )
                     .andExpect(status().isForbidden)
                     .andExpect(jsonPath("$.status").value(403))
-                    .andExpect(jsonPath("$.code").value("INVALID_ROLE"))
+                    .andExpect(jsonPath("$.code").value("SUBSCRIPTION_INSUFFICIENT_ROLE"))
+            }
+        }
+
+        context("존재하지 않는 아티스트에 구독 요청을 보내면") {
+            it("404 Not Found와 함께 에러를 반환한다") {
+                // given
+                val memberId = 1L
+                val artProfileId = 999L
+                val authentication = UsernamePasswordAuthenticationToken(
+                    memberId,
+                    null,
+                    listOf(SimpleGrantedAuthority("ROLE_FAN"))
+                )
+                SecurityContextHolder.getContext().authentication = authentication
+
+                val request = SubscriptionRequest(artProfileId = artProfileId)
+
+                every { subscriptionService.subscribe(memberId, artProfileId) } throws com.bandchu.api.global.exception.BusinessException(
+                    com.bandchu.api.global.exception.ErrorCode.ARTIST_NOT_FOUND
+                )
+
+                // when & then
+                mockMvc.perform(
+                    post("/api/subscriptions")
+                        .with(authentication(authentication))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                )
+                    .andExpect(status().isNotFound)
+                    .andExpect(jsonPath("$.status").value(404))
+                    .andExpect(jsonPath("$.code").value("ARTIST_NOT_FOUND"))
+                    .andExpect(jsonPath("$.detail").value("요청한 아티 프로필을 찾을 수 없습니다."))
             }
         }
 

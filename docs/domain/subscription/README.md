@@ -17,6 +17,7 @@
   ```
 - **검증**: 
   - 역할 검증: FAN만 구독 가능 (ARTIST는 403 Forbidden)
+  - 아티스트 프로필 존재 확인: 존재하지 않는 아티스트 프로필 ID로 구독 시도 시 404 에러
   - 중복 구독 체크: 동일한 회원이 같은 아티스트를 중복 구독할 수 없음
 - **응답**:
   ```json
@@ -32,7 +33,8 @@
   }
   ```
 - **에러**:
-  - 403 Forbidden, `INVALID_ROLE` (ARTIST 역할 유저가 구독 시도)
+  - 403 Forbidden, `SUBSCRIPTION_INSUFFICIENT_ROLE` (ARTIST 역할 유저가 구독 시도)
+  - 404 Not Found, `ARTIST_NOT_FOUND` (존재하지 않는 아티스트 프로필)
   - 409 Conflict, `SUBSCRIPTION_DUPLICATED` (이미 구독 중인 아티스트)
   - 401 Unauthorized, `INVALID_TOKEN` (유효하지 않은 토큰)
   - 403 Forbidden (토큰 없이 요청)
@@ -101,12 +103,13 @@
 - `src/main/kotlin/com/bandchu/api/domain/subscription/service/SubscriptionService.kt` (신규)
   - `subscribe()`: 아티스트 구독 비즈니스 로직 구현
     - 역할 검증 (FAN만 허용)
+    - 아티스트 프로필 존재 확인
     - 중복 구독 체크
   - `unsubscribe()`: 구독 취소 비즈니스 로직 구현
     - 구독 존재 확인 및 삭제
   - `getSubscriptions()`: 구독 목록 조회 비즈니스 로직 구현
-    - 구독 목록 조회 후 각 구독의 아티스트 프로필 정보 조회
-    - `ArtiProfileRepository.findById()`를 사용하여 아티스트 정보 조회
+    - 구독 목록 조회 후 배치 쿼리로 모든 아티스트 프로필 정보 조회
+    - `ArtiProfileRepository.findByIds()`를 사용하여 N+1 쿼리 문제 해결
     - 아티스트 프로필이 없는 경우 경고 로그 기록 및 필터링
 
 #### Repository
@@ -140,9 +143,9 @@
 ### 아티스트 도메인 (domain/artist)
 
 #### Repository
-- `src/main/kotlin/com/bandchu/api/domain/artist/repository/ArtiProfileRepository.kt` (사용)
-  - `findById()`: 아티스트 프로필 ID로 조회
-  - 구독 목록 조회 시 아티스트 정보를 가져오기 위해 사용
+- `src/main/kotlin/com/bandchu/api/domain/artist/repository/ArtiProfileRepository.kt` (수정)
+  - `findById()`: 아티스트 프로필 ID로 조회 (구독 시 아티스트 프로필 존재 확인에 사용)
+  - `findByIds()`: 여러 아티스트 프로필 ID를 배치로 조회 (구독 목록 조회 시 N+1 쿼리 문제 해결)
 
 ### 글로벌 (global)
 
@@ -150,6 +153,11 @@
 - `src/main/kotlin/com/bandchu/api/global/util/Resolver.kt` (수정)
   - `getCurrentUserRole()`: 현재 로그인한 사용자의 역할(Role) 반환
   - 구독 도메인에서 FAN 역할 검증에 사용
+
+- `src/main/kotlin/com/bandchu/api/global/util/DateTimeConverter.kt` (신규)
+  - `LocalDateTime.toOffsetDateTime()`: kotlinx.datetime.LocalDateTime을 java.time.OffsetDateTime으로 변환
+  - `OffsetDateTime.toKotlinLocalDateTime()`: java.time.OffsetDateTime을 kotlinx.datetime.LocalDateTime으로 변환
+  - 날짜 변환 로직 중복 제거를 위한 유틸리티 함수
 
 #### Config
 - `src/main/kotlin/com/bandchu/api/global/config/SecurityConfig.kt` (수정)
@@ -162,7 +170,7 @@
 - `src/main/kotlin/com/bandchu/api/global/exception/ErrorCode.kt` (수정)
   - `SUBSCRIPTION_DUPLICATED`: 이미 구독 중인 아티스트 에러
   - `SUBSCRIPTION_NOT_FOUND`: 구독 중이 아닌 아티스트 에러
-  - `INVALID_ROLE`: 권한이 없음 에러
+  - `SUBSCRIPTION_INSUFFICIENT_ROLE`: 팬만 구독할 수 있음 에러 (기존 INVALID_ROLE에서 변경)
 
 ## curl 테스트 결과
 
@@ -177,7 +185,8 @@ Content-Type: application/json
 ```
 - ✅ **성공 케이스**: 201 Created, 구독 정보 반환 (subscriptionId, memberId, artProfileId, createdAt)
 - ✅ **실패 케이스 (중복 구독)**: 409 Conflict, `SUBSCRIPTION_DUPLICATED` 에러
-- ✅ **실패 케이스 (ARTIST 역할)**: 403 Forbidden, `INVALID_ROLE` 에러
+- ✅ **실패 케이스 (존재하지 않는 아티스트)**: 404 Not Found, `ARTIST_NOT_FOUND` 에러
+- ✅ **실패 케이스 (ARTIST 역할)**: 403 Forbidden, `SUBSCRIPTION_INSUFFICIENT_ROLE` 에러
 - ✅ **실패 케이스 (토큰 없음)**: 403 Forbidden (Spring Security 기본 동작)
 - ✅ **실패 케이스 (유효하지 않은 토큰)**: 401 Unauthorized, `INVALID_TOKEN` 에러
 
@@ -207,6 +216,7 @@ Authorization: Bearer {accessToken}
 - ✅ 테스트 코드 작성 완료 (`SubscriptionControllerTest.kt`)
   - 아티스트 구독 테스트
   - 중복 구독 테스트
+  - 존재하지 않는 아티스트에 구독 요청 테스트
   - ARTIST 역할 유저 구독 시도 테스트
   - 토큰 없이 요청 테스트
   - 구독 취소 테스트
@@ -267,9 +277,16 @@ Authorization: Bearer {accessToken}
 **작성일**: 2025-11-28  
 **최종 수정일**: 2025-11-28  
 **작성자**: 신진수  
-**버전**: 1.2
+**버전**: 1.3
 
 ## 변경 이력
+
+### 버전 1.3 (2025-11-28)
+- 아티스트 프로필 존재 확인 추가 (구독 시 존재하지 않는 아티스트 프로필 ID로 구독 시도 방지)
+- N+1 쿼리 문제 해결: `ArtiProfileRepository.findByIds()` 메서드 추가로 구독 목록 조회 성능 개선
+- 에러 코드 개선: `INVALID_ROLE` → `SUBSCRIPTION_INSUFFICIENT_ROLE`로 변경 (도메인별 네이밍 일관성)
+- 날짜 변환 유틸리티 함수 추가: `DateTimeConverter.kt` 생성으로 코드 중복 제거
+- 테스트 케이스 추가: 존재하지 않는 아티스트에 구독 요청 시나리오 추가
 
 ### 버전 1.2 (2025-11-28)
 - 내가 구독한 아티스트 목록 조회 API 추가 (`GET /api/subscriptions`)
@@ -296,6 +313,6 @@ Authorization: Bearer {accessToken}
 - 중복 구독 방지 구현 (UNIQUE 제약조건)
 - Subscription 모델 및 테이블 생성
 - SubscriptionRepository, SubscriptionService, SubscriptionController 구현
-- ErrorCode에 `SUBSCRIPTION_DUPLICATED`, `INVALID_ROLE` 추가
+- ErrorCode에 `SUBSCRIPTION_DUPLICATED`, `SUBSCRIPTION_INSUFFICIENT_ROLE` 추가
 - 아티스트 구독 테스트 코드 작성 및 curl 테스트 완료
 

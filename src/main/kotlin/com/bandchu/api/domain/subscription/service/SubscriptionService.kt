@@ -25,8 +25,12 @@ class SubscriptionService(
         val role = getCurrentUserRole()
         if (role != Role.FAN) {
             log.warn("Subscription attempt by non-FAN user. MemberId: $memberId, Role: $role")
-            throw BusinessException(ErrorCode.INVALID_ROLE)
+            throw BusinessException(ErrorCode.SUBSCRIPTION_INSUFFICIENT_ROLE)
         }
+
+        // 아티스트 프로필 존재 확인
+        artiProfileRepository.findById(artProfileId)
+            ?: throw BusinessException(ErrorCode.ARTIST_NOT_FOUND)
 
         // 중복 구독 체크
         if (subscriptionRepository.existsByMemberIdAndArtProfileId(memberId, artProfileId)) {
@@ -54,19 +58,29 @@ class SubscriptionService(
         // 구독 목록 조회
         val subscriptions = subscriptionRepository.findByMemberId(memberId)
 
-        // 아티스트 프로필 정보 조회
+        if (subscriptions.isEmpty()) {
+            return emptyList()
+        }
+
+        // 아티스트 프로필 ID 목록 추출
+        val artProfileIds = subscriptions.map { it.artProfileId }
+
+        // 배치 쿼리로 모든 아티스트 프로필 정보 조회
+        val artiProfiles = artiProfileRepository.findByIds(artProfileIds)
+        val profileMap = artiProfiles.associateBy { it.id }
+
+        // 구독 정보와 아티스트 프로필 정보 매핑
         return subscriptions.mapNotNull { subscription ->
-            val artiProfile = artiProfileRepository.findById(subscription.artProfileId)
-            if (artiProfile == null) {
+            profileMap[subscription.artProfileId]?.let { artiProfile ->
+                SubscriptionListItemResponse(
+                    artProfileId = subscription.artProfileId,
+                    artistName = artiProfile.artistName,
+                    profileImage = artiProfile.profileImageUrl?.toString() ?: ""
+                )
+            } ?: run {
                 log.warn("ArtiProfile not found for subscription. MemberId: $memberId, ArtProfileId: ${subscription.artProfileId}")
-                return@mapNotNull null
+                null
             }
-            
-            SubscriptionListItemResponse(
-                artProfileId = subscription.artProfileId,
-                artistName = artiProfile.artistName, 
-                profileImage = artiProfile.profileImageUrl?.toString() ?: "" 
-            )
         }
     }
 }

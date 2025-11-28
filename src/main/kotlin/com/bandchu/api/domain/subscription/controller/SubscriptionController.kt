@@ -6,6 +6,7 @@ import com.bandchu.api.domain.subscription.dto.SubscriptionResponse
 import com.bandchu.api.domain.subscription.service.SubscriptionService
 import com.bandchu.api.global.response.ApiResponse
 import com.bandchu.api.global.util.getCurrentUserId
+import com.bandchu.api.global.util.toOffsetDateTime
 import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -32,17 +33,7 @@ class SubscriptionController(
             throw IllegalStateException("구독 ID가 없습니다.")
         }
 
-        val createdAt = subscription.createdAt?.let { localDateTime ->
-            java.time.LocalDateTime.of(
-                localDateTime.year,
-                java.time.Month.valueOf(localDateTime.month.name),
-                localDateTime.day,
-                localDateTime.hour,
-                localDateTime.minute,
-                localDateTime.second,
-                localDateTime.nanosecond
-            ).atOffset(ZoneOffset.UTC)
-        } ?: OffsetDateTime.now(ZoneOffset.UTC)
+        val createdAt = subscription.createdAt?.toOffsetDateTime() ?: OffsetDateTime.now(ZoneOffset.UTC)
 
         val response = SubscriptionResponse(
             subscriptionId = subscriptionId,

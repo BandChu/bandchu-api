@@ -38,7 +38,7 @@ enum class ErrorCode(
     // subscription
     SUBSCRIPTION_DUPLICATED("subscription-duplicated", HttpStatus.CONFLICT, "이미 구독 중인 아티스트입니다."),
     SUBSCRIPTION_NOT_FOUND("subscription-not-found", HttpStatus.NOT_FOUND, "구독 중이 아닌 아티스트입니다."),
-    INVALID_ROLE("invalid-role", HttpStatus.FORBIDDEN, "권한이 없습니다."),
+    SUBSCRIPTION_INSUFFICIENT_ROLE("subscription-insufficient-role", HttpStatus.FORBIDDEN, "팬만 구독할 수 있습니다."),
 
     // artist
     ARTIST_NOT_FOUND("artist-not-found", HttpStatus.NOT_FOUND, "요청한 아티 프로필을 찾을 수 없습니다."),
