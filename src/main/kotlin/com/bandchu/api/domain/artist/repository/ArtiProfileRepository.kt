@@ -43,7 +43,8 @@ class ArtiProfileRepository {
             information = this[ConcertTable.information],
             bookingUrl = this[ConcertTable.bookingUrl]?.let { URI(it) },
             bookingSchedule = this[ConcertTable.bookingSchedule],
-            createdAt = this[ConcertTable.createdAt]
+            createdAt = this[ConcertTable.createdAt],
+            artiProfileId = this[ConcertTable.arti_profile].value
         )
 
     private fun ResultRow.toSnsLinkDomain(): SnsLink =

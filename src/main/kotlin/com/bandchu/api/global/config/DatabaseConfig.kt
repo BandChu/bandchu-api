@@ -3,6 +3,7 @@ package com.bandchu.api.global.config
 
 import com.bandchu.api.domain.artist.table.ArtiProfileTable
 import com.bandchu.api.domain.artist.table.SnsLinkTable
+import com.bandchu.api.domain.concert.table.ConcertScheduleTable
 import com.bandchu.api.domain.concert.table.ConcertTable
 import com.bandchu.api.domain.member.table.MemberTable
 import com.bandchu.api.domain.posts.table.CommentTable
@@ -27,7 +28,17 @@ class DatabaseConfig(private val dataSource: DataSource) {
         Database.connect(dataSource)
 
         transaction {
-            SchemaUtils.create(SnsLinkTable, ConcertTable, ArtiProfileTable, MemberTable, PostTable, CommentTable, MediaTable, ReportTable)
+            SchemaUtils.create(
+                MemberTable,
+                PostTable,
+                CommentTable,
+                MediaTable,
+                ReportTable,
+                ArtiProfileTable,
+                SnsLinkTable,
+                ConcertTable,
+                ConcertScheduleTable,
+            )
         }
 
         println(" Exposed + Spring Boot 연결 성공")
