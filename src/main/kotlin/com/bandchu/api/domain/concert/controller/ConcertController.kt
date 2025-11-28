@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
+@RestController
 @RequestMapping("/api/concerts")
 class ConcertController(
     private val concertService: ConcertService
@@ -28,6 +29,8 @@ class ConcertController(
             .body(ApiResponse.success(concert.toConcertDetailResponse()))
     }
 
+    // TODO: 구독한 아티스트의 공연 정보 조회
+
     @PostMapping("")
     fun create(
         @RequestBody @Valid request: ConcertCreateRequest
@@ -39,7 +42,7 @@ class ConcertController(
             .body(ApiResponse.success(concert.toConcertDetailResponse()))
     }
 
-    @PostMapping("/{concertId}")
+    @PatchMapping("/{concertId}")
     fun update(
         @PathVariable concertId: Long,
         @RequestBody @Valid request: ConcertUpdateRequest
