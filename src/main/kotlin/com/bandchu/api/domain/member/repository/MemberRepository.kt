@@ -4,6 +4,7 @@ import com.bandchu.api.domain.member.model.Member
 import com.bandchu.api.domain.member.table.MemberTable
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
@@ -27,6 +28,7 @@ class MemberRepository {
                 it[nickname] = member.nickname
                 it[role] = member.role
                 it[googleId] = member.googleId
+                it[profileImageUrl] = member.profileImageUrl
                 it[createdAt] = OffsetDateTime.now(ZoneOffset.UTC)
             }
 
@@ -91,6 +93,27 @@ class MemberRepository {
         }
     }
 
+    fun deleteById(id: Long) {
+        transaction {
+            MemberTable.deleteWhere { MemberTable.id eq id }
+        }
+    }
+
+    fun updateProfile(memberId: Long, nickname: String, profileImageUrl: String?): Member {
+        return transaction {
+            MemberTable.update({ MemberTable.id eq memberId }) {
+                it[MemberTable.nickname] = nickname
+                it[MemberTable.profileImageUrl] = profileImageUrl
+            }
+            
+            MemberTable
+                .selectAll()
+                .where { MemberTable.id eq memberId }
+                .single()
+                .let { toMember(it) }
+        }
+    }
+
     private fun toMember(row: ResultRow): Member {
         val offsetDateTime = row[MemberTable.createdAt]
         val javaLocalDateTime = offsetDateTime.toLocalDateTime()
@@ -111,6 +134,7 @@ class MemberRepository {
             nickname = row[MemberTable.nickname],
             role = row[MemberTable.role],
             googleId = row[MemberTable.googleId],
+            profileImageUrl = row[MemberTable.profileImageUrl],
             createdAt = localDateTime
         )
     }

@@ -9,5 +9,6 @@ data class Member(
     val nickname: String,
     val role: Role,
     val googleId: String? = null,
+    val profileImageUrl: String? = null,
     val createdAt: LocalDateTime? = null
 )

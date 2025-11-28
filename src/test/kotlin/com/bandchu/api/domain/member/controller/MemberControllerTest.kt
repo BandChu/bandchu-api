@@ -19,6 +19,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -493,6 +495,157 @@ class MemberControllerTest(
                 // when & then
                 mockMvc.perform(
                     post("/api/members/me/oauth/link")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                )
+                    .andExpect(status().isUnauthorized)
+            }
+        }
+    }
+
+    describe("DELETE /api/members/me") {
+        context("유효한 토큰으로 회원 탈퇴 요청이 들어오면") {
+            it("200 OK와 함께 성공 메시지를 반환한다") {
+                // given
+                val memberId = 1L
+                val authentication = UsernamePasswordAuthenticationToken(
+                    memberId,
+                    null,
+                    listOf(SimpleGrantedAuthority("ROLE_FAN"))
+                )
+                SecurityContextHolder.getContext().authentication = authentication
+
+                every { memberService.deleteMember(memberId) } returns Unit
+
+                // when & then
+                mockMvc.perform(
+                    delete("/api/members/me")
+                        .with(authentication(authentication))
+                )
+                    .andExpect(status().isOk)
+                    .andExpect(jsonPath("$.success").value(true))
+                    .andExpect(jsonPath("$.data").doesNotExist())
+                    .andExpect(jsonPath("$.message").value("회원 탈퇴가 완료되었습니다."))
+            }
+        }
+
+        context("토큰이 없이 회원 탈퇴 요청이 들어오면") {
+            it("401 Unauthorized와 함께 에러를 반환한다") {
+                // when & then
+                mockMvc.perform(
+                    delete("/api/members/me")
+                )
+                    .andExpect(status().isUnauthorized)
+            }
+        }
+
+        context("유효하지 않은 토큰으로 회원 탈퇴 요청이 들어오면") {
+            it("401 Unauthorized와 함께 에러를 반환한다") {
+                // given
+                val invalidToken = "invalid-token"
+
+                // when & then
+                mockMvc.perform(
+                    delete("/api/members/me")
+                        .header("Authorization", "Bearer $invalidToken")
+                )
+                    .andExpect(status().isUnauthorized)
+                    .andExpect(jsonPath("$.status").value(401))
+                    .andExpect(jsonPath("$.code").value("INVALID_TOKEN"))
+                    .andExpect(jsonPath("$.detail").value("유효하지 않은 토큰입니다."))
+            }
+        }
+    }
+
+    describe("PATCH /api/members/me/profile/setup") {
+        context("유효한 토큰과 프로필 정보로 초기 설정 요청이 들어오면") {
+            it("200 OK와 함께 업데이트된 프로필 정보를 반환한다") {
+                // given
+                val memberId = 1L
+                val authentication = UsernamePasswordAuthenticationToken(
+                    memberId,
+                    null,
+                    listOf(SimpleGrantedAuthority("ROLE_FAN"))
+                )
+                SecurityContextHolder.getContext().authentication = authentication
+
+                val request = com.bandchu.api.domain.member.dto.ProfileSetupRequest(
+                    nickname = "새사용자",
+                    profileImageUrl = "https://example.com/profile.jpg"
+                )
+
+                val updatedMember = Member(
+                    id = memberId,
+                    email = "test@example.com",
+                    password = "password123",
+                    nickname = "새사용자",
+                    role = Role.FAN,
+                    profileImageUrl = "https://example.com/profile.jpg"
+                )
+
+                every { memberService.setupProfile(memberId, request.nickname, request.profileImageUrl) } returns updatedMember
+
+                // when & then
+                mockMvc.perform(
+                    patch("/api/members/me/profile/setup")
+                        .with(authentication(authentication))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                )
+                    .andExpect(status().isOk)
+                    .andExpect(jsonPath("$.success").value(true))
+                    .andExpect(jsonPath("$.data.memberId").value(memberId))
+                    .andExpect(jsonPath("$.data.nickname").value("새사용자"))
+                    .andExpect(jsonPath("$.data.profileImageUrl").value("https://example.com/profile.jpg"))
+                    .andExpect(jsonPath("$.message").value("프로필 초기 설정이 완료되었습니다."))
+            }
+        }
+
+        context("유효하지 않은 닉네임 형식으로 요청이 들어오면") {
+            it("400 Bad Request와 함께 에러를 반환한다") {
+                // given
+                val memberId = 1L
+                val authentication = UsernamePasswordAuthenticationToken(
+                    memberId,
+                    null,
+                    listOf(SimpleGrantedAuthority("ROLE_FAN"))
+                )
+                SecurityContextHolder.getContext().authentication = authentication
+
+                val request = com.bandchu.api.domain.member.dto.ProfileSetupRequest(
+                    nickname = "",
+                    profileImageUrl = "https://example.com/profile.jpg"
+                )
+
+                every { memberService.setupProfile(memberId, request.nickname, request.profileImageUrl) } throws com.bandchu.api.global.exception.BusinessException(
+                    com.bandchu.api.global.exception.ErrorCode.INVALID_NICKNAME
+                )
+
+                // when & then
+                mockMvc.perform(
+                    patch("/api/members/me/profile/setup")
+                        .with(authentication(authentication))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                )
+                    .andExpect(status().isBadRequest)
+                    .andExpect(jsonPath("$.status").value(400))
+                    .andExpect(jsonPath("$.code").value("INVALID_NICKNAME"))
+                    .andExpect(jsonPath("$.detail").value("닉네임 형식이 올바르지 않습니다."))
+            }
+        }
+
+        context("토큰이 없이 요청이 들어오면") {
+            it("401 Unauthorized와 함께 에러를 반환한다") {
+                // given
+                val request = com.bandchu.api.domain.member.dto.ProfileSetupRequest(
+                    nickname = "새사용자",
+                    profileImageUrl = "https://example.com/profile.jpg"
+                )
+
+                // when & then
+                mockMvc.perform(
+                    patch("/api/members/me/profile/setup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                 )
