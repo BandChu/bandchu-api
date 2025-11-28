@@ -33,7 +33,7 @@ class SecurityConfig(
                     "/api/members/oauth/verify"
                 ).permitAll()
                 // 인증이 필요한 엔드포인트
-                auth.requestMatchers("/api/members/logout", "/api/members/me/**").authenticated()
+                auth.requestMatchers("/api/members/logout", "/api/members/me/**", "/api/subscriptions/**").authenticated()
                 
                 // 나머지 요청은 개발 단계에서는 허용, 운영 환경에서는 authenticated()로 변경
                 auth.anyRequest().permitAll()
