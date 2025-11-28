@@ -11,6 +11,7 @@ object MemberTable : Table("members") {
     val nickname = varchar("nickname", 50)
     val role = enumerationByName("role", 20, Role::class)
     val googleId = varchar("google_id", 255).nullable().uniqueIndex()
+    val profileImageUrl = varchar("profile_image_url", 500).nullable()
     val createdAt = timestampWithTimeZone("created_at")
 
     override val primaryKey = PrimaryKey(id)

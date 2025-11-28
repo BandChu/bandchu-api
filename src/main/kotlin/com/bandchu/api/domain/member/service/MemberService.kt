@@ -224,7 +224,7 @@ class MemberService(
         }
 
         // 현재 회원 조회
-        val member = memberRepository.findById(memberId)
+        memberRepository.findById(memberId)
             ?: run {
                 log.error("Critical: Member not found by ID. MemberId: $memberId")
                 throw IllegalStateException("회원을 찾을 수 없습니다.")
@@ -242,6 +242,34 @@ class MemberService(
         return OAuthLinkResult(
             linkedProvider = provider.uppercase()
         )
+    }
+
+    fun deleteMember(memberId: Long) {
+        // 회원 존재 확인
+        val member = memberRepository.findById(memberId)
+        
+        // 회원이 이미 삭제된 경우에도 성공으로 처리 (DELETE는 idempotent)
+        if (member == null) {
+            log.info("Member already deleted. MemberId: $memberId")
+            return
+        }
+
+        // 회원 삭제
+        memberRepository.deleteById(memberId)
+    }
+
+    fun setupProfile(memberId: Long, nickname: String, profileImageUrl: String?): Member {
+        // 회원 존재 확인
+        memberRepository.findById(memberId)
+            ?: run {
+                log.error("Critical: Member not found by ID. MemberId: $memberId")
+                throw IllegalStateException("회원을 찾을 수 없습니다.")
+            }
+
+        // 닉네임 유효성 검증은 DTO의 @Pattern 어노테이션에 의해 처리됩니다.
+
+        // 프로필 업데이트
+        return memberRepository.updateProfile(memberId, nickname, profileImageUrl)
     }
 }
 
