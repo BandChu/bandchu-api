@@ -27,6 +27,9 @@ enum class ErrorCode(
     USER_INVALID_CREDENTIAL("user-invalid-credential", HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다."),
     INVALID_TOKEN("invalid-token", HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
     INVALID_REFRESH_TOKEN("invalid-refresh-token", HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다."),
+    GOOGLE_AUTH_INVALID("google-auth-invalid", HttpStatus.UNAUTHORIZED, "구글 인증이 유효하지 않습니다."),
+    OAUTH_TOKEN_INVALID("oauth-token-invalid", HttpStatus.UNAUTHORIZED, "소셜 인증 토큰이 유효하지 않습니다."),
+    OAUTH_ALREADY_LINKED("oauth-already-linked", HttpStatus.CONFLICT, "이미 연결된 소셜 계정입니다."),
 
     // artist
     ARTIST_NOT_FOUND("artist-not-found", HttpStatus.NOT_FOUND, "요청한 아티 프로필을 찾을 수 없습니다."),

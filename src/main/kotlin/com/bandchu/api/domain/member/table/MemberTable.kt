@@ -10,6 +10,7 @@ object MemberTable : Table("members") {
     val password = varchar("password", 255)
     val nickname = varchar("nickname", 50)
     val role = enumerationByName("role", 20, Role::class)
+    val googleId = varchar("google_id", 255).nullable().uniqueIndex()
     val createdAt = timestampWithTimeZone("created_at")
 
     override val primaryKey = PrimaryKey(id)

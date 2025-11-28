@@ -25,18 +25,19 @@ class SecurityConfig(
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
             .authorizeHttpRequests { auth ->
                 // 공개 엔드포인트
-                auth.requestMatchers("/api/members/signup", "/api/members/login", "/api/members/token/refresh").permitAll()
+                auth.requestMatchers(
+                    "/api/members/signup",
+                    "/api/members/login",
+                    "/api/members/token/refresh",
+                    "/api/members/oauth/google",
+                    "/api/members/oauth/verify"
+                ).permitAll()
                 // 인증이 필요한 엔드포인트
-                auth.requestMatchers("/api/members/logout").authenticated()
-                // TODO: OAuth2 엔드포인트 추가 시 permitAll() 설정
-                // auth.requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
+                auth.requestMatchers("/api/members/logout", "/api/members/me/**").authenticated()
                 
                 // 나머지 요청은 개발 단계에서는 허용, 운영 환경에서는 authenticated()로 변경
                 auth.anyRequest().permitAll()
             }
-            // TODO: OAuth2 설정 추가
-            // .oauth2Login { ... }
-            // .oauth2ResourceServer { it.jwt { ... } }
         
         return http.build()
     }
