@@ -519,7 +519,7 @@ UI상 달력 탭을 위한 데이터를 내려줍니다.
 
 `POST /api/concerts`
 
-아티스트가 새로운 공연을 등록합니다.
+역할이 아티스트인 회원이 새로운 공연을 등록합니다.
 
 #### 요청 헤더
 ```
@@ -530,6 +530,7 @@ Authorization: Bearer {token}
 #### 요청 본문
 ```json
 {
+  "artistId": 1,
   "title": "공연 제목",
   "place": "공연 장소",
   "posterImageUrl": "...",
@@ -560,7 +561,8 @@ Authorization: Bearer {token}
       {
         "date": "2025-12-25T10:00:00Z"
       }
-    ]
+    ],
+    "createdAt": "2025-11-25T10:00:00Z"
   },
   "message": "요청이 성공적으로 처리되었습니다."
 }
@@ -683,7 +685,8 @@ Authorization: Bearer {token}
     {
       "date": "2025-12-25T10:00:00Z"
     }
-  ]
+  ],
+  "message": "요청이 성공적으로 처리되었습니다."
 }
 ```
 

@@ -12,5 +12,6 @@ data class Concert(
     val bookingUrl: URI?,
     val bookingSchedule: OffsetDateTime?,
     val createdAt: OffsetDateTime,
-    val artiProfileId: Long
+    val artiProfileId: Long,
+    val schedules: List<ConcertSchedule> = emptyList()
 )
