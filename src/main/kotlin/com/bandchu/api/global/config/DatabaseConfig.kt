@@ -9,7 +9,6 @@ import com.bandchu.api.domain.posts.table.MediaTable
 import com.bandchu.api.domain.posts.table.PostTable
 import com.bandchu.api.domain.posts.table.ReportTable
 import com.bandchu.api.domain.subscription.table.SubscriptionTable
-
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
@@ -27,17 +26,7 @@ class DatabaseConfig(private val dataSource: DataSource) {
         Database.connect(dataSource)
 
         transaction {
-            SchemaUtils.create(
-                MemberTable,
-                ArtiProfileTable,
-                SnsLinkTable,
-                ConcertTable,
-                PostTable,
-                CommentTable,
-                MediaTable,
-                ReportTable,
-                SubscriptionTable
-            )
+            SchemaUtils.create(SnsLinkTable, ConcertTable, ArtiProfileTable, MemberTable, PostTable, CommentTable, MediaTable, ReportTable, SubscriptionTable)
         }
 
         println(" Exposed + Spring Boot 연결 성공")

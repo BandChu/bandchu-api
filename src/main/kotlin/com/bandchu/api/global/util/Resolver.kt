@@ -32,6 +32,6 @@ fun getCurrentUserRole(): Role {
         ?: throw BusinessException(ErrorCode.USER_INVALID_CREDENTIAL)
 
     val roleName = authority.removePrefix("ROLE_")
+
     return Role.valueOf(roleName)
 }
-
