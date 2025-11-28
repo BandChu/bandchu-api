@@ -33,7 +33,17 @@ enum class ErrorCode(
     INVALID_NICKNAME("invalid-nickname", HttpStatus.BAD_REQUEST, "닉네임 형식이 올바르지 않습니다."),
     INVALID_EMAIL("invalid-email", HttpStatus.BAD_REQUEST, "이메일 형식이 올바르지 않습니다."),
     INVALID_PASSWORD("invalid-password", HttpStatus.BAD_REQUEST, "비밀번호 형식이 올바르지 않습니다."),
-    INVALID_INPUT("invalid-input", HttpStatus.BAD_REQUEST, "요청 데이터가 유효하지 않습니다.");
+    INVALID_INPUT("invalid-input", HttpStatus.BAD_REQUEST, "요청 데이터가 유효하지 않습니다."),
+
+    // subscription
+    SUBSCRIPTION_DUPLICATED("subscription-duplicated", HttpStatus.CONFLICT, "이미 구독 중인 아티스트입니다."),
+    SUBSCRIPTION_NOT_FOUND("subscription-not-found", HttpStatus.NOT_FOUND, "구독 중이 아닌 아티스트입니다."),
+    INVALID_ROLE("invalid-role", HttpStatus.FORBIDDEN, "권한이 없습니다."),
+
+    // artist
+    ARTIST_NOT_FOUND("artist-not-found", HttpStatus.NOT_FOUND, "요청한 아티 프로필을 찾을 수 없습니다."),
+    ARTIST_INSUFFICIENT_ROLE("insufficient-role", HttpStatus.FORBIDDEN, "회원 역할이 아티스트가 아닙니다."),
+    ARTIST_FORBIDDEN("artist-forbidden", HttpStatus.FORBIDDEN, "해당 아티프로필에 대한 접근 권한이 없습니다.");
 
     val code: String
         get() = name

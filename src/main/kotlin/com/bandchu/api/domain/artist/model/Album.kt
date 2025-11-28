@@ -8,6 +8,4 @@ data class Album (
     val release_date: LocalDateTime,
     val cover_url: String,
     val description: String,
-
-
     )
