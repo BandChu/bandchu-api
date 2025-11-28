@@ -14,6 +14,7 @@ import org.jetbrains.exposed.v1.jdbc.andWhere
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.springframework.stereotype.Repository
 import java.time.OffsetDateTime
 
@@ -21,45 +22,51 @@ import java.time.OffsetDateTime
 class ChatMessageRepository {
     
     fun saveMessage(roomId: Long, senderId: Long, req: SendMessageRequest): ChatMessageResponse {
-        //DB에 요청 메시지를 저장함
-        val message = ChatMessageTable.insert {
-            it[ChatMessageTable.roomId] = roomId
-            it[ChatMessageTable.senderId] = senderId
-            it[messageType] = req.messageType
-            it[content] = req.content
-            it[fileUrl] = req.fileUrl
-            it[createdAt] = OffsetDateTime.now(java.time.ZoneOffset.UTC)
-        }.resultedValues?.firstOrNull()
-            ?: throw IllegalStateException("메시지 저장 실패")  // null 체크 추가
-        
-        //DB에서 저장된 메시지를 조회해서 가져옴
-        return ChatMessageTable
-            .selectAll()
-            .where{ ChatMessageTable.id eq message[ChatMessageTable.id] }
-            .single()
-            .let{ ChatMessageResponse.from(it) }
+        return transaction {
+            // DB에 요청 메시지를 저장
+            val message = ChatMessageTable.insert {
+                it[ChatMessageTable.roomId] = roomId
+                it[ChatMessageTable.senderId] = senderId
+                it[messageType] = req.messageType
+                it[content] = req.content
+                it[fileUrl] = req.fileUrl
+                it[createdAt] = OffsetDateTime.now(java.time.ZoneOffset.UTC)
+            }.resultedValues?.firstOrNull()
+                ?: throw IllegalStateException("메시지 저장 실패")
+
+            // 저장된 메시지를 조회해서 DTO 반환
+            ChatMessageTable
+                .selectAll()
+                .where { ChatMessageTable.id eq message[ChatMessageTable.id] }
+                .single()
+                .let { ChatMessageResponse.from(it) }
+        }
     }
     
     fun isRoomMember(roomId: Long, memberId: Long): Boolean {
-        return MemberChatRoomTable.selectAll()
-            .where{(MemberChatRoomTable.roomId eq roomId) and  (MemberChatRoomTable.memberId eq memberId) }
-            .any()
+        return transaction {
+            MemberChatRoomTable.selectAll()
+                .where { (MemberChatRoomTable.roomId eq roomId) and (MemberChatRoomTable.memberId eq memberId) }
+                .any()
+        }
     }
     
     fun fetchMessages(roomId: Long, cursor: Long?, size: Int): List<ChatMessageResponse> {
-        val query = ChatMessageTable
-            .selectAll()
-            .where { ChatMessageTable.roomId eq roomId }
-            .apply {
-                if (cursor != null) {
-                    andWhere { ChatMessageTable.id less cursor }
+        return transaction {
+            val query = ChatMessageTable
+                .selectAll()
+                .where { ChatMessageTable.roomId eq roomId }
+                .apply {
+                    if (cursor != null) {
+                        andWhere { ChatMessageTable.id less cursor }
+                    }
                 }
-            }
-            .orderBy(ChatMessageTable.id, SortOrder.DESC)
-            .limit(size)
-        
-        return query.map { ChatMessageResponse.from(it) }
-            .reversed() //시간 순으로
+                .orderBy(ChatMessageTable.id, SortOrder.DESC)
+                .limit(size)
+
+            query.map { ChatMessageResponse.from(it) }
+                .reversed() // 시간 순으로
+        }
     }
 
     /**
@@ -67,13 +74,15 @@ class ChatMessageRepository {
      * @return 마지막 메시지 또는 null (메시지가 없는 경우)
      */
     fun findLastMessageByRoomId(roomId: Long): ChatMessageResponse? {
-        return ChatMessageTable
-            .selectAll()
-            .where { ChatMessageTable.roomId eq roomId }
-            .orderBy(ChatMessageTable.id, SortOrder.DESC)
-            .limit(1)
-            .singleOrNull()
-            ?.let { ChatMessageResponse.from(it) }
+        return transaction {
+            ChatMessageTable
+                .selectAll()
+                .where { ChatMessageTable.roomId eq roomId }
+                .orderBy(ChatMessageTable.id, SortOrder.DESC)
+                .limit(1)
+                .singleOrNull()
+                ?.let { ChatMessageResponse.from(it) }
+        }
     }
 
     /**
@@ -102,13 +111,15 @@ class ChatMessageRepository {
      * @return 전체 메시지 개수
      */
     fun countAllMessages(roomId: Long, excludeSenderId: Long): Int {
-        return ChatMessageTable
-            .select(ChatMessageTable.id)
-            .where {
-                (ChatMessageTable.roomId eq roomId) and
-                (ChatMessageTable.senderId neq excludeSenderId)
-            }
-            .count()
-            .toInt()
+        return transaction {
+            ChatMessageTable
+                .select(ChatMessageTable.id)
+                .where {
+                    (ChatMessageTable.roomId eq roomId) and
+                            (ChatMessageTable.senderId neq excludeSenderId)
+                }
+                .count()
+                .toInt()
+        }
     }
 }

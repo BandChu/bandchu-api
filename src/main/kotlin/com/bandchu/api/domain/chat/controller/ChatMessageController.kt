@@ -6,6 +6,7 @@ import com.bandchu.api.domain.chat.dto.SendMessageRequest
 import com.bandchu.api.domain.chat.service.ChatMessageService
 import com.bandchu.api.global.response.ApiResponse
 import org.springframework.http.HttpStatus
+import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -18,14 +19,16 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping(value = ["/api/chatrooms"])
+@CrossOrigin(origins = ["*"])
 class ChatMessageController(
-    private val chatMessageService: ChatMessageService
+    private val chatMessageService: ChatMessageService,
+    //private val jwtService : JwtService
 ) {
     @PostMapping("/{roomId}/messages")
     @ResponseStatus(HttpStatus.CREATED)
     fun sendMessage(@PathVariable roomId: Long,
                     @RequestBody chatMessageRequest: SendMessageRequest,
-                    @RequestHeader("Authorization") token: String) : ApiResponse<ChatMessageResponse> {
+                    @RequestHeader("Authorization", required = false) token: String?) : ApiResponse<ChatMessageResponse> {
         val senderId = 1L //JWT Utility 클래스에서 가져오기
         val message = chatMessageService.sendMessage(roomId, senderId, chatMessageRequest)
 

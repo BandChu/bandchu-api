@@ -21,6 +21,7 @@ class SecurityConfig {
             .authorizeHttpRequests { auth ->
                 auth
                     .requestMatchers("/api/chatrooms/**").permitAll()  // 채팅 API 임시 오픈
+                    .requestMatchers("/ws-chat/**").permitAll()  // WS API 임시 오픈
                     .anyRequest().authenticated()
             }
         

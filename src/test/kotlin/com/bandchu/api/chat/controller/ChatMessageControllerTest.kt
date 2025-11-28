@@ -3,6 +3,7 @@ package com.bandchu.api.chat.controller
 import com.bandchu.api.chat.dto.ChatMessageResponse
 import com.bandchu.api.chat.dto.SendMessageRequest
 import com.bandchu.api.chat.service.ChatMessageService
+import com.bandchu.api.domain.chat.dto.SendMessageRequest
 import com.bandchu.api.domain.chat.table.MessageType
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.kotest.core.spec.style.FunSpec

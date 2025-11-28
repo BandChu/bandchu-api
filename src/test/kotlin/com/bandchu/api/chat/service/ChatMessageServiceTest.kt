@@ -1,9 +1,11 @@
 package com.bandchu.api.chat.service
 
 import com.bandchu.api.domain.chat.table.MessageType
-import com.bandchu.api.chat.dto.ChatMessageResponse
-import com.bandchu.api.chat.dto.SendMessageRequest
+import com.bandchu.api.domain.chat.dto.ChatMessageResponse
+import com.bandchu.api.domain.chat.dto.SendMessageRequest
 import com.bandchu.api.domain.chat.repository.ChatMessageRepository
+import com.bandchu.api.domain.chat.repository.ChatRoomRepository
+import com.bandchu.api.domain.chat.service.ChatMessageService
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
@@ -19,8 +21,9 @@ import java.time.ZoneOffset
 class ChatMessageServiceTest : FunSpec({
     val chatMessageRepository = mockk<ChatMessageRepository>()
     val simpMessagingTemplate = mockk<SimpMessagingTemplate>(relaxed = true)
+    val chatRoomRepository = mockk<ChatRoomRepository>()
 
-    val service = ChatMessageService(chatMessageRepository, simpMessagingTemplate)
+    val service = ChatMessageService(chatMessageRepository, simpMessagingTemplate, chatRoomRepository)
 
     test("채팅방 참여자가 아닐 경우 FORBIDDEN 예외 발생") {
         // given

@@ -4,23 +4,25 @@ import com.bandchu.api.domain.chat.dto.ChatMessageResponse
 import com.bandchu.api.domain.chat.dto.MessagePageResponse
 import com.bandchu.api.domain.chat.dto.SendMessageRequest
 import com.bandchu.api.domain.chat.repository.ChatMessageRepository
+import com.bandchu.api.domain.chat.repository.ChatRoomRepository
 import com.bandchu.api.global.exception.BusinessException
 import com.bandchu.api.global.exception.ErrorCode
-import org.springframework.http.HttpStatus
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
-import org.springframework.web.server.ResponseStatusException
 
 @Service
 class ChatMessageService(
     private val chatMessageRepository: ChatMessageRepository,
-    private val simpMessagingTemplate: SimpMessagingTemplate //웹소켓 구성파일 필요
+    private val simpMessagingTemplate: SimpMessagingTemplate, //웹소켓 구성파일 필요
+    private val chatRoomRepository: ChatRoomRepository
 ) {
     fun sendMessage(roomId: Long, senderId: Long, req: SendMessageRequest): ChatMessageResponse {
-        //1. 채팅방 참여자 검증 로직
+        //1. 채팅방 참여자, 채팅방 존재 여부 검증 로직
         if (!chatMessageRepository.isRoomMember(roomId, senderId)) {
             throw BusinessException(ErrorCode.NOT_CHATROOM_MEMBER)
         }
+        val chatRoom = chatRoomRepository.findById(roomId)
+            ?: throw BusinessException(ErrorCode.CHATROOM_NOT_FOUND)
 
         //2. 메시지 저장 및 DTO 반환
         val message = chatMessageRepository.saveMessage(roomId, senderId, req)
