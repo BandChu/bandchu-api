@@ -8,6 +8,8 @@ import com.bandchu.api.domain.member.dto.OAuthLinkRequest
 import com.bandchu.api.domain.member.dto.OAuthLinkResponse
 import com.bandchu.api.domain.member.dto.OAuthVerifyRequest
 import com.bandchu.api.domain.member.dto.OAuthVerifyResponse
+import com.bandchu.api.domain.member.dto.ProfileSetupRequest
+import com.bandchu.api.domain.member.dto.ProfileSetupResponse
 import com.bandchu.api.domain.member.dto.RefreshTokenRequest
 import com.bandchu.api.domain.member.dto.RefreshTokenResponse
 import com.bandchu.api.domain.member.dto.SignupRequest
@@ -151,6 +153,45 @@ class MemberController(
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(ApiResponse.success(response, "소셜 계정이 연결되었습니다."))
+    }
+
+    @DeleteMapping("/me")
+    fun deleteMember(): ResponseEntity<ApiResponse<Unit?>> {
+        // SecurityContext에서 인증된 회원 ID 가져오기
+        val authentication: Authentication = SecurityContextHolder.getContext().authentication
+            ?: throw BusinessException(ErrorCode.INVALID_TOKEN)
+        val memberId = authentication.principal as Long
+
+        memberService.deleteMember(memberId)
+        
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(ApiResponse<Unit?>(true, null, "회원 탈퇴가 완료되었습니다."))
+    }
+
+    @PatchMapping("/me/profile/setup")
+    fun setupProfile(@Valid @RequestBody request: ProfileSetupRequest): ResponseEntity<ApiResponse<ProfileSetupResponse>> {
+        // SecurityContext에서 인증된 회원 ID 가져오기
+        val authentication: Authentication = SecurityContextHolder.getContext().authentication
+            ?: throw BusinessException(ErrorCode.INVALID_TOKEN)
+        val memberId = authentication.principal as Long
+
+        val updatedMember = memberService.setupProfile(memberId, request.nickname, request.profileImageUrl)
+        
+        val memberIdValue = updatedMember.id ?: run {
+            log.error("Critical: Member ID is null after profile setup. Email: ${updatedMember.email}")
+            throw IllegalStateException("회원 ID가 없습니다.")
+        }
+        
+        val response = ProfileSetupResponse(
+            memberId = memberIdValue,
+            nickname = updatedMember.nickname,
+            profileImageUrl = updatedMember.profileImageUrl
+        )
+        
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(ApiResponse.success(response, "프로필 초기 설정이 완료되었습니다."))
     }
 }
 

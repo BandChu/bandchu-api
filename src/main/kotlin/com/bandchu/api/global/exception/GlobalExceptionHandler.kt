@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ProblemDetail
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import java.net.URI
@@ -30,7 +31,28 @@ class GlobalExceptionHandler {
         return ResponseEntity.status(errorCode.httpStatus).body(detail)
     }
 
-    @ExceptionHandler(RuntimeException::class, Exception::class)
+    @ExceptionHandler(MethodArgumentNotValidException::class)
+    fun handleValidationException(e: MethodArgumentNotValidException): ResponseEntity<ProblemDetail> {
+        val fieldError = e.bindingResult.fieldErrors.firstOrNull()
+        val errorMessage = fieldError?.defaultMessage ?: "요청 데이터가 유효하지 않습니다."
+
+        log.warn("Validation Exception: $errorMessage", e)
+
+        // validation 에러는 기본적으로 INVALID_NICKNAME으로 처리
+        // 필요시 필드별로 다른 ErrorCode를 반환하도록 확장 가능
+        val errorCode = ErrorCode.INVALID_NICKNAME
+
+        val detail = ProblemDetail.forStatusAndDetail(errorCode.httpStatus, errorMessage).apply {
+            type = URI.create("https://api.bandchu.com/errors/${errorCode.docUri}")
+            title = errorCode.httpStatus.reasonPhrase
+            setProperty("code", errorCode.code)
+            setProperty("timestamp", OffsetDateTime.now(ZoneOffset.UTC).toString())
+        }
+
+        return ResponseEntity.status(errorCode.httpStatus).body(detail)
+    }
+
+    @ExceptionHandler(Exception::class)
     fun handleAllUncaughtExceptions(e: Exception): ResponseEntity<ProblemDetail> {
         log.error("Uncaught Internal Server Error:", e)
 
