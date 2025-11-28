@@ -137,10 +137,12 @@ class ConcertRepository {
     }
 
     fun getDetail(concertId: Long): Concert = transaction {
-        ConcertTable
+        val row = ConcertTable
             .selectAll()
             .where { ConcertTable.id eq concertId }
-            .single()
-            .toDomain()
+            .singleOrNull()
+            ?: throw BusinessException(ErrorCode.CONCERT_NOT_FOUND)
+
+        row.toDomain()
     }
 }
