@@ -46,10 +46,10 @@ class ArtistApiTestConfig {
 /**
  * Artist API 통합 테스트
  *
- * - MockMvc 기반으로 Controller–Service–Repository 흐름을 검증한다.
+ * - MockMvc 기반으로 Controller–Service–Repository 흐름을 검증합니다.
  * - 실제 JWT 검증은 수행하지 않으며,
  *   SecurityMockMvcRequestPostProcessors.user()를 사용해
- *   SecurityContext에 인증 정보를 직접 주입하여 인증/인가를 테스트한다.
+ *   SecurityContext에 인증 정보를 직접 주입하여 인증/인가를 테스트합니다.
  */
 
 @SpringBootTest
@@ -244,7 +244,7 @@ class ArtistApiTest (
 
                     val root = objectMapper.readTree(result.contentAsString)
                     root["title"].asText() shouldBe "Forbidden"
-                    root["detail"].asText() shouldBe "해당 아티프로필에 대한 접근 권한이 없습니다."
+                    root["detail"].asText() shouldBe "해당 아티 프로필에 대한 접근 권한이 없습니다."
                     root["code"].asText() shouldBe "ARTIST_FORBIDDEN"
                 }
             }
