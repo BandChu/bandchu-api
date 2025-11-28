@@ -8,5 +8,6 @@ data class Member(
     val password: String,
     val nickname: String,
     val role: Role,
+    val googleId: String? = null,
     val createdAt: LocalDateTime? = null
 )
