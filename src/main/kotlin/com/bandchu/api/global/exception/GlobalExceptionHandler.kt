@@ -38,9 +38,15 @@ class GlobalExceptionHandler {
 
         log.warn("Validation Exception: $errorMessage", e)
 
-        // validation 에러는 기본적으로 INVALID_NICKNAME으로 처리
-        // 필요시 필드별로 다른 ErrorCode를 반환하도록 확장 가능
-        val errorCode = ErrorCode.INVALID_NICKNAME
+        // validation 에러는 필드별로 다른 ErrorCode를 반환하도록 처리
+        val errorCode = when (fieldError?.field) {
+            "nickname" -> ErrorCode.INVALID_NICKNAME
+            "email" -> ErrorCode.INVALID_EMAIL
+            "password" -> ErrorCode.INVALID_PASSWORD
+            "token" -> ErrorCode.INVALID_TOKEN
+            "refreshToken" -> ErrorCode.INVALID_REFRESH_TOKEN
+            else -> ErrorCode.INVALID_INPUT
+        }
 
         val detail = ProblemDetail.forStatusAndDetail(errorCode.httpStatus, errorMessage).apply {
             type = URI.create("https://api.bandchu.com/errors/${errorCode.docUri}")

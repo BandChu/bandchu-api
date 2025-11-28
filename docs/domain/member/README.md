@@ -240,7 +240,7 @@
 - `src/main/kotlin/com/bandchu/api/domain/member/controller/MemberController.kt` (신규)
   - 회원 가입, 로그인, 로그아웃, 토큰 재발급 엔드포인트 구현
   - 구글 로그인, 소셜 인증 검증, 소셜 계정 연결 엔드포인트 구현
-  - 회원 탈퇴 엔드포인트 구현
+  - 회원 탈퇴 엔드포인트 구현 (ApiResponse.success 사용으로 통일)
   - 프로필 초기 설정 엔드포인트 구현
 
 #### Service
@@ -248,7 +248,7 @@
   - 회원 가입, 로그인, 로그아웃, 토큰 재발급 비즈니스 로직 구현
   - 구글 로그인, 소셜 인증 검증, 소셜 계정 연결 비즈니스 로직 구현
   - 회원 탈퇴 비즈니스 로직 구현 (idempotent 처리)
-  - 프로필 초기 설정 비즈니스 로직 구현 (닉네임 유효성 검증 포함)
+  - 프로필 초기 설정 비즈니스 로직 구현 (닉네임 유효성 검증은 DTO의 @Pattern 어노테이션으로 처리)
 
 - `src/main/kotlin/com/bandchu/api/domain/member/service/GoogleOAuthService.kt` (신규)
   - Google ID Token 검증 서비스
@@ -347,9 +347,13 @@
   - `OAUTH_TOKEN_INVALID`: 소셜 인증 토큰이 유효하지 않음 에러
   - `OAUTH_ALREADY_LINKED`: 이미 연결된 소셜 계정 에러
   - `INVALID_NICKNAME`: 닉네임 형식이 올바르지 않음 에러
+  - `INVALID_EMAIL`: 이메일 형식이 올바르지 않음 에러
+  - `INVALID_PASSWORD`: 비밀번호 형식이 올바르지 않음 에러
+  - `INVALID_INPUT`: 요청 데이터가 유효하지 않음 에러 (일반적인 validation 에러)
 
 - `src/main/kotlin/com/bandchu/api/global/exception/GlobalExceptionHandler.kt` (수정)
   - `MethodArgumentNotValidException` 핸들러 추가 (Validation 에러 처리)
+  - 필드별로 적절한 ErrorCode 반환 (nickname → INVALID_NICKNAME, email → INVALID_EMAIL, password → INVALID_PASSWORD, token → INVALID_TOKEN, refreshToken → INVALID_REFRESH_TOKEN, 기타 → INVALID_INPUT)
 
 ### 기타
 - `build.gradle.kts` (수정)
@@ -540,9 +544,15 @@ Content-Type: application/json
 **작성일**: 2025-11-26  
 **최종 수정일**: 2025-11-28  
 **작성자**: 신진수  
-**버전**: 2.2
+**버전**: 2.3
 
 ## 변경 이력
+
+### 버전 2.3 (2025-11-28)
+- GlobalExceptionHandler의 validation 에러 처리 개선 (필드별로 적절한 ErrorCode 반환)
+- ErrorCode에 `INVALID_EMAIL`, `INVALID_PASSWORD`, `INVALID_INPUT` 추가
+- MemberService의 setupProfile 메서드에서 중복된 닉네임 validation 제거 (DTO의 @Pattern으로 처리)
+- MemberController의 deleteMember 메서드에서 ApiResponse 사용 방식 통일 (`ApiResponse.success` 사용)
 
 ### 버전 2.2 (2025-11-28)
 - 프로필 초기 설정 API 추가 (`PATCH /api/members/me/profile/setup`)

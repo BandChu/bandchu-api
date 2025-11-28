@@ -266,11 +266,7 @@ class MemberService(
                 throw IllegalStateException("회원을 찾을 수 없습니다.")
             }
 
-        // 닉네임 유효성 검증 (2-20자, 한글/영문/숫자만)
-        val nicknamePattern = "^[가-힣a-zA-Z0-9]{2,20}$".toRegex()
-        if (!nicknamePattern.matches(nickname)) {
-            throw BusinessException(ErrorCode.INVALID_NICKNAME)
-        }
+        // 닉네임 유효성 검증은 DTO의 @Pattern 어노테이션에 의해 처리됩니다.
 
         // 프로필 업데이트
         return memberRepository.updateProfile(memberId, nickname, profileImageUrl)

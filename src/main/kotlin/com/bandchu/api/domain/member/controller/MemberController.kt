@@ -156,7 +156,7 @@ class MemberController(
     }
 
     @DeleteMapping("/me")
-    fun deleteMember(): ResponseEntity<ApiResponse<Unit?>> {
+    fun deleteMember(): ResponseEntity<ApiResponse<Unit>> {
         // SecurityContext에서 인증된 회원 ID 가져오기
         val authentication: Authentication = SecurityContextHolder.getContext().authentication
             ?: throw BusinessException(ErrorCode.INVALID_TOKEN)
@@ -166,7 +166,7 @@ class MemberController(
         
         return ResponseEntity
             .status(HttpStatus.OK)
-            .body(ApiResponse<Unit?>(true, null, "회원 탈퇴가 완료되었습니다."))
+            .body(ApiResponse.success(Unit, "회원 탈퇴가 완료되었습니다."))
     }
 
     @PatchMapping("/me/profile/setup")
