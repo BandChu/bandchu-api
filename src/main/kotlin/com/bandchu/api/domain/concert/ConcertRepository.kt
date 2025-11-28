@@ -74,25 +74,29 @@ class ConcertRepository {
     }
 
     fun updateProcess(command: UpdateConcertCommand, userId: Long): Concert = transaction {
-        val artiProfileIdResultRow = ArtiProfileTable
+        val artiProfileId = ArtiProfileTable
             .select(ArtiProfileTable.id)
             .where { ArtiProfileTable.member eq userId }
-            .limit(1)
+            .single()[ArtiProfileTable.id]
+            .value
+
+        val concertRow = ConcertTable
+            .select(ConcertTable.arti_profile)
+            .where { ConcertTable.id eq command.concertId }
             .singleOrNull()
 
-        val artiProfileId = artiProfileIdResultRow?.get(ArtiProfileTable.id)?.value
-            ?: throw BusinessException(ErrorCode.ARTIST_NOT_CREATED)
+        if (concertRow == null) throw BusinessException(ErrorCode.CONCERT_NOT_FOUND)
 
-        val rowsAffected = ConcertTable.update({ ConcertTable.id eq command.concertId and (ConcertTable.arti_profile eq artiProfileId) }) {
+        val currentOwnerProfileId = concertRow[ConcertTable.arti_profile].value
+
+        if (currentOwnerProfileId != artiProfileId) throw BusinessException(ErrorCode.ARTIST_FORBIDDEN)
+
+        ConcertTable.update({ ConcertTable.id eq command.concertId }) {
             it[title] = command.title
             it[place] = command.place
             it[posterImageUrl] = command.posterImageUrl?.toString()
             it[information] = command.information
             it[bookingUrl] = command.bookingUrl?.toString()
-        }
-
-        if (rowsAffected == 0) {
-            throw BusinessException(ErrorCode.CONCERT_NOT_FOUND)
         }
 
         if (command.performingSchedule.isNotEmpty()) {
@@ -109,5 +113,26 @@ class ConcertRepository {
             .where { ConcertTable.id eq command.concertId }
             .single()
             .toDomain()
+    }
+
+    fun delete(concertId: Long, userId: Long) {
+        val artiProfileId = ArtiProfileTable
+            .select(ArtiProfileTable.id)
+            .where { ArtiProfileTable.member eq userId }
+            .single()[ArtiProfileTable.id]
+            .value
+
+        val concertRow = ConcertTable
+            .select(ConcertTable.arti_profile)
+            .where { ConcertTable.id eq concertId }
+            .singleOrNull()
+
+        if (concertRow == null) throw BusinessException(ErrorCode.CONCERT_NOT_FOUND)
+
+        val ownerProfileId = concertRow[ConcertTable.arti_profile].value
+
+        if (ownerProfileId != artiProfileId) throw BusinessException(ErrorCode.ARTIST_FORBIDDEN)
+
+        ConcertTable.deleteWhere { ConcertTable.id eq concertId }
     }
 }

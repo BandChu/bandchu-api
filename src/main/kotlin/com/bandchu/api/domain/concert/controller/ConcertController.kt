@@ -12,6 +12,7 @@ import com.bandchu.api.global.response.ApiResponse
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -28,7 +29,7 @@ class ConcertController(
         val concert = concertService.create(request.toCommand())
 
         return ResponseEntity
-            .status(HttpStatus.OK)
+            .status(HttpStatus.CREATED)
             .body(ApiResponse.success(concert.toConcertCreateResponse()))
     }
 
@@ -42,5 +43,16 @@ class ConcertController(
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(ApiResponse.success(concert.toConcertUpdateResponse()))
+    }
+
+    @DeleteMapping("/{concertId}")
+    fun delete(
+        @PathVariable concertId: Long
+    ): ResponseEntity<ApiResponse<Unit>> {
+        concertService.delete(concertId)
+
+        return ResponseEntity
+            .status(HttpStatus.NO_CONTENT)
+            .body(ApiResponse.success(message = "공연 삭제가 완료되었습니다."))
     }
 }

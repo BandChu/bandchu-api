@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service
 class ConcertService(
     private val concertRepository: ConcertRepository
 ) {
+
     fun create(command: CreateConcertCommand): Concert {
         if (getCurrentUserRole() != Role.ARTIST) throw BusinessException(ErrorCode.ARTIST_INSUFFICIENT_ROLE)
 
@@ -25,5 +26,11 @@ class ConcertService(
         if (getCurrentUserRole() != Role.ARTIST) throw BusinessException(ErrorCode.ARTIST_INSUFFICIENT_ROLE)
 
         return concertRepository.updateProcess(command, getCurrentUserId())
+    }
+
+    fun delete(concertId: Long) {
+        if (getCurrentUserRole() != Role.ARTIST) throw BusinessException(ErrorCode.ARTIST_INSUFFICIENT_ROLE)
+
+        return concertRepository.delete(concertId, getCurrentUserId())
     }
 }
