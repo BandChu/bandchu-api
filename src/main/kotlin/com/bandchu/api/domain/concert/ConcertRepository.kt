@@ -40,13 +40,12 @@ class ConcertRepository {
         )
 
     fun createProcess(command: CreateConcertCommand, userId: Long): Concert = transaction {
-        val artiProfileIdResultRow = ArtiProfileTable
+        val artiProfileId = ArtiProfileTable
             .select(ArtiProfileTable.id)
             .where { ArtiProfileTable.member eq userId }
             .limit(1)
-            .singleOrNull()
-
-        val artiProfileId = artiProfileIdResultRow?.get(ArtiProfileTable.id)?.value
+            .map { it[ArtiProfileTable.id].value }
+            .firstOrNull()
             ?: throw BusinessException(ErrorCode.ARTIST_NOT_CREATED)
 
         val concertId = ConcertTable.insertAndGetId {
@@ -67,7 +66,7 @@ class ConcertRepository {
         }
 
         ConcertTable
-            .select(ConcertTable.id)
+            .selectAll()
             .where { ConcertTable.id eq concertId }
             .single()
             .toDomain()
@@ -77,12 +76,13 @@ class ConcertRepository {
         val artiProfileId = ArtiProfileTable
             .select(ArtiProfileTable.id)
             .where { ArtiProfileTable.member eq userId }
-            .single()[ArtiProfileTable.id]
-            .value
+            .limit(1)
+            .single()[ArtiProfileTable.id].value
 
         val concertRow = ConcertTable
             .select(ConcertTable.arti_profile)
             .where { ConcertTable.id eq command.concertId }
+            .limit(1)
             .singleOrNull()
 
         if (concertRow == null) throw BusinessException(ErrorCode.CONCERT_NOT_FOUND)
@@ -111,7 +111,7 @@ class ConcertRepository {
         ConcertTable
             .selectAll()
             .where { ConcertTable.id eq command.concertId }
-            .single()
+            .first()
             .toDomain()
     }
 
@@ -140,6 +140,7 @@ class ConcertRepository {
         val row = ConcertTable
             .selectAll()
             .where { ConcertTable.id eq concertId }
+            .limit(1)
             .singleOrNull()
             ?: throw BusinessException(ErrorCode.CONCERT_NOT_FOUND)
 
