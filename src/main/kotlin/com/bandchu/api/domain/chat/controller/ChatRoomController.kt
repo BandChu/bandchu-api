@@ -1,7 +1,11 @@
 package com.bandchu.api.domain.chat.controller
 
-import com.bandchu.api.chat.dto.*
-import com.bandchu.api.chat.service.ChatRoomService
+import com.bandchu.api.domain.chat.dto.ChatRoomListResponse
+import com.bandchu.api.domain.chat.dto.CreateChatRoomRequest
+import com.bandchu.api.domain.chat.dto.CreateChatRoomResponse
+import com.bandchu.api.domain.chat.dto.UpdateReadStatusRequest
+import com.bandchu.api.domain.chat.dto.UpdateReadStatusResponse
+import com.bandchu.api.domain.chat.service.ChatRoomService
 import com.bandchu.api.global.response.ApiResponse
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*

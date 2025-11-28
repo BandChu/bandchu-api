@@ -1,9 +1,11 @@
 package com.bandchu.api.domain.chat.service
 
-import com.bandchu.api.chat.dto.ChatMessageResponse
-import com.bandchu.api.chat.dto.MessagePageResponse
-import com.bandchu.api.chat.dto.SendMessageRequest
+import com.bandchu.api.domain.chat.dto.ChatMessageResponse
+import com.bandchu.api.domain.chat.dto.MessagePageResponse
+import com.bandchu.api.domain.chat.dto.SendMessageRequest
 import com.bandchu.api.domain.chat.repository.ChatMessageRepository
+import com.bandchu.api.global.exception.BusinessException
+import com.bandchu.api.global.exception.ErrorCode
 import org.springframework.http.HttpStatus
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
@@ -17,7 +19,7 @@ class ChatMessageService(
     fun sendMessage(roomId: Long, senderId: Long, req: SendMessageRequest): ChatMessageResponse {
         //1. 채팅방 참여자 검증 로직
         if (!chatMessageRepository.isRoomMember(roomId, senderId)) {
-            throw ResponseStatusException(HttpStatus.FORBIDDEN, "해당 채팅방의 참여자가 아닙니다.")
+            throw BusinessException(ErrorCode.NOT_CHATROOM_MEMBER)
         }
 
         //2. 메시지 저장 및 DTO 반환

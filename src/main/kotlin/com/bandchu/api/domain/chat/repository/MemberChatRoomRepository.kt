@@ -1,6 +1,5 @@
 package com.bandchu.api.domain.chat.repository
 
-import com.bandchu.api.domain.chat.model.MemberChatRoom
 import com.bandchu.api.domain.chat.table.MemberChatRoomTable
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq

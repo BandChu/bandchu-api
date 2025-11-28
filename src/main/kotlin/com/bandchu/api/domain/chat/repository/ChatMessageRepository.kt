@@ -1,7 +1,7 @@
 package com.bandchu.api.domain.chat.repository
 
-import com.bandchu.api.chat.dto.ChatMessageResponse
-import com.bandchu.api.chat.dto.SendMessageRequest
+import com.bandchu.api.domain.chat.dto.ChatMessageResponse
+import com.bandchu.api.domain.chat.dto.SendMessageRequest
 import com.bandchu.api.domain.chat.table.ChatMessageTable
 import com.bandchu.api.domain.chat.table.MemberChatRoomTable
 import org.jetbrains.exposed.v1.core.SortOrder
