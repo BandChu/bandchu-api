@@ -1,4 +1,4 @@
-package com.bandchu.api.chat.dto
+package com.bandchu.api.domain.chat.dto
 
 data class MessagePageResponse(
     val messages: List<ChatMessageResponse>,

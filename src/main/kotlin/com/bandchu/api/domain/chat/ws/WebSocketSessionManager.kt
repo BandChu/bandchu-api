@@ -1,4 +1,4 @@
-package com.bandchu.api.chat.websocket
+package com.bandchu.api.domain.chat.ws
 
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap

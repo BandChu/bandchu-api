@@ -1,4 +1,4 @@
-package com.bandchu.api.chat.controller
+package com.bandchu.api.domain.chat.controller
 
 import com.bandchu.api.chat.dto.*
 import com.bandchu.api.chat.service.ChatRoomService

@@ -1,9 +1,9 @@
-package com.bandchu.api.chat.controller
+package com.bandchu.api.domain.chat.controller
 
-import com.bandchu.api.chat.dto.ChatMessageResponse
-import com.bandchu.api.chat.dto.MessagePageResponse
-import com.bandchu.api.chat.dto.SendMessageRequest
-import com.bandchu.api.chat.service.ChatMessageService
+import com.bandchu.api.domain.chat.dto.ChatMessageResponse
+import com.bandchu.api.domain.chat.dto.MessagePageResponse
+import com.bandchu.api.domain.chat.dto.SendMessageRequest
+import com.bandchu.api.domain.chat.service.ChatMessageService
 import com.bandchu.api.global.response.ApiResponse
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping

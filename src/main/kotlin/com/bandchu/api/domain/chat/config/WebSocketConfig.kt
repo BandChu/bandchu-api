@@ -1,4 +1,4 @@
-package com.bandchu.api.chat.config
+package com.bandchu.api.domain.chat.config
 
 import org.springframework.context.annotation.Configuration
 import org.springframework.messaging.simp.config.MessageBrokerRegistry

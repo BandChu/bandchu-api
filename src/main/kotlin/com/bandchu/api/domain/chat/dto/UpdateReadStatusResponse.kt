@@ -1,4 +1,4 @@
-package com.bandchu.api.chat.dto
+package com.bandchu.api.domain.chat.dto
 
 /**
  * 읽음 처리 응답 DTO

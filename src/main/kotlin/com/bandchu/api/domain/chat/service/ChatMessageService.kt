@@ -1,4 +1,4 @@
-package com.bandchu.api.chat.service
+package com.bandchu.api.domain.chat.service
 
 import com.bandchu.api.chat.dto.ChatMessageResponse
 import com.bandchu.api.chat.dto.MessagePageResponse
