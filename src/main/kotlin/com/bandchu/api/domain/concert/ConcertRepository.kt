@@ -115,7 +115,7 @@ class ConcertRepository {
             .toDomain()
     }
 
-    fun delete(concertId: Long, userId: Long) {
+    fun delete(concertId: Long, userId: Long): Unit = transaction {
         val artiProfileId = ArtiProfileTable
             .select(ArtiProfileTable.id)
             .where { ArtiProfileTable.member eq userId }
@@ -134,5 +134,13 @@ class ConcertRepository {
         if (ownerProfileId != artiProfileId) throw BusinessException(ErrorCode.ARTIST_FORBIDDEN)
 
         ConcertTable.deleteWhere { ConcertTable.id eq concertId }
+    }
+
+    fun getDetail(concertId: Long): Concert = transaction {
+        ConcertTable
+            .selectAll()
+            .where { ConcertTable.id eq concertId }
+            .single()
+            .toDomain()
     }
 }

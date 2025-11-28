@@ -1,9 +1,8 @@
 package com.bandchu.api.domain.concert.dto.response
 
 import com.bandchu.api.domain.concert.PerformingScheduleDto
-import java.time.OffsetDateTime
 
-data class ConcertUpdateResponse(
+data class ConcertDetailResponse(
     val concertId: Long,
     val title: String,
     val place: String,
@@ -12,5 +11,5 @@ data class ConcertUpdateResponse(
     val bookingSchedule: String?,
     val bookingUrl: String?,
     val performingSchedule: List<PerformingScheduleDto> = emptyList(),
-    val createdAt: OffsetDateTime
+    val createdAt: String
 )

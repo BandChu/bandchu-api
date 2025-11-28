@@ -2,47 +2,53 @@ package com.bandchu.api.domain.concert.controller
 
 import com.bandchu.api.domain.concert.dto.request.ConcertCreateRequest
 import com.bandchu.api.domain.concert.dto.request.ConcertUpdateRequest
-import com.bandchu.api.domain.concert.dto.response.ConcertCreateResponse
-import com.bandchu.api.domain.concert.dto.response.ConcertUpdateResponse
+import com.bandchu.api.domain.concert.dto.response.ConcertDetailResponse
 import com.bandchu.api.domain.concert.dto.toCommand
-import com.bandchu.api.domain.concert.dto.toConcertCreateResponse
-import com.bandchu.api.domain.concert.dto.toConcertUpdateResponse
+import com.bandchu.api.domain.concert.dto.toConcertDetailResponse
 import com.bandchu.api.domain.concert.service.ConcertService
 import com.bandchu.api.global.response.ApiResponse
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.*
 
 @RequestMapping("/api/concerts")
 class ConcertController(
     private val concertService: ConcertService
 ) {
+
+    @GetMapping("/{concertId}")
+    fun getDetail(
+        @PathVariable concertId: Long
+    ): ResponseEntity<ApiResponse<ConcertDetailResponse>> {
+        val concert = concertService.getDetail(concertId)
+
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(ApiResponse.success(concert.toConcertDetailResponse()))
+    }
+
     @PostMapping("")
     fun create(
         @RequestBody @Valid request: ConcertCreateRequest
-    ): ResponseEntity<ApiResponse<ConcertCreateResponse>> {
+    ): ResponseEntity<ApiResponse<ConcertDetailResponse>> {
         val concert = concertService.create(request.toCommand())
 
         return ResponseEntity
             .status(HttpStatus.CREATED)
-            .body(ApiResponse.success(concert.toConcertCreateResponse()))
+            .body(ApiResponse.success(concert.toConcertDetailResponse()))
     }
 
     @PostMapping("/{concertId}")
     fun update(
         @PathVariable concertId: Long,
         @RequestBody @Valid request: ConcertUpdateRequest
-    ): ResponseEntity<ApiResponse<ConcertUpdateResponse>> {
+    ): ResponseEntity<ApiResponse<ConcertDetailResponse>> {
         val concert = concertService.update(request.toCommand(concertId))
 
         return ResponseEntity
             .status(HttpStatus.OK)
-            .body(ApiResponse.success(concert.toConcertUpdateResponse()))
+            .body(ApiResponse.success(concert.toConcertDetailResponse()))
     }
 
     @DeleteMapping("/{concertId}")
