@@ -7,7 +7,6 @@
     - [회원 가입](#회원-가입)
 - [아티스트 API](#아티스트-api)
     - [전체 아티스트 목록 조회](#전체-아티스트-목록-조회)
-    - [구독한 아티스트 목록 조회](#구독한-아티스트-목록-조회)
     - [아티스트 및 공연 검색](#아티스트-및-공연-검색)
     - [아티프로필 상세 조회](#아티프로필-상세-조회)
     - [아티프로필 수정](#아티프로필-수정)
@@ -17,6 +16,7 @@
   - [앨범 삭제](#앨범-삭제)
 - [공연 API](#공연-api)
   - [공연 등록](#공연-등록)
+  - [구독한 아티스트의 공연 정보 조회](#구독한-아티스트의-공연-정보-조회)
   - [공연 상세 조회](#공연-상세-조회)
   - [공연 수정](#공연-수정)
   - [공연 삭제](#공연-삭제)
@@ -182,48 +182,6 @@ Authorization: Bearer {token}
         "name": "아티스트 이름",
         "profileImageUrl": "...",
         "createdAt": "2025-11-20T03:21:00Z"
-      }
-    ]
-  },
-  "message": "요청이 성공적으로 처리되었습니다."
-}
-```
-
-### 구독한 아티스트 목록 조회
-
-`GET /api/artists/subscribed`
-
-특정 회원이 구독한 아티스트 목록과 아티스트별 공연 일정, 공연 예매 일정을 조회합니다.
-
-#### 요청 헤더
-```
-Authorization: Bearer {token}
-```
-
-#### 응답 본문 (성공 - 200 Ok)
-```json
-{
-  "success": true,
-  "data": {
-    "artists": [
-      {
-        "artistId": 1,
-        "name": "아티스트 이름",
-        "profileImageUrl": "...",
-        "subscribedAt": "2025-11-20T03:21:00Z",
-        "concerts": [
-          {
-            "concertId": 10,
-            "title": "공연 제목",
-            "place": "공연 장소",
-            "performingSchedule": [
-              {
-                "date": "2025-12-25T10:00:00Z"
-              }
-            ],
-            "bookingSchedule": "2025-11-25T10:00:00Z"
-          }
-        ]
       }
     ]
   },
@@ -621,6 +579,49 @@ Authorization: Bearer {token}
   "instance": "/api/concerts",
   "code": "CONCERT_ACCESS_DENIED",
   "timestamp": "2025-11-20T03:21:00.123Z"
+}
+```
+
+### 구독한 아티스트의 공연 정보 조회
+
+`GET /api/concerts/subscribed`
+
+특정 회원이 구독한 아티스트 목록과 아티스트별 공연 일정, 공연 예매 일정을 조회합니다.  
+아티스트 정보는 필터링에 사용됩니다.
+
+#### 요청 헤더
+```
+Authorization: Bearer {token}
+```
+
+#### 응답 본문 (성공 - 200 Ok)
+```json
+{
+  "success": true,
+  "data": {
+    "artists": [
+      {
+        "artistId": 1,
+        "name": "아티스트 이름",
+        "profileImageUrl": "...",
+        "subscribedAt": "2025-11-20T03:21:00Z",
+        "concerts": [
+          {
+            "concertId": 10,
+            "title": "공연 제목",
+            "place": "공연 장소",
+            "performingSchedule": [
+              {
+                "date": "2025-12-25T10:00:00Z"
+              }
+            ],
+            "bookingSchedule": "2025-11-25T10:00:00Z"
+          }
+        ]
+      }
+    ]
+  },
+  "message": "요청이 성공적으로 처리되었습니다."
 }
 ```
 
