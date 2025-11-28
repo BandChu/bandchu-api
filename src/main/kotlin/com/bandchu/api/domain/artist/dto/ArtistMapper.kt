@@ -8,8 +8,9 @@ import com.bandchu.api.domain.artist.dto.response.ArtistUpdateResponse
 import com.bandchu.api.domain.artist.model.ArtiProfile
 import com.bandchu.api.domain.artist.model.SnsLink
 import com.bandchu.api.domain.artist.service.dto.UpdateArtistDetailCommand
-import com.bandchu.api.domain.artist.service.dto.UpdateArtistSnsCommand
+import com.bandchu.api.domain.artist.service.dto.ArtistSnsCommand
 import com.bandchu.api.domain.concert.model.Concert
+import java.net.URI
 
 /**
  *  Domain Model → Web Response
@@ -93,11 +94,11 @@ fun ArtistUpdateRequest.toCommand(artistId: Long): UpdateArtistDetailCommand =
     UpdateArtistDetailCommand(
         artistId = artistId,
         name = name,
-        profileImageUrl = profileImageUrl,
+        profileImageUrl = profileImageUrl?.let { URI(it) },
         description = description,
         genre = genre,
         sns = sns.map {
-            UpdateArtistSnsCommand(
+            ArtistSnsCommand(
                 platform = it.platform,
                 url = it.url
             )

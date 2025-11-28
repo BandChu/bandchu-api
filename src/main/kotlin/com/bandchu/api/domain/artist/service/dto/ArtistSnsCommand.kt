@@ -1,6 +1,6 @@
 package com.bandchu.api.domain.artist.service.dto
 
-data class UpdateArtistSnsCommand(
+data class ArtistSnsCommand(
     val platform: String,
     val url: String
 )
