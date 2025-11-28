@@ -13,8 +13,11 @@ import com.bandchu.api.domain.member.dto.RefreshTokenResponse
 import com.bandchu.api.domain.member.dto.SignupRequest
 import com.bandchu.api.domain.member.dto.SignupResponse
 import com.bandchu.api.domain.member.service.MemberService
+import com.bandchu.api.global.exception.BusinessException
+import com.bandchu.api.global.exception.ErrorCode
 import com.bandchu.api.global.response.ApiResponse
 import jakarta.validation.Valid
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
@@ -28,12 +31,16 @@ import java.time.ZoneOffset
 class MemberController(
     private val memberService: MemberService
 ) {
+    private val log = LoggerFactory.getLogger(javaClass)
 
     @PostMapping("/signup")
     fun signup(@Valid @RequestBody request: SignupRequest): ResponseEntity<ApiResponse<SignupResponse>> {
         val savedMember = memberService.signup(request)
         
-        val memberId = savedMember.id ?: throw IllegalStateException("회원 저장 후 ID가 없습니다.")
+        val memberId = savedMember.id ?: run {
+            log.error("Critical: Member ID is null after save. Email: ${savedMember.email}")
+            throw IllegalStateException("회원 저장 후 ID가 없습니다.")
+        }
         
         val response = SignupResponse(
             memberId = memberId,
@@ -132,7 +139,7 @@ class MemberController(
     fun linkOAuth(@Valid @RequestBody request: OAuthLinkRequest): ResponseEntity<ApiResponse<OAuthLinkResponse>> {
         // SecurityContext에서 인증된 회원 ID 가져오기
         val authentication: Authentication = SecurityContextHolder.getContext().authentication
-            ?: throw IllegalStateException("인증 정보가 없습니다.")
+            ?: throw BusinessException(ErrorCode.INVALID_TOKEN)
         val memberId = authentication.principal as Long
 
         val oauthLinkResult = memberService.linkOAuth(memberId, request.provider, request.token)

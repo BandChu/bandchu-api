@@ -15,4 +15,4 @@ spring:
 
 oauth:
   google:
-    client-id: 624314771252-1jndq6n34174n6fn2rd3btmbrqmrmfbi.apps.googleusercontent.com
+    client-id: ${GOOGLE_CLIENT_ID}

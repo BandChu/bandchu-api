@@ -1,15 +1,15 @@
 package com.bandchu.api.global.config
 
-
 import com.bandchu.api.domain.member.table.MemberTable
 import com.bandchu.api.domain.posts.table.CommentTable
 import com.bandchu.api.domain.posts.table.MediaTable
 import com.bandchu.api.domain.posts.table.PostTable
 import com.bandchu.api.domain.posts.table.ReportTable
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
-import org.springframework.context.annotation.Bean
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener

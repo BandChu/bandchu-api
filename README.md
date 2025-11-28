@@ -36,6 +36,27 @@
     └── ApiApplication
 ```
 
+<br>
+
+## 환경 변수 설정
+
+```properties
+# 데이터베이스 설정
+DB_URL=jdbc:postgresql://localhost:5432/bandchu
+DB_USERNAME=your_db_username
+DB_PASSWORD=your_db_password
+
+# Google OAuth 설정
+GOOGLE_CLIENT_ID=your_google_client_id
+```
+
+### 환경 변수 설명
+
+- **DB_URL**: PostgreSQL 데이터베이스 연결 URL
+- **DB_USERNAME**: 데이터베이스 사용자 이름
+- **DB_PASSWORD**: 데이터베이스 비밀번호
+- **GOOGLE_CLIENT_ID**: Google OAuth 2.0 클라이언트 ID (Google Cloud Console에서 발급)
+
 <!--
 <br>
 

@@ -5,7 +5,7 @@ import com.bandchu.api.global.exception.ErrorCode
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.security.Keys
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
@@ -31,8 +31,9 @@ class GoogleOAuthService(
     @Value("\${spring.security.oauth2.client.provider.google.jwk-set-uri}")
     private val jwkSetUri: String,
     private val objectMapper: ObjectMapper,
-    private val restTemplate: RestTemplate = RestTemplate()
+    private val restTemplate: RestTemplate
 ) {
+    private val log = LoggerFactory.getLogger(javaClass)
 
     /**
      * Google ID Token을 검증하고 사용자 정보를 추출합니다.
@@ -87,6 +88,7 @@ class GoogleOAuthService(
         } catch (e: BusinessException) {
             throw e
         } catch (e: Exception) {
+            log.error("Failed to verify JWT signature and parse claims", e)
             throw BusinessException(ErrorCode.GOOGLE_AUTH_INVALID)
         }
     }
@@ -120,6 +122,7 @@ class GoogleOAuthService(
         } catch (e: BusinessException) {
             throw e
         } catch (e: Exception) {
+            log.error("Failed to get public key from JWK Set (kid: $kid, uri: $jwkSetUri)", e)
             throw BusinessException(ErrorCode.GOOGLE_AUTH_INVALID)
         }
     }

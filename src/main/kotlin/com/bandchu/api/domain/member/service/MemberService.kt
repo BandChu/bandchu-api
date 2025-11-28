@@ -8,6 +8,7 @@ import com.bandchu.api.domain.member.repository.MemberRepository
 import com.bandchu.api.global.exception.BusinessException
 import com.bandchu.api.global.exception.ErrorCode
 import com.bandchu.api.global.security.JwtService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -18,6 +19,7 @@ class MemberService(
     private val jwtService: JwtService,
     private val googleOAuthService: GoogleOAuthService
 ) {
+    private val log = LoggerFactory.getLogger(javaClass)
 
     fun signup(request: SignupRequest): Member {
         // 이메일 중복 체크
@@ -47,7 +49,10 @@ class MemberService(
             throw BusinessException(ErrorCode.USER_INVALID_CREDENTIAL)
         }
 
-        val memberId = member.id ?: throw IllegalStateException("회원 ID가 없습니다.")
+        val memberId = member.id ?: run {
+            log.error("Critical: Member ID is null after login. Email: ${member.email}")
+            throw IllegalStateException("회원 ID가 없습니다.")
+        }
 
         // JWT 토큰 생성
         val accessToken = jwtService.generateAccessToken(memberId, member.role)
@@ -127,19 +132,33 @@ class MemberService(
         
         val member = if (existingMember != null) {
             // 기존 회원인 경우
-            existingMember
+            // Google ID가 아직 연결되지 않은 경우 자동으로 연결
+            if (existingMember.googleId == null) {
+                val memberId = existingMember.id ?: run {
+                    log.error("Critical: Member ID is null when updating Google ID. Email: ${existingMember.email}")
+                    throw IllegalStateException("회원 ID가 없습니다.")
+                }
+                memberRepository.updateGoogleId(memberId, googleUserInfo.googleId)
+                existingMember.copy(googleId = googleUserInfo.googleId)
+            } else {
+                existingMember
+            }
         } else {
             // 신규 회원인 경우 자동 가입
             val newMember = Member(
                 email = googleUserInfo.email,
                 password = "", // OAuth 회원은 비밀번호 없음
                 nickname = googleUserInfo.name,
-                role = Role.FAN // 기본 역할은 FAN
+                role = Role.FAN, // 기본 역할은 FAN
+                googleId = googleUserInfo.googleId
             )
             memberRepository.save(newMember)
         }
 
-        val memberId = member.id ?: throw IllegalStateException("회원 ID가 없습니다.")
+        val memberId = member.id ?: run {
+            log.error("Critical: Member ID is null after login. Email: ${member.email}")
+            throw IllegalStateException("회원 ID가 없습니다.")
+        }
 
         // JWT 토큰 생성
         val accessToken = jwtService.generateAccessToken(memberId, member.role)
@@ -173,7 +192,10 @@ class MemberService(
         val member = memberRepository.findByEmail(userInfo.email)
             ?: throw BusinessException(ErrorCode.OAUTH_TOKEN_INVALID)
 
-        val memberId = member.id ?: throw IllegalStateException("회원 ID가 없습니다.")
+        val memberId = member.id ?: run {
+            log.error("Critical: Member ID is null after login. Email: ${member.email}")
+            throw IllegalStateException("회원 ID가 없습니다.")
+        }
 
         // JWT 토큰 생성
         val accessToken = jwtService.generateAccessToken(memberId, member.role)
@@ -201,18 +223,16 @@ class MemberService(
             else -> throw BusinessException(ErrorCode.OAUTH_TOKEN_INVALID)
         }
 
-        // 이미 연결된 계정인지 확인
-        val existingMemberWithGoogleId = memberRepository.findByGoogleId(userInfo.googleId)
-        if (existingMemberWithGoogleId != null && existingMemberWithGoogleId.id != memberId) {
-            throw BusinessException(ErrorCode.OAUTH_ALREADY_LINKED)
-        }
-
         // 현재 회원 조회
         val member = memberRepository.findById(memberId)
-            ?: throw IllegalStateException("회원을 찾을 수 없습니다.")
+            ?: run {
+                log.error("Critical: Member not found by ID. MemberId: $memberId")
+                throw IllegalStateException("회원을 찾을 수 없습니다.")
+            }
 
-        // 이미 같은 Google 계정이 연결되어 있는지 확인
-        if (member.googleId == userInfo.googleId) {
+        // 이미 연결된 계정인지 확인 (다른 회원이 이미 이 Google ID를 사용 중인 경우)
+        val existingMemberWithGoogleId = memberRepository.findByGoogleId(userInfo.googleId)
+        if (existingMemberWithGoogleId != null && existingMemberWithGoogleId.id != memberId) {
             throw BusinessException(ErrorCode.OAUTH_ALREADY_LINKED)
         }
 
