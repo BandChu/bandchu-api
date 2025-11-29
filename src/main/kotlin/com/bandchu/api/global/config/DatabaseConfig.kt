@@ -10,10 +10,10 @@ import com.bandchu.api.domain.posts.table.CommentTable
 import com.bandchu.api.domain.posts.table.MediaTable
 import com.bandchu.api.domain.posts.table.PostTable
 import com.bandchu.api.domain.posts.table.ReportTable
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
-
+import com.bandchu.api.domain.subscription.table.SubscriptionTable
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.event.ContextRefreshedEvent
@@ -30,6 +30,7 @@ class DatabaseConfig(private val dataSource: DataSource) {
         transaction {
             SchemaUtils.create(
                 MemberTable,
+                SubscriptionTable,
                 PostTable,
                 CommentTable,
                 MediaTable,

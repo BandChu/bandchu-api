@@ -102,6 +102,33 @@ class ArtiProfileRepository {
         artistRow.toDomain(snsLinks = snsLinks)
     }
 
+    fun findByIds(ids: List<Long>): List<ArtiProfile> = transaction {
+        if (ids.isEmpty()) {
+            return@transaction emptyList()
+        }
+
+        val artistRows = ArtiProfileTable
+            .selectAll()
+            .where { ArtiProfileTable.id inList ids }
+            .map { it }
+
+        if (artistRows.isEmpty()) {
+            return@transaction emptyList()
+        }
+
+        val artProfileIds = artistRows.map { it[ArtiProfileTable.id].value }
+        val snsLinksMap = SnsLinkTable
+            .selectAll()
+            .where { SnsLinkTable.artiProfile inList artProfileIds }
+            .groupBy { it[SnsLinkTable.artiProfile].value }
+            .mapValues { (_, rows) -> rows.map { it.toSnsLinkDomain() } }
+
+        artistRows.map { row ->
+            val artProfileId = row[ArtiProfileTable.id].value
+            row.toDomain(snsLinks = snsLinksMap[artProfileId] ?: emptyList())
+        }
+    }
+
     fun createProcess(command: CreateArtistDetailCommand, memberId: Long): ArtiProfile? = transaction {
         val artiProfileId = ArtiProfileTable.insertAndGetId {
             it[artistName] = command.name

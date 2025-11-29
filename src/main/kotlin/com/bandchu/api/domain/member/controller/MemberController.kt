@@ -18,6 +18,7 @@ import com.bandchu.api.domain.member.service.MemberService
 import com.bandchu.api.global.exception.BusinessException
 import com.bandchu.api.global.exception.ErrorCode
 import com.bandchu.api.global.response.ApiResponse
+import com.bandchu.api.global.util.toOffsetDateTime
 import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -49,17 +50,7 @@ class MemberController(
             email = savedMember.email,
             nickname = savedMember.nickname,
             role = savedMember.role,
-            createdAt = savedMember.createdAt?.let { localDateTime ->
-                java.time.LocalDateTime.of(
-                    localDateTime.year,
-                    java.time.Month.valueOf(localDateTime.month.name),
-                    localDateTime.day,
-                    localDateTime.hour,
-                    localDateTime.minute,
-                    localDateTime.second,
-                    localDateTime.nanosecond
-                ).atOffset(ZoneOffset.UTC)
-            } ?: OffsetDateTime.now(ZoneOffset.UTC)
+            createdAt = savedMember.createdAt?.toOffsetDateTime() ?: OffsetDateTime.now(ZoneOffset.UTC)
         )
         
         return ResponseEntity

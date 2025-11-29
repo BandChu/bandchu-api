@@ -281,6 +281,7 @@
   - `updateGoogleId()`: 회원의 Google ID 업데이트
   - `deleteById()`: 회원 삭제
   - `updateProfile()`: 회원 프로필 업데이트 (닉네임, 프로필 이미지 URL)
+  - 날짜 변환 유틸리티 함수 사용: `OffsetDateTime.toKotlinLocalDateTime()` 사용으로 코드 중복 제거
 
 #### DTO
 - `src/main/kotlin/com/bandchu/api/domain/member/dto/SignupRequest.kt` (신규)
@@ -336,6 +337,13 @@
 
 - `src/main/kotlin/com/bandchu/api/global/config/DatabaseConfig.kt` (수정)
   - `MemberTable` 스키마 생성 추가
+
+#### Util
+- `src/main/kotlin/com/bandchu/api/global/util/DateTimeConverter.kt` (신규)
+  - `LocalDateTime.toOffsetDateTime()`: kotlinx.datetime.LocalDateTime을 java.time.OffsetDateTime으로 변환
+  - `OffsetDateTime.toKotlinLocalDateTime()`: java.time.OffsetDateTime을 kotlinx.datetime.LocalDateTime으로 변환
+  - 날짜 변환 로직 중복 제거를 위한 유틸리티 함수
+  - MemberController와 MemberRepository에서 사용
 
 #### Exception
 - `src/main/kotlin/com/bandchu/api/global/exception/ErrorCode.kt` (수정)
@@ -544,9 +552,13 @@ Content-Type: application/json
 **작성일**: 2025-11-26  
 **최종 수정일**: 2025-11-28  
 **작성자**: 신진수  
-**버전**: 2.3
+**버전**: 2.4
 
 ## 변경 이력
+
+### 버전 2.4 (2025-11-28)
+- 날짜 변환 유틸리티 함수 추가: `DateTimeConverter.kt` 생성으로 코드 중복 제거
+- MemberController와 MemberRepository에서 날짜 변환 로직을 유틸리티 함수로 대체
 
 ### 버전 2.3 (2025-11-28)
 - GlobalExceptionHandler의 validation 에러 처리 개선 (필드별로 적절한 ErrorCode 반환)
