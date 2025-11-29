@@ -1,6 +1,6 @@
 package com.bandchu.api.domain.concert.dto
 
-import com.bandchu.api.domain.concert.PerformingScheduleDto
+import com.bandchu.api.domain.concert.dto.PerformingScheduleDto
 import com.bandchu.api.domain.concert.dto.request.ConcertCreateRequest
 import com.bandchu.api.domain.concert.dto.request.ConcertUpdateRequest
 import com.bandchu.api.domain.concert.dto.response.ConcertDetailResponse

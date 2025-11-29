@@ -1,6 +1,6 @@
 package com.bandchu.api.domain.concert.service
 
-import com.bandchu.api.domain.concert.ConcertRepository
+import com.bandchu.api.domain.concert.repository.ConcertRepository
 import com.bandchu.api.domain.concert.model.Concert
 import com.bandchu.api.domain.concert.service.dto.CreateConcertCommand
 import com.bandchu.api.domain.concert.service.dto.UpdateConcertCommand

@@ -1,4 +1,4 @@
-package com.bandchu.api.domain.concert
+package com.bandchu.api.domain.concert.repository
 
 import com.bandchu.api.domain.artist.table.ArtiProfileTable
 import com.bandchu.api.domain.concert.model.Concert
@@ -9,7 +9,6 @@ import com.bandchu.api.domain.concert.table.ConcertTable
 import com.bandchu.api.global.exception.BusinessException
 import com.bandchu.api.global.exception.ErrorCode
 import org.jetbrains.exposed.v1.core.ResultRow
-import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.batchInsert
 import org.jetbrains.exposed.v1.jdbc.deleteWhere

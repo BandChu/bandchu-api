@@ -1,6 +1,6 @@
 package com.bandchu.api.domain.concert.dto.response
 
-import com.bandchu.api.domain.concert.PerformingScheduleDto
+import com.bandchu.api.domain.concert.dto.PerformingScheduleDto
 
 data class ConcertDetailResponse(
     val concertId: Long,

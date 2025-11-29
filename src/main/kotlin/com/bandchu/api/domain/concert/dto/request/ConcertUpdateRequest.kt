@@ -1,6 +1,6 @@
 package com.bandchu.api.domain.concert.dto.request
 
-import com.bandchu.api.domain.concert.PerformingScheduleDto
+import com.bandchu.api.domain.concert.dto.PerformingScheduleDto
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
 

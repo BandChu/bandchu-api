@@ -1,4 +1,4 @@
-package com.bandchu.api.domain.concert
+package com.bandchu.api.domain.concert.dto
 
 import jakarta.validation.constraints.NotBlank
 
