@@ -12,7 +12,7 @@
 - **요청 본문**:
   ```json
   {
-    "artProfileId": 12
+    "artiProfileId": 12
   }
   ```
 - **검증**: 
@@ -26,7 +26,7 @@
     "data": {
       "subscriptionId": 88,
       "memberId": 1,
-      "artProfileId": 12,
+      "artiProfileId": 12,
       "createdAt": "2025-11-28T00:00:00Z"
     },
     "message": "아티스트를 구독했습니다."
@@ -40,13 +40,13 @@
   - 403 Forbidden (토큰 없이 요청)
 
 ### 2. 구독 취소 API
-- **엔드포인트**: `DELETE /api/subscriptions/{artProfileId}`
+- **엔드포인트**: `DELETE /api/subscriptions/{artiProfileId}`
 - **인증**: Bearer Token 필요
 - **기능**: 팬(FAN)이 구독 중인 아티스트 구독 취소
 - **경로 파라미터**:
   | 이름 | 타입 | 설명 |
   | --- | --- | --- |
-  | artProfileId | Long | 구독 취소할 아티스트 ID |
+  | artiProfileId | Long | 구독 취소할 아티스트 ID |
 - **응답**:
   ```json
   {
@@ -70,7 +70,7 @@
     "success": true,
     "data": [
       {
-        "artProfileId": 1,
+        "artiProfileId": 1,
         "artistName": "NewJeans",
         "profileImage": "https://example.com/profile.jpg"
       }
@@ -79,7 +79,7 @@
   }
   ```
 - **응답 필드 설명**:
-  - `artProfileId`: 아티스트 프로필 ID
+  - `artiProfileId`: 아티스트 프로필 ID
   - `artistName`: 아티스트 이름 (ArtiProfile에서 조회)
   - `profileImage`: 아티스트 프로필 이미지 URL (ArtiProfile에서 조회, 없으면 빈 문자열)
 - **에러**:
@@ -96,7 +96,7 @@
 #### Controller
 - `src/main/kotlin/com/bandchu/api/domain/subscription/controller/SubscriptionController.kt` (신규)
   - 아티스트 구독 엔드포인트 구현 (`POST /api/subscriptions`)
-  - 구독 취소 엔드포인트 구현 (`DELETE /api/subscriptions/{artProfileId}`)
+  - 구독 취소 엔드포인트 구현 (`DELETE /api/subscriptions/{artiProfileId}`)
   - 구독 목록 조회 엔드포인트 구현 (`GET /api/subscriptions`)
 
 #### Service
@@ -115,19 +115,19 @@
 #### Repository
 - `src/main/kotlin/com/bandchu/api/domain/subscription/repository/SubscriptionRepository.kt` (신규)
   - `save()`: 구독 저장
-  - `existsByMemberIdAndArtProfileId()`: 중복 구독 체크
-  - `deleteByMemberIdAndArtProfileId()`: 구독 삭제
+  - `existsByMemberIdAndArtiProfileId()`: 중복 구독 체크
+  - `deleteByMemberIdAndArtiProfileId()`: 구독 삭제
   - `findByMemberId()`: 회원 ID로 구독 목록 조회
 
 #### DTO
 - `src/main/kotlin/com/bandchu/api/domain/subscription/dto/SubscriptionRequest.kt` (신규)
 - `src/main/kotlin/com/bandchu/api/domain/subscription/dto/SubscriptionResponse.kt` (신규)
 - `src/main/kotlin/com/bandchu/api/domain/subscription/dto/SubscriptionListItemResponse.kt` (신규)
-  - 구독 목록 조회 응답 DTO (artProfileId, artistName, profileImage)
+  - 구독 목록 조회 응답 DTO (artiProfileId, artistName, profileImage)
 
 #### Model
 - `src/main/kotlin/com/bandchu/api/domain/subscription/model/Subscription.kt` (신규)
-  - 필드: id, memberId, artProfileId, createdAt
+  - 필드: id, memberId, artiProfileId, createdAt
 
 #### Table
 - `src/main/kotlin/com/bandchu/api/domain/subscription/table/SubscriptionTable.kt` (신규)
@@ -182,10 +182,10 @@ POST /api/subscriptions
 Authorization: Bearer {accessToken}
 Content-Type: application/json
 {
-  "artProfileId": 12
+  "artiProfileId": 12
 }
 ```
-- ✅ **성공 케이스**: 201 Created, 구독 정보 반환 (subscriptionId, memberId, artProfileId, createdAt)
+- ✅ **성공 케이스**: 201 Created, 구독 정보 반환 (subscriptionId, memberId, artiProfileId, createdAt)
 - ✅ **실패 케이스 (중복 구독)**: 409 Conflict, `SUBSCRIPTION_DUPLICATED` 에러
 - ✅ **실패 케이스 (존재하지 않는 아티스트)**: 404 Not Found, `ARTIST_NOT_FOUND` 에러
 - ✅ **실패 케이스 (ARTIST 역할)**: 403 Forbidden, `SUBSCRIPTION_INSUFFICIENT_ROLE` 에러
@@ -194,7 +194,7 @@ Content-Type: application/json
 
 ### 2. 구독 취소 API
 ```bash
-DELETE /api/subscriptions/{artProfileId}
+DELETE /api/subscriptions/{artiProfileId}
 Authorization: Bearer {accessToken}
 ```
 - ✅ **성공 케이스**: 200 OK, 성공 메시지 반환
@@ -207,7 +207,7 @@ Authorization: Bearer {accessToken}
 GET /api/subscriptions
 Authorization: Bearer {accessToken}
 ```
-- ✅ **성공 케이스**: 200 OK, 구독 목록 반환 (artProfileId, artistName, profileImage)
+- ✅ **성공 케이스**: 200 OK, 구독 목록 반환 (artiProfileId, artistName, profileImage)
 - ✅ **성공 케이스 (구독 없음)**: 200 OK, 빈 배열 반환
 - ✅ **실패 케이스 (토큰 없음)**: 403 Forbidden (Spring Security 기본 동작)
 - ✅ **실패 케이스 (유효하지 않은 토큰)**: 401 Unauthorized, `INVALID_TOKEN` 에러
@@ -317,9 +317,9 @@ Authorization: Bearer {accessToken}
 - 구독 목록 조회 테스트 코드 작성 및 curl 테스트 완료
 
 ### 버전 1.1 (2025-11-28)
-- 구독 취소 API 추가 (`DELETE /api/subscriptions/{artProfileId}`)
+- 구독 취소 API 추가 (`DELETE /api/subscriptions/{artiProfileId}`)
 - 구독 취소 기능 구현
-- `SubscriptionRepository.deleteByMemberIdAndArtProfileId()` 메서드 추가
+- `SubscriptionRepository.deleteByMemberIdAndArtiProfileId()` 메서드 추가
 - `SubscriptionService.unsubscribe()` 메서드 추가
 - ErrorCode에 `SUBSCRIPTION_NOT_FOUND` 추가
 - 구독 취소 테스트 코드 작성 및 curl 테스트 완료

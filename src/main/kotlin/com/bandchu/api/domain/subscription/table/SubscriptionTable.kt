@@ -9,13 +9,13 @@ import org.jetbrains.exposed.v1.datetime.timestampWithTimeZone
 object SubscriptionTable : Table("subscriptions") {
     val id = long("id").autoIncrement()
     val member = reference("member", MemberTable.id, onDelete = ReferenceOption.CASCADE)
-    val artProfile = reference("art_profile", ArtiProfileTable.id, onDelete = ReferenceOption.CASCADE)
+    val artiProfile = reference("arti_profile", ArtiProfileTable.id, onDelete = ReferenceOption.CASCADE)
     val createdAt = timestampWithTimeZone("created_at")
 
     override val primaryKey = PrimaryKey(id)
 
     init {
-        uniqueIndex(member, artProfile)
+        uniqueIndex(member, artiProfile)
     }
 }
 

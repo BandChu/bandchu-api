@@ -2,7 +2,9 @@ package com.bandchu.api.domain.subscription.repository
 
 import com.bandchu.api.domain.subscription.model.Subscription
 import com.bandchu.api.domain.subscription.table.SubscriptionTable
-import org.jetbrains.exposed.v1.core.*
+import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.ResultRow
+import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
@@ -19,7 +21,7 @@ class SubscriptionRepository {
         return transaction {
             val insertResult = SubscriptionTable.insert {
                 it[member] = subscription.memberId
-                it[artProfile] = subscription.artProfileId
+                it[artiProfile] = subscription.artiProfileId
                 it[createdAt] = OffsetDateTime.now(ZoneOffset.UTC)
             }
 
@@ -31,19 +33,19 @@ class SubscriptionRepository {
         }
     }
 
-    fun existsByMemberIdAndArtProfileId(memberId: Long, artProfileId: Long): Boolean {
+    fun existsByMemberIdAndArtiProfileId(memberId: Long, artiProfileId: Long): Boolean {
         return transaction {
             SubscriptionTable
                 .selectAll()
-                .where { (SubscriptionTable.member eq memberId) and (SubscriptionTable.artProfile eq artProfileId) }
+                .where { (SubscriptionTable.member eq memberId) and (SubscriptionTable.artiProfile eq artiProfileId) }
                 .any()
         }
     }
 
-    fun deleteByMemberIdAndArtProfileId(memberId: Long, artProfileId: Long): Boolean {
+    fun deleteByMemberIdAndArtiProfileId(memberId: Long, artiProfileId: Long): Boolean {
         return transaction {
             val deletedCount = SubscriptionTable.deleteWhere {
-                (SubscriptionTable.member eq memberId) and (SubscriptionTable.artProfile eq artProfileId)
+                (SubscriptionTable.member eq memberId) and (SubscriptionTable.artiProfile eq artiProfileId)
             }
             deletedCount > 0
         }
@@ -65,8 +67,9 @@ class SubscriptionRepository {
         return Subscription(
             id = row[SubscriptionTable.id],
             memberId = row[SubscriptionTable.member].value,
-            artProfileId = row[SubscriptionTable.artProfile].value,
+            artiProfileId = row[SubscriptionTable.artiProfile].value,
             createdAt = localDateTime
         )
     }
 }
+

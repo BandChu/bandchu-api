@@ -1,7 +1,7 @@
 package com.bandchu.api.domain.subscription.dto
 
 data class SubscriptionListItemResponse(
-    val artProfileId: Long,
+    val artiProfileId: Long,
     val artistName: String,
     val profileImage: String
 )

@@ -43,7 +43,12 @@ enum class ErrorCode(
     // artist
     ARTIST_NOT_FOUND("artist-not-found", HttpStatus.NOT_FOUND, "요청한 아티 프로필을 찾을 수 없습니다."),
     ARTIST_INSUFFICIENT_ROLE("insufficient-role", HttpStatus.FORBIDDEN, "회원 역할이 아티스트가 아닙니다."),
-    ARTIST_FORBIDDEN("artist-forbidden", HttpStatus.FORBIDDEN, "해당 아티프로필에 대한 접근 권한이 없습니다."),
+    ARTIST_FORBIDDEN("artist-forbidden", HttpStatus.FORBIDDEN, "해당 아티 프로필에 대한 접근 권한이 없습니다."),
+    ARTIST_NOT_CREATED("artist-not-created", HttpStatus.CONFLICT, "아티스트가 아직 아티 프로필을 생성하지 않았습니다."),
+
+    // concert
+    CONCERT_NOT_FOUND("concert-not-found", HttpStatus.NOT_FOUND, "요청한 콘서트를 찾을 수 없습니다."),
+    CONCERT_FORBIDDEN("concert-not-found-or-forbidden", HttpStatus.FORBIDDEN, "해당 공연에 대한 접근 권한이 없습니다."),
 
     ;
 
