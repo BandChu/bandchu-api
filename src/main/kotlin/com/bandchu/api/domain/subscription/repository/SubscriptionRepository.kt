@@ -20,8 +20,8 @@ class SubscriptionRepository {
     fun save(subscription: Subscription): Subscription {
         return transaction {
             val insertResult = SubscriptionTable.insert {
-                it[memberId] = subscription.memberId
-                it[artProfileId] = subscription.artProfileId
+                it[member] = subscription.memberId
+                it[artProfile] = subscription.artProfileId
                 it[createdAt] = OffsetDateTime.now(ZoneOffset.UTC)
             }
 
@@ -37,7 +37,7 @@ class SubscriptionRepository {
         return transaction {
             SubscriptionTable
                 .selectAll()
-                .where { (SubscriptionTable.memberId eq memberId) and (SubscriptionTable.artProfileId eq artProfileId) }
+                .where { (SubscriptionTable.member eq memberId) and (SubscriptionTable.artProfile eq artProfileId) }
                 .any()
         }
     }
@@ -45,7 +45,7 @@ class SubscriptionRepository {
     fun deleteByMemberIdAndArtProfileId(memberId: Long, artProfileId: Long): Boolean {
         return transaction {
             val deletedCount = SubscriptionTable.deleteWhere {
-                (SubscriptionTable.memberId eq memberId) and (SubscriptionTable.artProfileId eq artProfileId)
+                (SubscriptionTable.member eq memberId) and (SubscriptionTable.artProfile eq artProfileId)
             }
             deletedCount > 0
         }
@@ -55,7 +55,7 @@ class SubscriptionRepository {
         return transaction {
             SubscriptionTable
                 .selectAll()
-                .where { SubscriptionTable.memberId eq memberId }
+                .where { SubscriptionTable.member eq memberId }
                 .map { toSubscription(it) }
         }
     }
@@ -66,8 +66,8 @@ class SubscriptionRepository {
         
         return Subscription(
             id = row[SubscriptionTable.id],
-            memberId = row[SubscriptionTable.memberId],
-            artProfileId = row[SubscriptionTable.artProfileId],
+            memberId = row[SubscriptionTable.member],
+            artProfileId = row[SubscriptionTable.artProfile],
             createdAt = localDateTime
         )
     }
