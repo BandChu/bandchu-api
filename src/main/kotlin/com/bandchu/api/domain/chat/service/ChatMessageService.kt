@@ -42,7 +42,7 @@ class ChatMessageService(
 
         //nextCursor 값 지정
         val nextCursor = if (messages.isNotEmpty()) {
-            messages.first().messageId - 1
+            messages.first().messageId // -1을 제거해야 통합 테스트 가능했음(ChatMessageIntegrationTest)
         } else {
             null
         }
