@@ -2,9 +2,7 @@ package com.bandchu.api.domain.subscription.repository
 
 import com.bandchu.api.domain.subscription.model.Subscription
 import com.bandchu.api.domain.subscription.table.SubscriptionTable
-import org.jetbrains.exposed.v1.core.and
-import org.jetbrains.exposed.v1.core.ResultRow
-import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
@@ -66,10 +64,9 @@ class SubscriptionRepository {
         
         return Subscription(
             id = row[SubscriptionTable.id],
-            memberId = row[SubscriptionTable.member],
-            artProfileId = row[SubscriptionTable.artProfile],
+            memberId = row[SubscriptionTable.member].value,
+            artProfileId = row[SubscriptionTable.artProfile].value,
             createdAt = localDateTime
         )
     }
 }
-
