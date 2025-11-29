@@ -30,7 +30,7 @@ class ArtiProfileRepository {
         profileImageUrl = this[ArtiProfileTable.profileImageUrl]?.let { URI(it) },
         createdAt = this[ArtiProfileTable.createdAt],
         updatedAt = this[ArtiProfileTable.updatedAt],
-        memberId = this[ArtiProfileTable.member],
+        memberId = this[ArtiProfileTable.member]?.value,
         snsLinks = snsLinks
     )
 

@@ -11,6 +11,6 @@ data class ArtiProfile (
     val profileImageUrl: URI?,
     val createdAt: OffsetDateTime,
     val updatedAt: OffsetDateTime,
-    val memberId: Long,
+    val memberId: Long?,
     val snsLinks: List<SnsLink> = emptyList()
 )
