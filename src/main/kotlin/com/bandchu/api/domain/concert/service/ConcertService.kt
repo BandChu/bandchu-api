@@ -2,6 +2,7 @@ package com.bandchu.api.domain.concert.service
 
 import com.bandchu.api.domain.concert.repository.ConcertRepository
 import com.bandchu.api.domain.concert.model.Concert
+import com.bandchu.api.domain.concert.service.dto.ConcertSubscribedRead
 import com.bandchu.api.domain.concert.service.dto.CreateConcertCommand
 import com.bandchu.api.domain.concert.service.dto.UpdateConcertCommand
 import com.bandchu.api.domain.member.model.Role
@@ -17,6 +18,12 @@ class ConcertService(
 ) {
     fun getDetail(concertId: Long): Concert {
         return concertRepository.getDetail(concertId)
+    }
+
+    fun getSubscribed(): List<ConcertSubscribedRead> {
+        if (getCurrentUserRole() != Role.FAN) throw BusinessException(ErrorCode.SUBSCRIPTION_INSUFFICIENT_ROLE)
+
+        return concertRepository.getConcertsBySubscription(getCurrentUserId())
     }
 
     fun create(command: CreateConcertCommand): Concert {

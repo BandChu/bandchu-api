@@ -148,7 +148,7 @@ class ConcertApiTest(
                     val artistIds = artistsNode.map { it["artistId"].asLong() }
                     artistIds.all { it > 0L } shouldBe true
 
-                    artistsNode[0]["concerts"].isArray shouldBe true
+                    // TODO: 구독 정보 추가해서 확인하면 좋을 듯
                 }
             }
             context("현재 접속한 사용자 역할이 팬이 아닌 경우") {

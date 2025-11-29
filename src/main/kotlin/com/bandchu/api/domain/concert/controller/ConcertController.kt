@@ -3,8 +3,10 @@ package com.bandchu.api.domain.concert.controller
 import com.bandchu.api.domain.concert.dto.request.ConcertCreateRequest
 import com.bandchu.api.domain.concert.dto.request.ConcertUpdateRequest
 import com.bandchu.api.domain.concert.dto.response.ConcertDetailResponse
+import com.bandchu.api.domain.concert.dto.response.ConcertSubscribedResponse
 import com.bandchu.api.domain.concert.dto.toCommand
 import com.bandchu.api.domain.concert.dto.toConcertDetailResponse
+import com.bandchu.api.domain.concert.dto.toConcertSubscribedResponse
 import com.bandchu.api.domain.concert.service.ConcertService
 import com.bandchu.api.global.response.ApiResponse
 import jakarta.validation.Valid
@@ -29,6 +31,14 @@ class ConcertController(
             .body(ApiResponse.success(concert.toConcertDetailResponse()))
     }
 
+    @GetMapping("/subscribed")
+    fun getSubscribed(): ResponseEntity<ApiResponse<ConcertSubscribedResponse>> {
+        val concerts = concertService.getSubscribed()
+
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(ApiResponse.success(concerts.toConcertSubscribedResponse()))
+    }
     // TODO: 구독한 아티스트의 공연 정보 조회
 
     @PostMapping("")
