@@ -2,13 +2,9 @@ package com.bandchu.api.domain.member.repository
 
 import com.bandchu.api.domain.member.model.Member
 import com.bandchu.api.domain.member.table.MemberTable
-import org.jetbrains.exposed.v1.core.ResultRow
-import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.jdbc.deleteWhere
-import org.jetbrains.exposed.v1.jdbc.insert
-import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.core.*
+import org.jetbrains.exposed.v1.jdbc.*
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
-import org.jetbrains.exposed.v1.jdbc.update
 import org.springframework.stereotype.Repository
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
@@ -116,7 +112,7 @@ class MemberRepository {
         val localDateTime = offsetDateTime.toKotlinLocalDateTime()
         
         return Member(
-            id = row[MemberTable.id],
+            id = row[MemberTable.id].value,
             email = row[MemberTable.email],
             password = row[MemberTable.password],
             nickname = row[MemberTable.nickname],
