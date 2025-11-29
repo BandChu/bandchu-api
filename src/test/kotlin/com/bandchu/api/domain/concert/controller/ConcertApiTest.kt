@@ -77,8 +77,8 @@ class ConcertApiTest(
     private val artistFixture: ArtistFixture,
     private val concertFixture: ConcertFixture
 ) : DescribeSpec() {
-    private lateinit var artistMember: Member       // 콘서트 생성 권한이 있는 사용자 (Role.ARTIST)
-    private lateinit var fanMember: Member       // 권한 없는 일반 사용자 (Role.USER)
+    private lateinit var artistMember: Member       // 공연 생성 권한이 있는 사용자 (Role.ARTIST)
+    private lateinit var fanMember: Member       // 구독 조회 권한이 있는 일반 사용자 (Role.FAN)
     private lateinit var otherArtistMember: Member  // 다른 아티스트 (403 Forbidden 테스트용)
     private lateinit var myConcert: Concert       // artistMember가 생성한 기본 콘서트
     private lateinit var otherConcert: Concert
@@ -126,6 +126,40 @@ class ConcertApiTest(
                     ).andReturn().response
 
                     result.status shouldBe HttpStatus.NOT_FOUND.value()
+                }
+            }
+        }
+
+        describe("구독한 아티스트의 공연 조회") {
+            context("팬 역할의 사용자가 올바른 형식으로 요청한 경우") {
+                it("성공(200)") {
+                    val result = mockMvc.perform(
+                        MockMvcRequestBuilders.get("/api/concerts/subscribed")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .with(user(fanMember.id.toString()).roles(FAN_ROLE))
+                    ).andReturn().response
+
+                    result.status shouldBe HttpStatus.OK.value()
+                    val root = objectMapper.readTree(result.contentAsString)
+
+                    val artistsNode = root["data"]["artists"]
+                    artistsNode.isArray shouldBe true
+
+                    val artistIds = artistsNode.map { it["artistId"].asLong() }
+                    artistIds.all { it > 0L } shouldBe true
+
+                    artistsNode[0]["concerts"].isArray shouldBe true
+                }
+            }
+            context("현재 접속한 사용자 역할이 팬이 아닌 경우") {
+                it("권한 없음(403)") {
+                    val result = mockMvc.perform(
+                        MockMvcRequestBuilders.get("/api/concerts/subscribed")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .with(user(artistMember.id.toString()).roles(ARTIST_ROLE))
+                    ).andReturn().response
+
+                    result.status shouldBe HttpStatus.FORBIDDEN.value()
                 }
             }
         }
