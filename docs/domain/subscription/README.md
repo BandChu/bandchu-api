@@ -131,8 +131,10 @@
 
 #### Table
 - `src/main/kotlin/com/bandchu/api/domain/subscription/table/SubscriptionTable.kt` (신규)
-  - 컬럼: id, member_id, art_profile_id, created_at
-  - UNIQUE 제약조건: (member_id, art_profile_id)
+  - 컬럼: id, member, art_profile, created_at
+  - 외래키: `member` → `MemberTable.id` (CASCADE), `art_profile` → `ArtiProfileTable.id` (CASCADE)
+  - UNIQUE 제약조건: (member, art_profile)
+  - 공식 문서 기준 `reference()` 방식 사용
 
 #### Test
 - `src/test/kotlin/com/bandchu/api/domain/subscription/controller/SubscriptionControllerTest.kt` (신규)
@@ -233,27 +235,36 @@ Authorization: Bearer {accessToken}
 
 ## 주의!!! 데이터베이스 변경사항
 
-**버전 1.0에서 `subscriptions` 테이블이 새로 생성되었습니다.**
+**버전 1.0에서 `subscriptions` 테이블이 새로 생성되었습니다.**  
+**버전 1.4에서 외래키 제약조건이 추가되었습니다.**
+
+### 변경 내용 (버전 1.4)
+- 외래키 제약조건 추가
+  - `member` → `members.id` (ON DELETE CASCADE)
+  - `art_profile` → `arti_profiles.id` (ON DELETE CASCADE)
+- 컬럼명 변경: `member_id` → `member`, `art_profile_id` → `art_profile`
 
 ### 변경 내용 (버전 1.0)
 - `subscriptions` 테이블 생성
   - `id`: BIGSERIAL PRIMARY KEY
-  - `member_id`: BIGINT NOT NULL
-  - `art_profile_id`: BIGINT NOT NULL
+  - `member`: BIGINT NOT NULL (외래키: `members.id`)
+  - `art_profile`: BIGINT NOT NULL (외래키: `arti_profiles.id`)
   - `created_at`: TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
-  - UNIQUE 제약조건: `(member_id, art_profile_id)`
+  - UNIQUE 제약조건: `(member, art_profile)`
+  - 외래키 제약조건: `member` → `members.id` (CASCADE), `art_profile` → `arti_profiles.id` (CASCADE)
 
 ### 주의사항
 - 기존 데이터베이스를 사용하는 경우, **반드시 마이그레이션을 실행**해야 합니다.
 - 마이그레이션을 실행하지 않으면 아티스트 구독 API가 동작하지 않습니다.
-- 마이그레이션 SQL:
+- 버전 1.4부터는 외래키 제약조건이 추가되어 부모 레코드 삭제 시 자식 레코드도 자동 삭제됩니다.
+- 마이그레이션 SQL (버전 1.4):
   ```sql
   CREATE TABLE IF NOT EXISTS subscriptions (
       id BIGSERIAL PRIMARY KEY,
-      member_id BIGINT NOT NULL,
-      art_profile_id BIGINT NOT NULL,
+      member BIGINT NOT NULL REFERENCES members(id) ON DELETE CASCADE,
+      art_profile BIGINT NOT NULL REFERENCES arti_profiles(id) ON DELETE CASCADE,
       created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(member_id, art_profile_id)
+      UNIQUE(member, art_profile)
   );
   ```
 
@@ -277,9 +288,16 @@ Authorization: Bearer {accessToken}
 **작성일**: 2025-11-28  
 **최종 수정일**: 2025-11-28  
 **작성자**: 신진수  
-**버전**: 1.3
+**버전**: 1.4
 
 ## 변경 이력
+
+### 버전 1.4 (2025-11-28)
+- 외래키 참조 방식 통일: `SubscriptionTable`의 외래키를 공식 문서 기준인 `reference()` 방식으로 변경
+- `onDelete = ReferenceOption.CASCADE` 옵션 추가로 부모 레코드 삭제 시 자식 레코드 자동 삭제
+- `MemberTable`을 `LongIdTable`로 변경하여 `EntityID<Long>` 타입 통일
+- `SubscriptionRepository`에서 외래키 컬럼 접근 시 `.value` 사용으로 타입 일관성 확보
+- 아티스트 도메인과 동일한 네이밍 컨벤션 적용 (`member`, `art_profile`)
 
 ### 버전 1.3 (2025-11-28)
 - 아티스트 프로필 존재 확인 추가 (구독 시 존재하지 않는 아티스트 프로필 ID로 구독 시도 방지)
