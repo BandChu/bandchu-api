@@ -20,7 +20,7 @@ class SubscriptionService(
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
-    fun subscribe(memberId: Long, artProfileId: Long): Subscription {
+    fun subscribe(memberId: Long, artiProfileId: Long): Subscription {
         // 역할 검증: FAN만 구독 가능
         val role = getCurrentUserRole()
         if (role != Role.FAN) {
@@ -29,26 +29,26 @@ class SubscriptionService(
         }
 
         // 아티스트 프로필 존재 확인
-        artiProfileRepository.findById(artProfileId)
+        artiProfileRepository.findById(artiProfileId)
             ?: throw BusinessException(ErrorCode.ARTIST_NOT_FOUND)
 
         // 중복 구독 체크
-        if (subscriptionRepository.existsByMemberIdAndArtProfileId(memberId, artProfileId)) {
+        if (subscriptionRepository.existsByMemberIdAndArtiProfileId(memberId, artiProfileId)) {
             throw BusinessException(ErrorCode.SUBSCRIPTION_DUPLICATED)
         }
 
         // 구독 생성
         val subscription = Subscription(
             memberId = memberId,
-            artProfileId = artProfileId
+            artiProfileId = artiProfileId
         )
 
         return subscriptionRepository.save(subscription)
     }
 
-    fun unsubscribe(memberId: Long, artProfileId: Long) {
+    fun unsubscribe(memberId: Long, artiProfileId: Long) {
         // 구독 존재 확인 및 삭제
-        val deleted = subscriptionRepository.deleteByMemberIdAndArtProfileId(memberId, artProfileId)
+        val deleted = subscriptionRepository.deleteByMemberIdAndArtiProfileId(memberId, artiProfileId)
         if (!deleted) {
             throw BusinessException(ErrorCode.SUBSCRIPTION_NOT_FOUND)
         }
@@ -63,22 +63,22 @@ class SubscriptionService(
         }
 
         // 아티스트 프로필 ID 목록 추출
-        val artProfileIds = subscriptions.map { it.artProfileId }
+        val artiProfileIds = subscriptions.map { it.artiProfileId }
 
         // 배치 쿼리로 모든 아티스트 프로필 정보 조회
-        val artiProfiles = artiProfileRepository.findByIds(artProfileIds)
+        val artiProfiles = artiProfileRepository.findByIds(artiProfileIds)
         val profileMap = artiProfiles.associateBy { it.id }
 
         // 구독 정보와 아티스트 프로필 정보 매핑
         return subscriptions.mapNotNull { subscription ->
-            profileMap[subscription.artProfileId]?.let { artiProfile ->
+            profileMap[subscription.artiProfileId]?.let { artiProfile ->
                 SubscriptionListItemResponse(
-                    artProfileId = subscription.artProfileId,
+                    artiProfileId = subscription.artiProfileId,
                     artistName = artiProfile.artistName,
                     profileImage = artiProfile.profileImageUrl?.toString() ?: ""
                 )
             } ?: run {
-                log.warn("ArtiProfile not found for subscription. MemberId: $memberId, ArtProfileId: ${subscription.artProfileId}")
+                log.warn("ArtiProfile not found for subscription. MemberId: $memberId, ArtiProfileId: ${subscription.artiProfileId}")
                 null
             }
         }

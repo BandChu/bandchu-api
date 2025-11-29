@@ -46,7 +46,7 @@ class SubscriptionControllerTest(
             it("201 Created와 함께 구독 정보를 반환한다") {
                 // given
                 val memberId = 1L
-                val artProfileId = 12L
+                val artiProfileId = 12L
                 val subscriptionId = 88L
                 val authentication = UsernamePasswordAuthenticationToken(
                     memberId,
@@ -55,16 +55,16 @@ class SubscriptionControllerTest(
                 )
                 SecurityContextHolder.getContext().authentication = authentication
 
-                val request = SubscriptionRequest(artProfileId = artProfileId)
+                val request = SubscriptionRequest(artiProfileId = artiProfileId)
 
                 val subscription = Subscription(
                     id = subscriptionId,
                     memberId = memberId,
-                    artProfileId = artProfileId,
+                    artiProfileId = artiProfileId,
                     createdAt = LocalDateTime(2025, Month.NOVEMBER, 21, 0, 0, 0)
                 )
 
-                every { subscriptionService.subscribe(memberId, artProfileId) } returns subscription
+                every { subscriptionService.subscribe(memberId, artiProfileId) } returns subscription
 
                 // when & then
                 mockMvc.perform(
@@ -77,7 +77,7 @@ class SubscriptionControllerTest(
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.data.subscriptionId").value(subscriptionId))
                     .andExpect(jsonPath("$.data.memberId").value(memberId))
-                    .andExpect(jsonPath("$.data.artProfileId").value(artProfileId))
+                    .andExpect(jsonPath("$.data.artiProfileId").value(artiProfileId))
                     .andExpect(jsonPath("$.data.createdAt").exists())
                     .andExpect(jsonPath("$.message").value("아티스트를 구독했습니다."))
             }
@@ -87,7 +87,7 @@ class SubscriptionControllerTest(
             it("409 Conflict와 함께 에러를 반환한다") {
                 // given
                 val memberId = 1L
-                val artProfileId = 12L
+                val artiProfileId = 12L
                 val authentication = UsernamePasswordAuthenticationToken(
                     memberId,
                     null,
@@ -95,9 +95,9 @@ class SubscriptionControllerTest(
                 )
                 SecurityContextHolder.getContext().authentication = authentication
 
-                val request = SubscriptionRequest(artProfileId = artProfileId)
+                val request = SubscriptionRequest(artiProfileId = artiProfileId)
 
-                every { subscriptionService.subscribe(memberId, artProfileId) } throws com.bandchu.api.global.exception.BusinessException(
+                every { subscriptionService.subscribe(memberId, artiProfileId) } throws com.bandchu.api.global.exception.BusinessException(
                     com.bandchu.api.global.exception.ErrorCode.SUBSCRIPTION_DUPLICATED
                 )
 
@@ -119,7 +119,7 @@ class SubscriptionControllerTest(
             it("403 Forbidden과 함께 에러를 반환한다") {
                 // given
                 val memberId = 1L
-                val artProfileId = 12L
+                val artiProfileId = 12L
                 val authentication = UsernamePasswordAuthenticationToken(
                     memberId,
                     null,
@@ -127,9 +127,9 @@ class SubscriptionControllerTest(
                 )
                 SecurityContextHolder.getContext().authentication = authentication
 
-                val request = SubscriptionRequest(artProfileId = artProfileId)
+                val request = SubscriptionRequest(artiProfileId = artiProfileId)
 
-                every { subscriptionService.subscribe(memberId, artProfileId) } throws com.bandchu.api.global.exception.BusinessException(
+                every { subscriptionService.subscribe(memberId, artiProfileId) } throws com.bandchu.api.global.exception.BusinessException(
                     com.bandchu.api.global.exception.ErrorCode.SUBSCRIPTION_INSUFFICIENT_ROLE
                 )
 
@@ -150,7 +150,7 @@ class SubscriptionControllerTest(
             it("404 Not Found와 함께 에러를 반환한다") {
                 // given
                 val memberId = 1L
-                val artProfileId = 999L
+                val artiProfileId = 999L
                 val authentication = UsernamePasswordAuthenticationToken(
                     memberId,
                     null,
@@ -158,9 +158,9 @@ class SubscriptionControllerTest(
                 )
                 SecurityContextHolder.getContext().authentication = authentication
 
-                val request = SubscriptionRequest(artProfileId = artProfileId)
+                val request = SubscriptionRequest(artiProfileId = artiProfileId)
 
-                every { subscriptionService.subscribe(memberId, artProfileId) } throws com.bandchu.api.global.exception.BusinessException(
+                every { subscriptionService.subscribe(memberId, artiProfileId) } throws com.bandchu.api.global.exception.BusinessException(
                     com.bandchu.api.global.exception.ErrorCode.ARTIST_NOT_FOUND
                 )
 
@@ -181,7 +181,7 @@ class SubscriptionControllerTest(
         context("토큰이 없이 구독 요청을 보내면") {
             it("403 Forbidden과 함께 에러를 반환한다") {
                 // given
-                val request = SubscriptionRequest(artProfileId = 12L)
+                val request = SubscriptionRequest(artiProfileId = 12L)
 
                 // when & then
                 mockMvc.perform(
@@ -194,12 +194,12 @@ class SubscriptionControllerTest(
         }
     }
 
-    describe("DELETE /api/subscriptions/{artProfileId}") {
+    describe("DELETE /api/subscriptions/{artiProfileId}") {
         context("FAN 역할의 유저가 구독 중인 아티스트의 구독 취소 요청을 보내면") {
             it("200 OK와 함께 성공 메시지를 반환한다") {
                 // given
                 val memberId = 1L
-                val artProfileId = 12L
+                val artiProfileId = 12L
                 val authentication = UsernamePasswordAuthenticationToken(
                     memberId,
                     null,
@@ -207,11 +207,11 @@ class SubscriptionControllerTest(
                 )
                 SecurityContextHolder.getContext().authentication = authentication
 
-                every { subscriptionService.unsubscribe(memberId, artProfileId) } returns Unit
+                every { subscriptionService.unsubscribe(memberId, artiProfileId) } returns Unit
 
                 // when & then
                 mockMvc.perform(
-                    delete("/api/subscriptions/$artProfileId")
+                    delete("/api/subscriptions/$artiProfileId")
                         .with(authentication(authentication))
                 )
                     .andExpect(status().isOk)
@@ -225,7 +225,7 @@ class SubscriptionControllerTest(
             it("404 Not Found와 함께 에러를 반환한다") {
                 // given
                 val memberId = 1L
-                val artProfileId = 12L
+                val artiProfileId = 12L
                 val authentication = UsernamePasswordAuthenticationToken(
                     memberId,
                     null,
@@ -233,13 +233,13 @@ class SubscriptionControllerTest(
                 )
                 SecurityContextHolder.getContext().authentication = authentication
 
-                every { subscriptionService.unsubscribe(memberId, artProfileId) } throws com.bandchu.api.global.exception.BusinessException(
+                every { subscriptionService.unsubscribe(memberId, artiProfileId) } throws com.bandchu.api.global.exception.BusinessException(
                     com.bandchu.api.global.exception.ErrorCode.SUBSCRIPTION_NOT_FOUND
                 )
 
                 // when & then
                 mockMvc.perform(
-                    delete("/api/subscriptions/$artProfileId")
+                    delete("/api/subscriptions/$artiProfileId")
                         .with(authentication(authentication))
                 )
                     .andExpect(status().isNotFound)
@@ -252,11 +252,11 @@ class SubscriptionControllerTest(
         context("토큰이 없이 구독 취소 요청을 보내면") {
             it("403 Forbidden과 함께 에러를 반환한다") {
                 // given
-                val artProfileId = 12L
+                val artiProfileId = 12L
 
                 // when & then
                 mockMvc.perform(
-                    delete("/api/subscriptions/$artProfileId")
+                    delete("/api/subscriptions/$artiProfileId")
                 )
                     .andExpect(status().isForbidden)
             }
@@ -277,7 +277,7 @@ class SubscriptionControllerTest(
 
                 val subscriptionList = listOf(
                     SubscriptionListItemResponse(
-                        artProfileId = 12L,
+                        artiProfileId = 12L,
                         artistName = "NewJeans",
                         profileImage = "https://example.com/profile.jpg"
                     )
@@ -292,7 +292,7 @@ class SubscriptionControllerTest(
                 )
                     .andExpect(status().isOk)
                     .andExpect(jsonPath("$.success").value(true))
-                    .andExpect(jsonPath("$.data[0].artProfileId").value(12))
+                    .andExpect(jsonPath("$.data[0].artiProfileId").value(12))
                     .andExpect(jsonPath("$.data[0].artistName").value("NewJeans"))
                     .andExpect(jsonPath("$.data[0].profileImage").value("https://example.com/profile.jpg"))
                     .andExpect(jsonPath("$.message").value("구독 목록 조회 성공"))

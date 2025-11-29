@@ -26,10 +26,10 @@ class SubscriptionController(
     fun subscribe(@Valid @RequestBody request: SubscriptionRequest): ResponseEntity<ApiResponse<SubscriptionResponse>> {
         val memberId = getCurrentUserId()
 
-        val subscription = subscriptionService.subscribe(memberId, request.artProfileId)
+        val subscription = subscriptionService.subscribe(memberId, request.artiProfileId)
 
         val subscriptionId = subscription.id ?: run {
-            log.error("Critical: Subscription ID is null after save. MemberId: $memberId, ArtProfileId: ${request.artProfileId}")
+            log.error("Critical: Subscription ID is null after save. MemberId: $memberId, ArtiProfileId: ${request.artiProfileId}")
             throw IllegalStateException("구독 ID가 없습니다.")
         }
 
@@ -38,7 +38,7 @@ class SubscriptionController(
         val response = SubscriptionResponse(
             subscriptionId = subscriptionId,
             memberId = subscription.memberId,
-            artProfileId = subscription.artProfileId,
+            artiProfileId = subscription.artiProfileId,
             createdAt = createdAt
         )
 
@@ -47,11 +47,11 @@ class SubscriptionController(
             .body(ApiResponse.success(response, "아티스트를 구독했습니다."))
     }
 
-    @DeleteMapping("/{artProfileId}")
-    fun unsubscribe(@PathVariable artProfileId: Long): ResponseEntity<ApiResponse<Unit>> {
+    @DeleteMapping("/{artiProfileId}")
+    fun unsubscribe(@PathVariable artiProfileId: Long): ResponseEntity<ApiResponse<Unit>> {
         val memberId = getCurrentUserId()
 
-        subscriptionService.unsubscribe(memberId, artProfileId)
+        subscriptionService.unsubscribe(memberId, artiProfileId)
 
         return ResponseEntity
             .status(HttpStatus.OK)

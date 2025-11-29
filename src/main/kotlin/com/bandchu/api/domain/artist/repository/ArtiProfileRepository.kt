@@ -116,16 +116,16 @@ class ArtiProfileRepository {
             return@transaction emptyList()
         }
 
-        val artProfileIds = artistRows.map { it[ArtiProfileTable.id].value }
+        val artiProfileIds = artistRows.map { it[ArtiProfileTable.id].value }
         val snsLinksMap = SnsLinkTable
             .selectAll()
-            .where { SnsLinkTable.artiProfile inList artProfileIds }
+            .where { SnsLinkTable.artiProfile inList artiProfileIds }
             .groupBy { it[SnsLinkTable.artiProfile].value }
             .mapValues { (_, rows) -> rows.map { it.toSnsLinkDomain() } }
 
         artistRows.map { row ->
-            val artProfileId = row[ArtiProfileTable.id].value
-            row.toDomain(snsLinks = snsLinksMap[artProfileId] ?: emptyList())
+            val artiProfileId = row[ArtiProfileTable.id].value
+            row.toDomain(snsLinks = snsLinksMap[artiProfileId] ?: emptyList())
         }
     }
 

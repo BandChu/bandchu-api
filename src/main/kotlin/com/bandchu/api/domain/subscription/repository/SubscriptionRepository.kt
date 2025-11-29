@@ -21,7 +21,7 @@ class SubscriptionRepository {
         return transaction {
             val insertResult = SubscriptionTable.insert {
                 it[memberId] = subscription.memberId
-                it[artProfileId] = subscription.artProfileId
+                it[artiProfileId] = subscription.artiProfileId
                 it[createdAt] = OffsetDateTime.now(ZoneOffset.UTC)
             }
 
@@ -33,19 +33,19 @@ class SubscriptionRepository {
         }
     }
 
-    fun existsByMemberIdAndArtProfileId(memberId: Long, artProfileId: Long): Boolean {
+    fun existsByMemberIdAndArtiProfileId(memberId: Long, artiProfileId: Long): Boolean {
         return transaction {
             SubscriptionTable
                 .selectAll()
-                .where { (SubscriptionTable.memberId eq memberId) and (SubscriptionTable.artProfileId eq artProfileId) }
+                .where { (SubscriptionTable.memberId eq memberId) and (SubscriptionTable.artiProfileId eq artiProfileId) }
                 .any()
         }
     }
 
-    fun deleteByMemberIdAndArtProfileId(memberId: Long, artProfileId: Long): Boolean {
+    fun deleteByMemberIdAndArtiProfileId(memberId: Long, artiProfileId: Long): Boolean {
         return transaction {
             val deletedCount = SubscriptionTable.deleteWhere {
-                (SubscriptionTable.memberId eq memberId) and (SubscriptionTable.artProfileId eq artProfileId)
+                (SubscriptionTable.memberId eq memberId) and (SubscriptionTable.artiProfileId eq artiProfileId)
             }
             deletedCount > 0
         }
@@ -67,7 +67,7 @@ class SubscriptionRepository {
         return Subscription(
             id = row[SubscriptionTable.id],
             memberId = row[SubscriptionTable.memberId],
-            artProfileId = row[SubscriptionTable.artProfileId],
+            artiProfileId = row[SubscriptionTable.artiProfileId],
             createdAt = localDateTime
         )
     }
