@@ -1,0 +1,9 @@
+package com.bandchu.api.domain.posts.dto.request
+
+import com.bandchu.api.domain.posts.model.PostType
+
+data class CreatePostRequest(
+    val postType: PostType,
+    val title: String,
+    val content: String
+)

@@ -29,6 +29,8 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:1.0.0-rc-2")
     implementation("org.jetbrains.exposed:exposed-jdbc:1.0.0-rc-2")
     implementation("org.jetbrains.exposed:exposed-kotlin-datetime:1.0.0-rc-2")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime-jvm:0.4.1")
+    implementation("org.jetbrains.exposed:exposed-java-time:0.49.0")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
@@ -44,6 +46,8 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
 
+    implementation("org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE")
+    implementation("software.amazon.awssdk:s3:2.25.0")
 }
 
 kotlin {

@@ -1,12 +1,11 @@
 package com.bandchu.api.domain.posts.model
 
-import kotlinx.datetime.LocalDateTime
-
 data class Post(
-    val post_id: Int? = null,
+    val post_id: Long ,
     val title: String,
     val content: String,
-    val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime,
-
+    val createdAt: kotlinx.datetime.LocalDateTime,
+    val updatedAt: kotlinx.datetime.LocalDateTime,
+    val postType: PostType,
 )
+
