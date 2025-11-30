@@ -1,10 +1,5 @@
-spring:
-  datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/bandchu_chat}
-    username: ${DB_USERNAME:jung-yoonsuh}
-    password: ${DB_PASSWORD:}
-    driver-class-name: org.postgresql.Driver
-  sql:
-    init:
-      mode: always
-      data-locations: classpath:test-data.sql
+#spring:
+#  sql:
+#    init:
+#      mode: always
+#      data-locations: classpath:test-data.sql
