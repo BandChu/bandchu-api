@@ -27,6 +27,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14")
     implementation("org.jetbrains.exposed:exposed-core:1.0.0-rc-2")
     implementation("org.jetbrains.exposed:exposed-jdbc:1.0.0-rc-2")
     implementation("org.jetbrains.exposed:exposed-kotlin-datetime:1.0.0-rc-2")
