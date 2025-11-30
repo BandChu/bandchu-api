@@ -20,11 +20,12 @@ class SecurityConfig(
         http
             .csrf { it.disable() }
             .sessionManagement { session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // JWT 사용을 위한 STATELESS
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             }
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
             .authorizeHttpRequests { auth ->
-                // 공개 엔드포인트
+
+                // ===== 공개 엔드포인트 =====
                 auth.requestMatchers(
                     "/api/members/signup",
                     "/api/members/login",
@@ -32,14 +33,22 @@ class SecurityConfig(
                     "/api/members/oauth/google",
                     "/api/members/oauth/verify"
                 ).permitAll()
-                // 인증이 필요한 엔드포인트
-                auth.requestMatchers("/api/members/logout", "/api/members/me/**", "/api/subscriptions/**").authenticated()
-                
-                // 나머지 요청은 개발 단계에서는 허용, 운영 환경에서는 authenticated()로 변경
+
+                // ===== chat & ws 엔드포인트 =====
+                auth.requestMatchers("/api/chatrooms/**").permitAll()
+                auth.requestMatchers("/ws-chat/**").permitAll()
+
+                // ===== 보호 엔드포인트 =====
+                auth.requestMatchers(
+                    "/api/members/logout",
+                    "/api/members/me/**",
+                    "/api/subscriptions/**"
+                ).authenticated()
+
+                // 개발 단계에서는 나머지 요청 허용 → 운영에서는 authenticated()로 변경 가능
                 auth.anyRequest().permitAll()
             }
-        
+
         return http.build()
     }
 }
-

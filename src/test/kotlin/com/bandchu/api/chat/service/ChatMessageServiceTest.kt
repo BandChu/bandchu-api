@@ -1,77 +1,75 @@
 package com.bandchu.api.chat.service
 
 import com.bandchu.api.domain.chat.table.MessageType
-import com.bandchu.api.chat.dto.ChatMessageResponse
-import com.bandchu.api.chat.dto.SendMessageRequest
+import com.bandchu.api.domain.chat.dto.ChatMessageResponse
+import com.bandchu.api.domain.chat.dto.SendMessageRequest
 import com.bandchu.api.domain.chat.repository.ChatMessageRepository
+import com.bandchu.api.domain.chat.repository.ChatRoomRepository
+import com.bandchu.api.domain.chat.service.ChatMessageService
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
+import io.mockk.verify
 import org.springframework.http.HttpStatus
+import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.web.server.ResponseStatusException
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
-class ChatMessageServiceTest : StringSpec({
+class ChatMessageServiceTest : FunSpec({
+    val chatMessageRepository = mockk<ChatMessageRepository>()
+    val simpMessagingTemplate = mockk<SimpMessagingTemplate>(relaxed = true)
+    val chatRoomRepository = mockk<ChatRoomRepository>()
 
-    "sendMessage should save message and return DTO" {
-        // Arrange
-        val repository = mockk<ChatMessageRepository>()
-        val service = ChatMessageService(repository)
+    val service = ChatMessageService(chatMessageRepository, simpMessagingTemplate, chatRoomRepository)
 
-        val roomId = 10L
-        val senderId = 1L
-        val request = SendMessageRequest(
-            messageType = MessageType.TEXT,
-            content = "안녕하세요!",
-            fileUrl = null
-        )
+    test("채팅방 참여자가 아닐 경우 FORBIDDEN 예외 발생") {
+        // given
+        every { chatMessageRepository.isRoomMember(1L, 100L) } returns false
 
-        val expectedResponse = ChatMessageResponse(
-            messageId = 100L,
-            roomId = roomId,
-            senderId = senderId,
-            messageType = MessageType.TEXT,
-            content = "안녕하세요!",
-            fileUrl = null,
-            createdAt = Clock.System.now().toLocalDateTime(TimeZone.UTC)
-        )
+        val req = SendMessageRequest(MessageType.TEXT, "안녕하세요", null)
 
-        // Mock repository behavior
-        every { repository.isRoomMember(roomId, 1) } returns true
-        every { repository.saveMessage(roomId, 1, request) } returns expectedResponse
-
-        // Act
-        val actualResponse = service.sendMessage(roomId, senderId, request)
-
-        // Assert
-        actualResponse shouldBe expectedResponse
+        // when & then
+        shouldThrow<ResponseStatusException> {
+            service.sendMessage(1L, 100L, req)
+        }.statusCode shouldBe HttpStatus.FORBIDDEN
     }
 
-    "sendMessage should throw exception if user is not a member of the room" {
-        // Arrange
-        val repository = mockk<ChatMessageRepository>()
-        val service = ChatMessageService(repository)
+    test("메시지 저장 후 WebSocket으로 브로드캐스트 되어야 함") {
+        // given
+        every { chatMessageRepository.isRoomMember(1L, 100L) } returns true
 
-        val roomId = 10L
-        val senderId = 2L
-        val request = SendMessageRequest(
+        val req = SendMessageRequest(MessageType.TEXT, "안녕하세요", null)
+        val savedMessage = ChatMessageResponse(
+            messageId = 1L,
+            roomId = 1L,
+            senderId = 100L,
             messageType = MessageType.TEXT,
-            content = "안녕하세요!",
-            fileUrl = null
+            content = "메시지 내용",
+            fileUrl = null,
+            createdAt = OffsetDateTime.now(ZoneOffset.UTC)
         )
 
-        every { repository.isRoomMember(roomId, senderId) } returns false
+        every { chatMessageRepository.saveMessage(1L, 100L, req) } returns savedMessage
+        every { simpMessagingTemplate.convertAndSend(any<String>(), any<Any>()) } returns Unit
 
-        // Act & Assert
-        val exception = shouldThrow<ResponseStatusException>{
-            service.sendMessage(roomId, senderId, request)
+        // when
+        val result = service.sendMessage(1L, 100L, req)
+
+        // then
+        result shouldBe savedMessage
+
+        verify(exactly = 1) {
+            chatMessageRepository.saveMessage(1L, 100L, req)
         }
 
-        exception.statusCode shouldBe HttpStatus.FORBIDDEN
-        exception.reason shouldBe "해당 채팅방의 참여자가 아닙니다."
+        verify(exactly = 1) {
+            simpMessagingTemplate.convertAndSend(
+                "/topic/chatroom.1",
+                savedMessage
+            )
+        }
     }
 })
