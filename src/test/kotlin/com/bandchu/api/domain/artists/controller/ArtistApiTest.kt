@@ -2,10 +2,9 @@ package com.bandchu.api.domain.artists.controller
 
 import com.bandchu.api.domain.artist.dto.request.ArtistUpdateRequest
 import com.bandchu.api.domain.artist.model.ArtiProfile
-import com.bandchu.api.domain.artist.service.ArtistService
+import com.bandchu.api.domain.artists.ArtisTestConfig
 import com.bandchu.api.domain.member.model.Member
 import com.bandchu.api.domain.member.model.Role
-import com.bandchu.api.domain.member.service.MemberService
 import com.bandchu.api.fixture.ArtistFixture
 import com.bandchu.api.fixture.AuthFixture
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -13,35 +12,12 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.transaction.annotation.Transactional
-
-@TestConfiguration
-class ArtistApiTestConfig {
-    @Bean
-    fun authFixture(
-        memberService: MemberService
-    ): AuthFixture {
-        return AuthFixture(
-            memberService = memberService
-        )
-    }
-
-    @Bean
-    fun artistFixture(
-        artistService: ArtistService
-    ): ArtistFixture {
-        return ArtistFixture(
-            artistService = artistService
-        )
-    }
-}
 
 /**
  * Artist API 통합 테스트
@@ -55,7 +31,7 @@ class ArtistApiTestConfig {
 @SpringBootTest
 @Transactional
 @AutoConfigureMockMvc
-@Import(ArtistApiTestConfig::class)
+@Import(ArtisTestConfig::class)
 class ArtistApiTest (
     private val mockMvc: MockMvc,
     private val objectMapper: ObjectMapper,

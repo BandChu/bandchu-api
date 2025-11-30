@@ -1,6 +1,8 @@
 package com.bandchu.api.global.config
 
 
+import com.bandchu.api.domain.album.table.AlbumTable
+import com.bandchu.api.domain.album.table.TrackTable
 import com.bandchu.api.domain.artist.table.ArtiProfileTable
 import com.bandchu.api.domain.artist.table.SnsLinkTable
 import com.bandchu.api.domain.concert.table.ConcertScheduleTable
@@ -39,6 +41,8 @@ class DatabaseConfig(private val dataSource: DataSource) {
                 SnsLinkTable,
                 ConcertTable,
                 ConcertScheduleTable,
+                AlbumTable,
+                TrackTable
             )
         }
 
