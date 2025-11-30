@@ -38,6 +38,8 @@ out/
 
 ### Kotlin ###
 .kotlin
+### 설정파일 ###
+.env
 
 ### husky, commitlint ###
 node_modules
