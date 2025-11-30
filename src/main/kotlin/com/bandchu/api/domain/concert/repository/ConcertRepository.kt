@@ -63,7 +63,7 @@ class ConcertRepository {
             profileImageUrl = this[ArtiProfileTable.profileImageUrl]?.let { URI(it) },
             createdAt = this[ArtiProfileTable.createdAt],
             updatedAt = this[ArtiProfileTable.updatedAt],
-            memberId = this[ArtiProfileTable.member].value
+            memberId = this[ArtiProfileTable.member]?.value
         )
 
     private fun findSchedulesByConcertId(concertId: Long): List<ConcertSchedule> = transaction {

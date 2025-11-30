@@ -1,8 +1,10 @@
 package com.bandchu.api.domain.concert.dto
 
 import com.bandchu.api.domain.concert.dto.request.ConcertCreateRequest
+import com.bandchu.api.domain.concert.dto.request.ConcertScheduleRequest
 import com.bandchu.api.domain.concert.dto.request.ConcertUpdateRequest
 import com.bandchu.api.domain.concert.dto.response.ConcertDetailResponse
+import com.bandchu.api.domain.concert.dto.response.ConcertScheduleResponse
 import com.bandchu.api.domain.concert.dto.response.ConcertSubscribedResponse
 import com.bandchu.api.domain.concert.model.Concert
 import com.bandchu.api.domain.concert.model.ConcertSchedule
@@ -20,8 +22,9 @@ import java.time.OffsetDateTime
 /* 공연 상세 조회 */
 /* 공연 생성 */
 /* 공연 수정 */
-fun ConcertSchedule.toPerformingScheduleDto(): PerformingScheduleDto =
-    PerformingScheduleDto(
+fun ConcertSchedule.toConcertScheduleResponse(): ConcertScheduleResponse =
+    ConcertScheduleResponse(
+        id = id,
         date = date.toString()
     )
 
@@ -34,7 +37,7 @@ fun Concert.toConcertDetailResponse(): ConcertDetailResponse =
         information = information,
         bookingUrl = bookingUrl?.toString(),
         bookingSchedule = bookingSchedule.toString(),
-        performingSchedule = schedules.map { it.toPerformingScheduleDto() },
+        performingSchedule = schedules.map { it.toConcertScheduleResponse() },
         createdAt = createdAt.toString()
     )
 
@@ -45,7 +48,7 @@ fun Concert.toSubscribedConcertDto(): SubscribedConcertDto =
         title = this.title,
         place = this.place,
         bookingSchedule = this.bookingSchedule.toString(),
-        performingSchedule = this.schedules.map { it.toPerformingScheduleDto() }
+        performingSchedule = this.schedules.map { it.toConcertScheduleResponse() }
     )
 fun List<ConcertSubscribedRead>.toConcertSubscribedResponse(): ConcertSubscribedResponse {
     val subscribedArtistResponses = this.map { readModel ->
@@ -69,7 +72,7 @@ fun List<ConcertSubscribedRead>.toConcertSubscribedResponse(): ConcertSubscribed
  */
 
 /* 공연 생성 */
-fun PerformingScheduleDto.toCommand(): ConcertScheduleCommand =
+fun ConcertScheduleRequest.toCommand(): ConcertScheduleCommand =
     ConcertScheduleCommand(
         date = OffsetDateTime.parse(date)
     )

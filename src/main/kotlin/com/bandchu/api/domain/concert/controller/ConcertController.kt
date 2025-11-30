@@ -39,7 +39,6 @@ class ConcertController(
             .status(HttpStatus.OK)
             .body(ApiResponse.success(concerts.toConcertSubscribedResponse()))
     }
-    // TODO: 구독한 아티스트의 공연 정보 조회
 
     @PostMapping("")
     fun create(

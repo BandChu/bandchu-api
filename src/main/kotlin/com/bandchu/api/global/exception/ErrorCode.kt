@@ -55,6 +55,9 @@ enum class ErrorCode(
     CONCERT_NOT_FOUND("concert-not-found", HttpStatus.NOT_FOUND, "요청한 콘서트를 찾을 수 없습니다."),
     CONCERT_FORBIDDEN("concert-not-found-or-forbidden", HttpStatus.FORBIDDEN, "해당 공연에 대한 접근 권한이 없습니다."),
 
+    // album
+    ALBUM_NOT_FOUND("album-not-found", HttpStatus.NOT_FOUND, "요청한 앨범을 찾을 수 없습니다."),
+
     ;
 
     val code: String

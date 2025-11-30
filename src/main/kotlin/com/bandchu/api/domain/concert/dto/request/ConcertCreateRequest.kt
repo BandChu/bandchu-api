@@ -1,6 +1,5 @@
 package com.bandchu.api.domain.concert.dto.request
 
-import com.bandchu.api.domain.concert.dto.PerformingScheduleDto
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
 
@@ -14,5 +13,5 @@ data class ConcertCreateRequest(
     val bookingSchedule: String?,
     val bookingUrl: String?,
     @field:Valid
-    val performingSchedule: List<PerformingScheduleDto> = emptyList()
+    val performingSchedule: List<ConcertScheduleRequest> = emptyList()
 )

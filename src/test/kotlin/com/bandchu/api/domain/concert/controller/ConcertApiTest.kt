@@ -1,13 +1,11 @@
 package com.bandchu.api.domain.concert.controller
 
-import com.bandchu.api.domain.artist.service.ArtistService
+import com.bandchu.api.domain.concert.ConcertTestConfig
 import com.bandchu.api.domain.concert.model.Concert
-import com.bandchu.api.domain.concert.service.ConcertService
 import com.bandchu.api.domain.concert.service.dto.CreateConcertCommand
 import com.bandchu.api.domain.concert.service.dto.UpdateConcertCommand
 import com.bandchu.api.domain.member.model.Member
 import com.bandchu.api.domain.member.model.Role
-import com.bandchu.api.domain.member.service.MemberService
 import com.bandchu.api.fixture.ArtistFixture
 import com.bandchu.api.fixture.AuthFixture
 import com.bandchu.api.fixture.ConcertFixture
@@ -16,8 +14,6 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -26,36 +22,6 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.transaction.annotation.Transactional
 import java.net.URI
-
-@TestConfiguration
-class ConcertApiTestConfig {
-    @Bean
-    fun authFixture(
-        memberService: MemberService
-    ): AuthFixture {
-        return AuthFixture(
-            memberService = memberService
-        )
-    }
-
-    @Bean
-    fun artistFixture(
-        artistService: ArtistService
-    ): ArtistFixture {
-        return ArtistFixture(
-            artistService = artistService
-        )
-    }
-
-    @Bean
-    fun concertFixture(
-        concertService: ConcertService
-    ): ConcertFixture {
-        return ConcertFixture(
-            concertService = concertService
-        )
-    }
-}
 
 /**
  * Concert API 통합 테스트
@@ -69,7 +35,7 @@ class ConcertApiTestConfig {
 @SpringBootTest
 @Transactional
 @AutoConfigureMockMvc
-@Import(ConcertApiTestConfig::class)
+@Import(ConcertTestConfig::class)
 class ConcertApiTest(
     private val mockMvc: MockMvc,
     private val objectMapper: ObjectMapper,

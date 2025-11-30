@@ -1,7 +1,5 @@
 package com.bandchu.api.domain.concert.dto.response
 
-import com.bandchu.api.domain.concert.dto.PerformingScheduleDto
-
 data class ConcertDetailResponse(
     val concertId: Long,
     val title: String,
@@ -10,6 +8,6 @@ data class ConcertDetailResponse(
     val information: String?,
     val bookingSchedule: String?,
     val bookingUrl: String?,
-    val performingSchedule: List<PerformingScheduleDto> = emptyList(),
+    val performingSchedule: List<ConcertScheduleResponse> = emptyList(),
     val createdAt: String
 )
