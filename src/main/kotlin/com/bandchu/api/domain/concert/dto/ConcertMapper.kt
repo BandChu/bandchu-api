@@ -55,6 +55,7 @@ fun Concert.toSubscribedConcertDto(): SubscribedConcertDto =
         title = this.title,
         place = this.place,
         bookingSchedule = this.bookingSchedule.toString(),
+        bookingUrl = this.bookingUrl.toString(),
         performingSchedule = this.schedules.map { it.toConcertScheduleResponse() }
     )
 fun List<ConcertSubscribedRead>.toConcertSubscribedResponse(): ConcertSubscribedResponse {

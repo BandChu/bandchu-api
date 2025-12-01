@@ -6,6 +6,7 @@ data class SubscribedConcertDto(
     val concertId: Long,
     val title: String,
     val place: String,
+    val bookingUrl: String?,
     val performingSchedule: List<ConcertScheduleResponse>,
     val bookingSchedule: String?
 )
