@@ -16,6 +16,11 @@ import org.springframework.stereotype.Service
 class ConcertService(
     private val concertRepository: ConcertRepository
 ) {
+
+    fun getAllByArtist(artistId: Long): List<Concert> {
+        return concertRepository.getAllByArtist(artistId)
+    }
+
     fun getDetail(concertId: Long): Concert {
         return concertRepository.getDetail(concertId)
     }
