@@ -4,6 +4,7 @@ import com.bandchu.api.domain.concert.dto.request.ConcertCreateRequest
 import com.bandchu.api.domain.concert.dto.request.ConcertScheduleRequest
 import com.bandchu.api.domain.concert.dto.request.ConcertUpdateRequest
 import com.bandchu.api.domain.concert.dto.response.ConcertDetailResponse
+import com.bandchu.api.domain.concert.dto.response.ConcertListResponse
 import com.bandchu.api.domain.concert.dto.response.ConcertScheduleResponse
 import com.bandchu.api.domain.concert.dto.response.ConcertSubscribedResponse
 import com.bandchu.api.domain.concert.model.Concert
@@ -18,6 +19,12 @@ import java.time.OffsetDateTime
 /**
  *  Domain Model → Web Response
  */
+
+/* 특정 아티스트의 공연 목록 조회 */
+fun List<Concert>.toConcertListResponse(): ConcertListResponse =
+    ConcertListResponse(
+        concerts = this.map { it.toConcertDetailResponse() }
+    )
 
 /* 공연 상세 조회 */
 /* 공연 생성 */
@@ -48,6 +55,7 @@ fun Concert.toSubscribedConcertDto(): SubscribedConcertDto =
         title = this.title,
         place = this.place,
         bookingSchedule = this.bookingSchedule.toString(),
+        bookingUrl = this.bookingUrl.toString(),
         performingSchedule = this.schedules.map { it.toConcertScheduleResponse() }
     )
 fun List<ConcertSubscribedRead>.toConcertSubscribedResponse(): ConcertSubscribedResponse {

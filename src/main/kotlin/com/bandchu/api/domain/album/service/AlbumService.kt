@@ -29,4 +29,9 @@ class AlbumService(
 
         return albumRepository.delete(albumId, getCurrentUserId())
     }
+
+    fun getAllByArtist(artistId: Long): List<Album> {
+
+        return albumRepository.getAllSummaryByArtist(artistId)
+    }
 }
