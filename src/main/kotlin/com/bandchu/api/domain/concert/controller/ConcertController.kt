@@ -3,9 +3,11 @@ package com.bandchu.api.domain.concert.controller
 import com.bandchu.api.domain.concert.dto.request.ConcertCreateRequest
 import com.bandchu.api.domain.concert.dto.request.ConcertUpdateRequest
 import com.bandchu.api.domain.concert.dto.response.ConcertDetailResponse
+import com.bandchu.api.domain.concert.dto.response.ConcertListResponse
 import com.bandchu.api.domain.concert.dto.response.ConcertSubscribedResponse
 import com.bandchu.api.domain.concert.dto.toCommand
 import com.bandchu.api.domain.concert.dto.toConcertDetailResponse
+import com.bandchu.api.domain.concert.dto.toConcertListResponse
 import com.bandchu.api.domain.concert.dto.toConcertSubscribedResponse
 import com.bandchu.api.domain.concert.service.ConcertService
 import com.bandchu.api.global.response.ApiResponse
@@ -19,6 +21,16 @@ import org.springframework.web.bind.annotation.*
 class ConcertController(
     private val concertService: ConcertService
 ) {
+    @GetMapping("")
+    fun getAll(
+        @RequestParam artistId: Long
+    ): ResponseEntity<ApiResponse<ConcertListResponse>> {
+        val concerts = concertService.getAllByArtist(artistId)
+
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(ApiResponse.success(concerts.toConcertListResponse()))
+    }
 
     @GetMapping("/{concertId}")
     fun getDetail(
