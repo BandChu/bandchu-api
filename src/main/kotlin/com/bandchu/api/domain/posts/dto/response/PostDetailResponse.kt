@@ -1,38 +1,35 @@
 package com.bandchu.api.domain.posts.dto.response
 
-
-data class MediaResponse(
-    val mediaId: Long,
-    val s3Url: String,
-    val fileSize: String
-)
-
-data class CommentResponse(
-    val commentId: Long,
-    val content: String,
-    val createdAt: String
-)
-
-data class LikeResponse(
-    val likeId: Long,
-    val commentId: Long,
-    val createdAt: String
-)
+import com.bandchu.api.domain.posts.table.PostTable
+import com.bandchu.api.domain.posts.table.PostType
+import org.jetbrains.exposed.v1.core.ResultRow
+import java.time.OffsetDateTime
 
 data class PostDetailResponse(
     val postId: Long,
     val artistId: Long,
-    val postType: String,
+    val postType: PostType,
     val title: String,
     val content: String,
-    val createdAt: String,
-    val updatedAt: String,
+    val createdAt: OffsetDateTime,
+    val updatedAt: OffsetDateTime,
     val media: List<MediaResponse>,
     val comments: List<CommentResponse>
 )
 
-data class ReportResponse(
-    val reportId: Long,
-    val postId: Long,
-    val createdAt: String,
-)
+fun ResultRow.toPostDetailResponse(
+    media: List<MediaResponse> = emptyList(),
+    comments: List<CommentResponse> = emptyList()
+): PostDetailResponse {
+    return PostDetailResponse(
+        postId = this[PostTable.id],
+        artistId = this[PostTable.memberId],
+        postType = this[PostTable.postType],
+        title = this[PostTable.title],
+        content = this[PostTable.content],
+        createdAt = this[PostTable.createdAt],
+        updatedAt = this[PostTable.updatedAt],
+        media = media,
+        comments = comments
+    )
+}

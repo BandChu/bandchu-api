@@ -48,6 +48,10 @@ dependencies {
 
     implementation("org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE")
     implementation("software.amazon.awssdk:s3:2.25.0")
+
+    // Mockk
+    testImplementation("io.mockk:mockk:1.13.13")
+
 }
 
 kotlin {

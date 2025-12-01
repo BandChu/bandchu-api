@@ -1,61 +1,63 @@
 package com.bandchu.api.domain.posts.repository
 
-import com.bandchu.api.domain.posts.model.Media
+import com.bandchu.api.domain.posts.dto.request.MediaRequest
+import com.bandchu.api.domain.posts.dto.response.MediaResponse
+import com.bandchu.api.domain.posts.dto.response.toMediaResponse
 import com.bandchu.api.domain.posts.table.MediaTable
-import com.bandchu.api.domain.posts.table.toMedia
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toKotlinLocalDateTime
-import kotlinx.datetime.toLocalDateTime
-import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.springframework.stereotype.Repository
-import kotlin.time.Clock
+import java.time.OffsetDateTime
 
 @Repository
 class MediaRepository {
-    fun findByPostId(postId: Long): List<Media> = transaction {
+    fun findByPostId(postId: Long): List<MediaResponse> = transaction {
         MediaTable
             .selectAll()
              .where{ MediaTable.postId eq postId }
-            .map { it.toMedia() }
+            .map { it.toMediaResponse() }
     }
 
     @OptIn(kotlin.time.ExperimentalTime::class)
-    fun insertMediaList(postId: Long, mediaList: List<Media>): List<Media> = transaction {
-        val now = Clock.System.now().toLocalDateTime(TimeZone.UTC)
+    fun insertMediaList(postId: Long, mediaList: List<MediaRequest>): List<MediaResponse> = transaction {
+        val now = OffsetDateTime.now(java.time.ZoneOffset.UTC)
 
-        mediaList.map { media ->
-            val inserted = MediaTable.insert { row ->
+        mediaList.map { mediaRequest ->
+            // MediaTable에 Insert
+            val insertedRow = MediaTable.insert { row ->
                 row[MediaTable.postId] = postId
-                row[MediaTable.s3Url] = media.s3Url
-                row[MediaTable.fileSize] = media.fileSize
-               row[MediaTable.createdAt] = now
-                row[MediaTable.updatedAt] = now
+                row[MediaTable.s3Url] = mediaRequest.s3Url
+                row[MediaTable.s3FileSize] = mediaRequest.fileSize
+                row[MediaTable.createdAt] = now
             }
 
-            val id = inserted[MediaTable.id]
-
-            Media(
-                mediaId = id,
-                postId = postId,
-                s3Url = media.s3Url,
-                fileSize = media.fileSize,
-                createdAt = now,
-                updatedAt = now
-            )
+            // Insert된 Row 조회 후 MediaResponse로 변환
+            MediaTable
+                .selectAll()
+                .where { MediaTable.id eq insertedRow[MediaTable.id] }
+                .single()
+                .toMediaResponse()
         }
     }
-}
 
-fun ResultRow.toMedia(): Media =
-    Media(
-        mediaId = this[MediaTable.id],
-        postId = this[MediaTable.postId],
-        s3Url = this[MediaTable.s3Url],
-        fileSize = this[MediaTable.fileSize],
-        createdAt = this[MediaTable.createdAt].toLocalDateTime(),
-        updatedAt = this[MediaTable.updatedAt].toKotlinLocalDateTime()
-    )
+    // S3 URL과 파일 사이즈로 미디어 저장 후 MediaResponse 반환
+    fun save(postId: Long, s3Url: String, fileSize: Long): MediaResponse = transaction {
+        val now = java.time.OffsetDateTime.now()
+
+        val insertedRow = MediaTable.insert { row ->
+            row[MediaTable.postId] = postId
+            row[MediaTable.s3Url] = s3Url
+            row[MediaTable.s3FileSize] = fileSize
+            row[MediaTable.createdAt] = now
+        }
+
+        // Insert된 Row 조회 후 MediaResponse 반환
+        MediaTable
+            .selectAll()
+            .where { MediaTable.id eq insertedRow[MediaTable.id] }
+            .single()
+            .toMediaResponse()
+    }
+}

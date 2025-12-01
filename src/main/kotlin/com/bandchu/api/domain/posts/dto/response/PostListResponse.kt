@@ -1,13 +1,6 @@
 package com.bandchu.api.domain.posts.dto.response
 
-
-data class PostListItem(
-    val postId: Int,
-    val postType: String,
-    val title: String,
-    val createdAt: String,
-    val updatedAt: String
-)
+import com.bandchu.api.domain.posts.dto.PostListItem
 
 data class PostListResponse(
     val posts: List<PostListItem>,

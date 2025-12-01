@@ -1,18 +1,17 @@
 package com.bandchu.api.domain.posts.table
 
 import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.datetime.timestampWithTimeZone
 
-import org.jetbrains.exposed.sql.javatime.datetime
-import org.jetbrains.exposed.v1.datetime.datetime
+object CommentTable : Table("comment") {
+    val id = long("comment_id").autoIncrement()
+    val content = varchar("content", length = 100)
 
+    val createdAt = timestampWithTimeZone("created_at")
+    val updatedAt = timestampWithTimeZone("updated_at")
 
-object CommentTable : Table("comments") {
+    val postId = long("post_id")
+        .references(PostTable.id)
 
-    val id = integer("comment_id").autoIncrement()
-    val postId = long("post_id").references(PostTable.id)
-    val content = varchar("content", 500)
-    // JODA DateTime 타입이다
-    val createdAt = datetime("created_at")
-    val updatedAt = datetime("updated_at")
     override val primaryKey = PrimaryKey(id)
 }
