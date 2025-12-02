@@ -1,7 +1,7 @@
 package com.bandchu.api.domain.posts.repository
 
 import com.bandchu.api.domain.posts.dto.request.MediaRequest
-import com.bandchu.api.domain.posts.dto.response.MediaResponse
+import com.bandchu.api.domain.posts.dto.response.CreateMediaResponse
 import com.bandchu.api.domain.posts.dto.response.toMediaResponse
 import com.bandchu.api.domain.posts.table.MediaTable
 import org.jetbrains.exposed.v1.core.eq
@@ -13,7 +13,7 @@ import java.time.OffsetDateTime
 
 @Repository
 class MediaRepository {
-    fun findByPostId(postId: Long): List<MediaResponse> = transaction {
+    fun findByPostId(postId: Long): List<CreateMediaResponse> = transaction {
         MediaTable
             .selectAll()
              .where{ MediaTable.postId eq postId }
@@ -21,7 +21,7 @@ class MediaRepository {
     }
 
     @OptIn(kotlin.time.ExperimentalTime::class)
-    fun insertMediaList(postId: Long, mediaList: List<MediaRequest>): List<MediaResponse> = transaction {
+    fun insertMediaList(postId: Long, mediaList: List<MediaRequest>): List<CreateMediaResponse> = transaction {
         val now = OffsetDateTime.now(java.time.ZoneOffset.UTC)
 
         mediaList.map { mediaRequest ->
@@ -33,7 +33,7 @@ class MediaRepository {
                 row[MediaTable.createdAt] = now
             }
 
-            // Insert된 Row 조회 후 MediaResponse로 변환
+            // Insert된 Row 조회 후 DTO로 변환
             MediaTable
                 .selectAll()
                 .where { MediaTable.id eq insertedRow[MediaTable.id] }
@@ -42,8 +42,8 @@ class MediaRepository {
         }
     }
 
-    // S3 URL과 파일 사이즈로 미디어 저장 후 MediaResponse 반환
-    fun save(postId: Long, s3Url: String, fileSize: Long): MediaResponse = transaction {
+    // S3 URL과 파일 사이즈로 미디어 저장 후 CreateMediaResponse 반환
+    fun save(postId: Long, s3Url: String, fileSize: Long): CreateMediaResponse = transaction {
         val now = java.time.OffsetDateTime.now()
 
         val insertedRow = MediaTable.insert { row ->

@@ -3,6 +3,7 @@ package com.bandchu.api.domain.posts.controller
 import com.bandchu.api.domain.posts.dto.request.CreatePostRequest
 import com.bandchu.api.domain.posts.dto.request.UpdatePostRequest
 import com.bandchu.api.domain.posts.dto.response.CommentResponse
+import com.bandchu.api.domain.posts.dto.response.CreateMediaResponse
 import com.bandchu.api.domain.posts.dto.response.CreatePostResponse
 import com.bandchu.api.domain.posts.dto.response.PostDetailResponse
 import com.bandchu.api.domain.posts.dto.response.PostListResponse
@@ -103,18 +104,18 @@ class PostController(
         )
     }
 
-//    // 미디어 업로드
-//    @PostMapping("/create/media/{postId}", consumes = ["multipart/form-data"])
-//    fun uploadMedia(
-//        @PathVariable postId: Long,
-//        @RequestPart("file") file: MultipartFile
-//    ): ApiResponse<MediaUploadResponse> {
-//        val result = postService.uploadMedia(postId, file)
-//        return ApiResponse.success(
-//            data = result,
-//            message = "미디어가 업로드되었습니다."
-//        )
-//    }
+    // 미디어 업로드
+    @PostMapping("/create/media/{postId}", consumes = ["multipart/form-data"])
+    fun uploadMedia(
+        @PathVariable postId: Long,
+        @RequestPart("file") file: MultipartFile
+    ): ApiResponse<CreateMediaResponse> {
+        val result = postService.uploadMedia(postId, file)
+        return ApiResponse.success(
+            data = result,
+            message = "미디어가 업로드되었습니다."
+        )
+    }
 //
 //    // 댓글 생성
 //    @PostMapping("/create/comments/{postId}")

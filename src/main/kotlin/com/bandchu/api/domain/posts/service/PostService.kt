@@ -2,10 +2,10 @@ package com.bandchu.api.domain.posts.service
 
 import com.bandchu.api.domain.posts.dto.request.CreatePostRequest
 import com.bandchu.api.domain.posts.dto.response.CreatePostResponse
-import com.bandchu.api.domain.posts.dto.response.MediaResponse
 import com.bandchu.api.domain.posts.dto.PostListItem
 import com.bandchu.api.domain.posts.dto.request.UpdatePostRequest
 import com.bandchu.api.domain.posts.dto.response.CommentResponse
+import com.bandchu.api.domain.posts.dto.response.CreateMediaResponse
 import com.bandchu.api.domain.posts.dto.response.PostDetailResponse
 import com.bandchu.api.domain.posts.dto.response.PostListResponse
 import com.bandchu.api.domain.posts.table.PostType
@@ -118,7 +118,7 @@ class PostService(
             createdAt = post.createdAt,
             updatedAt = post.updatedAt,
             media = mediaList.map {
-                MediaResponse(
+                CreateMediaResponse(
                     mediaId = it.mediaId,
                     s3Url = it.s3Url,
                     fileSize = it.fileSize,
@@ -138,7 +138,7 @@ class PostService(
 
 
     // 미디어 업로드
-    fun uploadMedia(postId: Long, file: MultipartFile): MediaResponse {
+    fun uploadMedia(postId: Long, file: MultipartFile): CreateMediaResponse {
         // S3에 업로드
         val s3Url = s3Uploader.upload(file, "posts/$postId")
         val fileSize = file.size
@@ -146,7 +146,7 @@ class PostService(
         // Repository에 저장
         val saved = mediaRepository.save(postId, s3Url, fileSize)
 
-        return saved // MediaResponse 반환
+        return saved
     }
 
     // 게시글 업데이트

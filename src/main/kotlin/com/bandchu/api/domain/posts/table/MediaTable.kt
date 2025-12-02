@@ -10,7 +10,7 @@ object MediaTable : Table("media") {
     val postId = long("post_id")
         .references(PostTable.id)
 
-    val s3Url = varchar("s3_url", length = 50)
+    val s3Url = varchar("s3_url", length = 500)
 
     val s3FileSize = long("s3_file_size")
 

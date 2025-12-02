@@ -1,15 +1,12 @@
 package com.bandchu.api.domain.posts.repository
 
-import com.bandchu.api.domain.posts.dto.PostListItem
 import com.bandchu.api.domain.posts.dto.request.UpdatePostRequest
 import com.bandchu.api.domain.posts.dto.response.CommentResponse
+import com.bandchu.api.domain.posts.dto.response.CreateMediaResponse
 import com.bandchu.api.domain.posts.dto.response.CreatePostResponse
-import com.bandchu.api.domain.posts.dto.response.MediaResponse
 import com.bandchu.api.domain.posts.dto.response.PostDetailResponse
-import com.bandchu.api.domain.posts.dto.response.UpdatePostResponse
 import com.bandchu.api.domain.posts.dto.response.toPostDetailResponse
 import com.bandchu.api.domain.posts.dto.response.toPostResponse
-import com.bandchu.api.domain.posts.dto.response.toUpdatePostResponse
 import com.bandchu.api.domain.posts.table.CommentTable
 import com.bandchu.api.domain.posts.table.MediaTable
 import com.bandchu.api.domain.posts.table.PostTable
@@ -18,7 +15,6 @@ import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
-import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
@@ -126,7 +122,7 @@ class PostRepository {
                 .selectAll()
                 .where { MediaTable.postId eq id }
                 .map { row ->
-                    MediaResponse(
+                    CreateMediaResponse(
                         postId = id,
                         mediaId = row[MediaTable.id],
                         s3Url = row[MediaTable.s3Url],

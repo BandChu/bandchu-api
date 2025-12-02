@@ -13,12 +13,12 @@ data class PostDetailResponse(
     val content: String,
     val createdAt: OffsetDateTime,
     val updatedAt: OffsetDateTime,
-    val media: List<MediaResponse>,
+    val media: List<CreateMediaResponse>,
     val comments: List<CommentResponse>
 )
 
 fun ResultRow.toPostDetailResponse(
-    media: List<MediaResponse> = emptyList(),
+    media: List<CreateMediaResponse> = emptyList(),
     comments: List<CommentResponse> = emptyList()
 ): PostDetailResponse {
     return PostDetailResponse(
