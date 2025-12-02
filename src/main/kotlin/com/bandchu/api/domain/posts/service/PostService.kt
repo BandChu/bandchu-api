@@ -13,7 +13,7 @@ import com.bandchu.api.domain.posts.repository.CommentRepository
 import com.bandchu.api.domain.posts.repository.MediaRepository
 import com.bandchu.api.domain.posts.repository.PostRepository
 import com.bandchu.api.domain.posts.repository.ReportRepository
-import com.bandchu.api.global.s3.S3Uploader
+import com.bandchu.api.global.config.S3Uploader
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 
@@ -86,7 +86,8 @@ class PostService(
         val post = postRepository.insertPost(
             type = req.postType,
             title = req.title,
-            content = req.content
+            content = req.content,
+            memberId = req.memberId
         )
 
         return CreatePostResponse(

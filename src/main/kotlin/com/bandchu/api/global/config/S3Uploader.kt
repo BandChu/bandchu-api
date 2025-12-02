@@ -1,4 +1,4 @@
-package com.bandchu.api.global.s3
+package com.bandchu.api.global.config
 
 import com.bandchu.api.global.config.S3Properties
 import org.springframework.stereotype.Component

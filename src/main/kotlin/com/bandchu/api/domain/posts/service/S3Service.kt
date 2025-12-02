@@ -1,6 +1,6 @@
 package com.bandchu.api.domain.posts.service
 
-import com.bandchu.api.global.s3.S3Uploader
+import com.bandchu.api.global.config.S3Uploader
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 

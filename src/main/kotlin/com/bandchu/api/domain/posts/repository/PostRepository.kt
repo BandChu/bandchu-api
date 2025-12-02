@@ -67,7 +67,7 @@ class PostRepository {
     }
 
     // 게시글 삽입 후 반환
-    fun insertPost(type: PostType, title: String, content: String): CreatePostResponse {
+    fun insertPost(memberId: Long, type: PostType, title: String, content: String): CreatePostResponse {
         return transaction {
             val now = OffsetDateTime.now()
             val insertedRow = PostTable.insert { row ->
@@ -76,6 +76,7 @@ class PostRepository {
                 row[PostTable.content] = content
                 row[PostTable.createdAt] = now
                 row[PostTable.updatedAt] = now
+                row[PostTable.memberId] = memberId
             }
 
             PostTable

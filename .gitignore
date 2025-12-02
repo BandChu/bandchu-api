@@ -43,3 +43,6 @@ out/
 
 ### husky, commitlint ###
 node_modules
+
+### aws config ###
+application-secret.yml
