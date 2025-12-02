@@ -34,6 +34,8 @@ dependencies {
     implementation("org.postgresql:postgresql:42.7.7")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     implementation("com.ninja-squad:springmockk:4.0.2")
+    implementation("org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE")
+    implementation("software.amazon.awssdk:s3:2.25.0")
     implementation("io.jsonwebtoken:jjwt-api:0.12.5")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.5")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.5")

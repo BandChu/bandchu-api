@@ -18,3 +18,13 @@ spring:
 oauth:
   google:
     client-id: ${GOOGLE_CLIENT_ID}
+
+
+aws:
+  region: ap-northeast-2
+  s3:
+    bucket: bandchu-bucket
+  credentials:
+    accessKey: ${AWS_ACCESS_KEY}
+    secretKey: ${AWS_SECRET_KEY}
+    client-id: ${GOOGLE_CLIENT_ID}

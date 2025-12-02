@@ -1,17 +1,20 @@
 package com.bandchu.api.domain.posts.table
 
 import org.jetbrains.exposed.v1.core.Table
-import org.jetbrains.exposed.v1.datetime.datetime
+import org.jetbrains.exposed.v1.datetime.timestampWithTimeZone
 
-object MediaTable : Table("medias") {
+object MediaTable : Table("media") {
 
-val id = integer("media_id").autoIncrement()
+    val id = long("media_id").autoIncrement()
 
-    val created_at = datetime("created_at")
+    val postId = long("post_id")
+        .references(PostTable.id)
 
-    val updated_at = datetime("updated_at")
+    val s3Url = varchar("s3_url", length = 500)
 
-    val post_id = long("post_id").references(PostTable.id)
+    val s3FileSize = long("s3_file_size")
+
+    val createdAt = timestampWithTimeZone("created_at")
 
     override val primaryKey = PrimaryKey(id)
 }
