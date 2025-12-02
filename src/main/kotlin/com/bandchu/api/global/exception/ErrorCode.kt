@@ -39,11 +39,10 @@ enum class ErrorCode(
     COMMENT_NOT_FOUND("comment-not-found", HttpStatus.NOT_FOUND, "해당 댓글을 찾을 수 없습니다."),
     COMMENT_INSERT_FAILED("comment-insert-failed", HttpStatus.INTERNAL_SERVER_ERROR, "댓글 생성에 실패했습니다."),
     COMMENT_UPDATE_FAILED("comment-update-failed", HttpStatus.INTERNAL_SERVER_ERROR, "댓글 수정에 실패했습니다."),
-    COMMENT_DELETE_FAILED("comment-delete-failed", HttpStatus.INTERNAL_SERVER_ERROR, "댓글 삭제에 실패했습니다.");
+    COMMENT_DELETE_FAILED("comment-delete-failed", HttpStatus.INTERNAL_SERVER_ERROR, "댓글 삭제에 실패했습니다."),
   
     // ===== member =====
     USER_EMAIL_DUPLICATED("user-email-duplicated", HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
-    USER_INVALID_CREDENTIAL("user-invalid-credential", HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다."),
     INVALID_TOKEN("invalid-token", HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
     INVALID_REFRESH_TOKEN("invalid-refresh-token", HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다."),
     GOOGLE_AUTH_INVALID("google-auth-invalid", HttpStatus.UNAUTHORIZED, "구글 인증이 유효하지 않습니다."),
