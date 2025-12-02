@@ -1,0 +1,137 @@
+<!-- ws 세션 연결 및 메시지 브로드캐스트 확인을 위한 테스트 클라이언트-->
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Full Test</title>
+
+    <!-- SockJS / STOMP CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        button { padding: 10px; margin-right: 10px; }
+        #log { margin-top: 20px; border: 1px solid #ddd; padding: 10px; height: 400px; overflow-y: scroll; }
+    </style>
+</head>
+<body>
+
+<h2>📡 Chat WebSocket + API Full Test</h2>
+
+<div>
+    <button onclick="connectWS()">1. WebSocket 연결</button>
+    <button onclick="subscribeRoom()">2. 채팅방 구독</button>
+    <button onclick="sendRestMessage()">3. REST API로 메시지 전송</button>
+    <button onclick="unsubscribeRoom()">4. 구독 해제</button>
+    <button onclick="disconnectWS()">5. 세션 종료</button>
+</div>
+
+<div id="log"></div>
+
+<script>
+    let stomp = null;
+    let socket = null;
+    let subscription = null;
+
+    const USER_ID = 1;      // 테스트용
+    const ROOM_ID = 2;      // 테스트 채팅방 ID
+    const BASE_URL = "http://localhost:8080";
+
+    function log(msg) {
+        const el = document.getElementById("log");
+        el.innerHTML += msg + "<br>";
+        el.scrollTop = el.scrollHeight;
+    }
+
+    /** 1. WebSocket 연결 */
+    function connectWS() {
+        socket = new SockJS(`${BASE_URL}/ws-chat`);
+        stomp = Stomp.over(socket);
+
+        stomp.connect(
+            { "X-User-Id": USER_ID.toString() },
+            () => log(`🟢 WebSocket 연결 성공 (userId=${USER_ID})`),
+            err => log(`🔴 WebSocket 연결 실패: ${err}`)
+        );
+    }
+
+    /** 2. 채팅방 구독 */
+    function subscribeRoom() {
+        if (!stomp || !stomp.connected) {
+            log("❗ 먼저 WebSocket을 연결하세요.");
+            return;
+        }
+
+        if (subscription) {
+            log("❗ 이미 구독 중인 채팅방이 있습니다.");
+            return;
+        }
+
+        subscription = stomp.subscribe(`/topic/chatroom.${ROOM_ID}`, (message) => {
+            log(`📩 메시지 수신: ${message.body}`);
+        });
+
+        log(`📌 채팅방 ${ROOM_ID} 구독 완료`);
+    }
+
+    /** 3. REST API로 메시지 보내기 */
+    async function sendRestMessage() {
+    const payload = {
+        messageType: "TEXT",
+        content: "REST API에서 보낸 메시지!",
+        fileUrl: null
+    };
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/chatrooms/${ROOM_ID}/messages`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                // JWT 테스트용이면 없애거나 서버에서 permitAll
+                // "Authorization": "Bearer dummy-token"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        console.log(response); // ✅ 상태 코드 확인
+
+        const result = await response.json();
+        console.log(result); // ✅ 서버 응답 확인
+
+        if (response.ok) {
+            log(`📤 REST API 메시지 전송 성공 → 서버 브로드캐스트 기다리는 중...`);
+        } else {
+            log(`❗ REST API 오류: ${JSON.stringify(result)}`);
+        }
+    } catch (err) {
+        log(`❗ REST API 호출 실패: ${err}`);
+        console.error(err);
+    }
+}
+
+    /** 4. 채팅방 구독 해제 */
+    function unsubscribeRoom() {
+        if (subscription) {
+            subscription.unsubscribe();
+            subscription = null; // ✅ 해제 후 초기화
+            log(`🧹 채팅방 구독 해제 완료`);
+        } else {
+            log("❗ 구독된 채팅방이 없습니다.");
+        }
+    }
+
+    /** 5. WebSocket 세션 종료 */
+    function disconnectWS() {
+        if (stomp) {
+            stomp.disconnect(() => log("🔌 WebSocket 세션 종료 완료"));
+            subscription = null; // 구독도 초기화
+        } else {
+            log("❗ 이미 연결되지 않음");
+        }
+    }
+</script>
+
+</body>
+</html>
