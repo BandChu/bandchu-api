@@ -1,5 +1,6 @@
 package com.bandchu.api.domain.posts.table
 
+import com.bandchu.api.domain.member.table.MemberTable
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.datetime.timestampWithTimeZone
 
@@ -12,6 +13,9 @@ object CommentTable : Table("comment") {
 
     val postId = long("post_id")
         .references(PostTable.id)
+
+    val memberId = long("member_id")
+        .references(MemberTable.id)
 
     override val primaryKey = PrimaryKey(id)
 }

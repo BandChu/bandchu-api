@@ -137,9 +137,12 @@ class PostRepository {
                 .where { CommentTable.postId eq id }
                 .map { row ->
                     CommentResponse(
+                        postId = row[CommentTable.postId],
+                        memberId = row[CommentTable.memberId],
                         commentId = row[CommentTable.id],
                         content = row[CommentTable.content],
-                        createdAt = row[CommentTable.createdAt]
+                        createdAt = row[CommentTable.createdAt],
+                        updatedAt = row[CommentTable.updatedAt],
                     )
                 }
 
@@ -162,4 +165,5 @@ class PostRepository {
         }
         return postId;
     }
+
 }

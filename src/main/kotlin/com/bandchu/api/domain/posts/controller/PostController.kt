@@ -7,6 +7,7 @@ import com.bandchu.api.domain.posts.dto.response.CreateMediaResponse
 import com.bandchu.api.domain.posts.dto.response.CreatePostResponse
 import com.bandchu.api.domain.posts.dto.response.PostDetailResponse
 import com.bandchu.api.domain.posts.dto.response.PostListResponse
+import com.bandchu.api.domain.posts.service.CommentService
 import com.bandchu.api.domain.posts.service.PostService
 import com.bandchu.api.global.response.ApiResponse
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -24,7 +26,8 @@ import org.springframework.web.multipart.MultipartFile
 @RestController
 @RequestMapping("/api/posts")
 class PostController(
-    private val postService: PostService
+    private val postService: PostService,
+    private val commentService: CommentService
 ) {
 
     // 모든 게시판의 최신 글 1개씩 조회
@@ -38,7 +41,7 @@ class PostController(
     }
 
     // 특정 게시판 타입별 게시글 조회 (페이징)
-    @GetMapping("/search/posttype")
+    @GetMapping("/postType")
     fun getPostsByType(
         @RequestParam(required = true) type: String,
         @RequestParam(required = false, defaultValue = "1") page: Int,
@@ -68,7 +71,7 @@ class PostController(
     }
 
     // 게시글 상세 조회
-    @GetMapping("/search/{postId}")
+    @GetMapping("/{postId}")
     fun getPostDetail(
         @PathVariable postId: Long
     ): ApiResponse<PostDetailResponse> {
@@ -80,7 +83,7 @@ class PostController(
     }
 
     // 게시글 수정
-    @PatchMapping("/update/{postId}")
+    @PatchMapping("/{postId}")
     fun updatePost(
         @PathVariable postId: Long,
         @RequestBody request: UpdatePostRequest
@@ -93,7 +96,7 @@ class PostController(
     }
 
     // 게시글 삭제
-    @DeleteMapping("/delete/{postId}")
+    @DeleteMapping("/{postId}")
     fun deletePost(
         @PathVariable postId: Long
     ): ApiResponse<Long> {
@@ -116,32 +119,49 @@ class PostController(
             message = "미디어가 업로드되었습니다."
         )
     }
-//
-//    // 댓글 생성
-//    @PostMapping("/create/comments/{postId}")
-//    fun createComment(
-//        @RequestBody request: CreateCommentRequest
-//    ): ApiResponse<CommentResponse> {
-//        val result = postService.createComment(request)
-//        return ApiResponse.success(
-//            data = result,
-//            message = "댓글이 작성되었습니다."
-//        )
-//    }
-//
-//    // 댓글 삭제
-//    @DeleteMapping("/delete/comments/{postId}/{commentId}")
-//    fun deleteComment(
-//        @PathVariable postId: Long,
-//        @PathVariable commentId: Long
-//    ): ApiResponse<CommentResponse> {
-//        val result = postService.deleteComment(postId, commentId)
-//        return ApiResponse.success(
-//            data = result,
-//            message = "게시글의 댓글이 삭제되었습니다."
-//        )
-//    }
 
+    // 댓글 생성
+    @PostMapping("/comments")
+    fun createComment(
+        @RequestParam postId: Long,
+        @RequestBody content: String,
+        //@AuthenticationPrincipal memberId: Long,
+    ): ApiResponse<CommentResponse> {
+
+        val memberId = 2L; //테스트용
+        val result = commentService.insertComment(memberId, postId, content)
+        return ApiResponse.success(
+            data = result,
+            message = "댓글이 작성되었습니다."
+        )
+    }
+
+    // 댓글 삭제
+    @DeleteMapping("/comments/{commentId}")
+    fun deleteComment(
+        @PathVariable commentId: Long,
+    ): ApiResponse<Long> {
+        val result = commentService.deleteComment(commentId)
+        return ApiResponse.success(
+            data = result,
+            message = "게시글의 댓글이 삭제되었습니다."
+        )
+    }
+    
+    //댓글 수정
+    @PutMapping("/comments/{commentId}")
+    fun updateComment(
+        @RequestBody content: String,
+        @PathVariable commentId: Long,
+    ): ApiResponse<CommentResponse> {
+
+        val memberId = 1L; //테스트용
+        val result = commentService.updateComment(commentId, content)
+        return ApiResponse.success(
+            data = result,
+            message = "댓글이 작성되었습니다."
+        )
+    }
 
     /*
     // 신고 생성

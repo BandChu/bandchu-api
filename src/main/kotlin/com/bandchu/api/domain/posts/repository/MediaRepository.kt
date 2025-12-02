@@ -1,6 +1,6 @@
 package com.bandchu.api.domain.posts.repository
 
-import com.bandchu.api.domain.posts.dto.request.MediaRequest
+import com.bandchu.api.domain.posts.dto.request.CreateMediaRequest
 import com.bandchu.api.domain.posts.dto.response.CreateMediaResponse
 import com.bandchu.api.domain.posts.dto.response.toMediaResponse
 import com.bandchu.api.domain.posts.table.MediaTable
@@ -21,7 +21,7 @@ class MediaRepository {
     }
 
     @OptIn(kotlin.time.ExperimentalTime::class)
-    fun insertMediaList(postId: Long, mediaList: List<MediaRequest>): List<CreateMediaResponse> = transaction {
+    fun insertMediaList(postId: Long, mediaList: List<CreateMediaRequest>): List<CreateMediaResponse> = transaction {
         val now = OffsetDateTime.now(java.time.ZoneOffset.UTC)
 
         mediaList.map { mediaRequest ->

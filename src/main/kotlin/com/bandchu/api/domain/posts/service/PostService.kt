@@ -12,8 +12,9 @@ import com.bandchu.api.domain.posts.table.PostType
 import com.bandchu.api.domain.posts.repository.CommentRepository
 import com.bandchu.api.domain.posts.repository.MediaRepository
 import com.bandchu.api.domain.posts.repository.PostRepository
-import com.bandchu.api.domain.posts.repository.ReportRepository
 import com.bandchu.api.global.config.S3Uploader
+import com.bandchu.api.global.exception.BusinessException
+import com.bandchu.api.global.exception.ErrorCode
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 
@@ -21,14 +22,12 @@ import org.springframework.web.multipart.MultipartFile
 class PostService(
     private val postRepository: PostRepository,
     private val mediaRepository: MediaRepository,
-    private val reportRepository: ReportRepository,
     private val commentRepository: CommentRepository,
     private val s3Uploader: S3Uploader
 ) {
 
     // 모든 게시판의 최신 글 1개씩 조회
     fun getAllPosts(): PostListResponse {
-
         val postTypes = listOf(
             PostType.FREE,
             PostType.MARKET,
@@ -38,15 +37,18 @@ class PostService(
             PostType.DONGHAENG
         )
 
-        // 게시판 타입별 최신 글 조회
         val posts = postTypes.mapNotNull { type ->
             postRepository.findTopByPostTypeOrderByCreatedAtDesc(type)
+        }
+
+        if (posts.isEmpty()) {
+            throw BusinessException(ErrorCode.POST_NOT_FOUND)
         }
 
         return PostListResponse(
             posts = posts.map {
                 PostListItem(
-                    postId = it.id,            // PostResponse 필드 사용
+                    postId = it.id,
                     postType = it.type.name,
                     title = it.title,
                     createdAt = it.createdAt.toString(),
@@ -54,17 +56,25 @@ class PostService(
                 )
             },
             totalElements = posts.size.toLong(),
-            totalPages = 1 // TODO: 페이지네이션 구현 필요
+            totalPages = 1
         )
     }
 
     // 특정 게시판 타입별 게시글 조회 (페이징)
     fun getPostByType(type: String, page: Int, size: Int): PostListResponse {
-        val postType = PostType.valueOf(type.uppercase())
+        val postType = try {
+            PostType.valueOf(type.uppercase())
+        } catch (e: IllegalArgumentException) {
+            throw BusinessException(ErrorCode.POST_TYPE_INVALID)
+        }
+
         val posts = postRepository.findPostsByType(postType, page, size)
         val totalElements = postRepository.countPostsByType(postType)
-        val totalPages = if (totalElements == 0L) 0
-        else ((totalElements - 1) / size + 1).toInt()
+        val totalPages = if (totalElements == 0L) 0 else ((totalElements - 1) / size + 1).toInt()
+
+        if (posts.isEmpty()) {
+            throw BusinessException(ErrorCode.POST_NOT_FOUND)
+        }
 
         return PostListResponse(
             posts = posts.map {
@@ -88,7 +98,7 @@ class PostService(
             title = req.title,
             content = req.content,
             memberId = req.memberId
-        )
+        ) ?: throw BusinessException(ErrorCode.POST_INSERT_FAILED)
 
         return CreatePostResponse(
             id = post.id,
@@ -104,7 +114,7 @@ class PostService(
     // 게시글 상세 조회
     fun getPostDetail(postId: Long): PostDetailResponse {
         val post = postRepository.findById(postId)
-            ?: throw IllegalArgumentException("해당 게시글이 존재하지 않습니다.")
+            ?: throw BusinessException(ErrorCode.POST_NOT_FOUND)
 
         val mediaList = mediaRepository.findByPostId(postId)
         val comments = commentRepository.findByPostId(postId)
@@ -123,49 +133,57 @@ class PostService(
                     s3Url = it.s3Url,
                     fileSize = it.fileSize,
                     postId = post.id,
-                    createdAt =  post.createdAt
+                    createdAt = post.createdAt
                 )
             },
             comments = comments.map {
                 CommentResponse(
+                    postId = it.postId,
+                    memberId = it.memberId,
                     commentId = it.commentId,
                     content = it.content,
-                    createdAt = it.createdAt
+                    createdAt = it.createdAt,
+                    updatedAt = it.updatedAt,
                 )
             }
         )
     }
 
-
     // 미디어 업로드
     fun uploadMedia(postId: Long, file: MultipartFile): CreateMediaResponse {
-        // S3에 업로드
-        val s3Url = s3Uploader.upload(file, "posts/$postId")
-        val fileSize = file.size
+        val s3Url = try {
+            s3Uploader.upload(file, "posts/$postId")
+        } catch (e: Exception) {
+            throw BusinessException(ErrorCode.MEDIA_UPLOAD_FAILED)
+        }
 
-        // Repository에 저장
+        val fileSize = file.size
         val saved = mediaRepository.save(postId, s3Url, fileSize)
+            ?: throw BusinessException(ErrorCode.MEDIA_INSERT_FAILED)
 
         return saved
     }
 
     // 게시글 업데이트
     fun updatePost(postId: Long, req: UpdatePostRequest): PostDetailResponse {
-            // 1. 게시글 존재 확인
-            val post = postRepository.findById(postId)
-                ?: throw NoSuchElementException("Post not found with id: $postId")
+        val post = postRepository.findById(postId)
+            ?: throw BusinessException(ErrorCode.POST_NOT_FOUND)
 
-            // 2. 게시글 업데이트
-            return postRepository.updatePost(postId, req)
+        return postRepository.updatePost(postId, req)
+            ?: throw BusinessException(ErrorCode.POST_UPDATE_FAILED)
     }
 
-
-    fun deletePost(postId: Long) : Long{
-        // 1. 게시글 존재 확인
+    // 게시글 삭제
+    fun deletePost(postId: Long): Long {
         val post = postRepository.findById(postId)
-            ?: throw NoSuchElementException("Post not found with id: $postId")
+            ?: throw BusinessException(ErrorCode.POST_NOT_FOUND)
 
-        // 2. 게시글 삭제
-        return postRepository.deletePost(postId);
+        val deletedRows = postRepository.deletePost(postId)
+        if (deletedRows == 0L) {
+            throw BusinessException(ErrorCode.POST_DELETE_FAILED)
+        }
+
+        return postId
     }
 }
+
