@@ -21,6 +21,26 @@ enum class ErrorCode(
      * | Internal Server Error | 서버 내부 오류 | 500 |
      */
 
+    // user
+    USER_INVALID_CREDENTIAL("user-invalid-credential", HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다."),
+
+    // ===== post =====
+    POST_NOT_FOUND("post-not-found", HttpStatus.NOT_FOUND, "해당 게시글을 찾을 수 없습니다."),
+    POST_INSERT_FAILED("post-insert-failed", HttpStatus.INTERNAL_SERVER_ERROR, "게시글 생성에 실패했습니다."),
+    POST_UPDATE_FAILED("post-update-failed", HttpStatus.INTERNAL_SERVER_ERROR, "게시글 수정에 실패했습니다."),
+    POST_DELETE_FAILED("post-delete-failed", HttpStatus.INTERNAL_SERVER_ERROR, "게시글 삭제에 실패했습니다."),
+    POST_TYPE_INVALID("post-type-invalid", HttpStatus.BAD_REQUEST, "유효하지 않은 게시판 타입입니다."),
+
+    // ===== media =====
+    MEDIA_UPLOAD_FAILED("media-upload-failed", HttpStatus.INTERNAL_SERVER_ERROR, "S3 업로드에 실패했습니다."),
+    MEDIA_INSERT_FAILED("media-insert-failed", HttpStatus.INTERNAL_SERVER_ERROR, "미디어 정보 저장에 실패했습니다."),
+
+    // ===== comment =====
+    COMMENT_NOT_FOUND("comment-not-found", HttpStatus.NOT_FOUND, "해당 댓글을 찾을 수 없습니다."),
+    COMMENT_INSERT_FAILED("comment-insert-failed", HttpStatus.INTERNAL_SERVER_ERROR, "댓글 생성에 실패했습니다."),
+    COMMENT_UPDATE_FAILED("comment-update-failed", HttpStatus.INTERNAL_SERVER_ERROR, "댓글 수정에 실패했습니다."),
+    COMMENT_DELETE_FAILED("comment-delete-failed", HttpStatus.INTERNAL_SERVER_ERROR, "댓글 삭제에 실패했습니다.");
+  
     // ===== member =====
     USER_EMAIL_DUPLICATED("user-email-duplicated", HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
     USER_INVALID_CREDENTIAL("user-invalid-credential", HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다."),

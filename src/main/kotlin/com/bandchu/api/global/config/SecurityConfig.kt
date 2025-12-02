@@ -38,6 +38,9 @@ class SecurityConfig(
                 auth.requestMatchers("/api/chatrooms/**").permitAll()
                 auth.requestMatchers("/ws-chat/**").permitAll()
 
+                // ===== posts 엔드포인트 =====
+                auth.requestMatchers("/api/posts/**").permitAll()
+
                 // ===== 보호 엔드포인트 =====
                 auth.requestMatchers(
                     "/api/members/logout",
