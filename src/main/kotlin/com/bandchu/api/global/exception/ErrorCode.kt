@@ -26,6 +26,7 @@ enum class ErrorCode(
 
     // ===== post =====
     POST_NOT_FOUND("post-not-found", HttpStatus.NOT_FOUND, "해당 게시글을 찾을 수 없습니다."),
+    POST_FORBIDDEN("post-forbidden", HttpStatus.FORBIDDEN, "해당 게시글의 작성자가 아닙니다."),
     POST_INSERT_FAILED("post-insert-failed", HttpStatus.INTERNAL_SERVER_ERROR, "게시글 생성에 실패했습니다."),
     POST_UPDATE_FAILED("post-update-failed", HttpStatus.INTERNAL_SERVER_ERROR, "게시글 수정에 실패했습니다."),
     POST_DELETE_FAILED("post-delete-failed", HttpStatus.INTERNAL_SERVER_ERROR, "게시글 삭제에 실패했습니다."),
@@ -37,6 +38,7 @@ enum class ErrorCode(
 
     // ===== comment =====
     COMMENT_NOT_FOUND("comment-not-found", HttpStatus.NOT_FOUND, "해당 댓글을 찾을 수 없습니다."),
+    COMMENT_FORBIDDEN("cooment-forbidden", HttpStatus.FORBIDDEN, "해당 댓글의 사용자가 아닙니다."),
     COMMENT_INSERT_FAILED("comment-insert-failed", HttpStatus.INTERNAL_SERVER_ERROR, "댓글 생성에 실패했습니다."),
     COMMENT_UPDATE_FAILED("comment-update-failed", HttpStatus.INTERNAL_SERVER_ERROR, "댓글 수정에 실패했습니다."),
     COMMENT_DELETE_FAILED("comment-delete-failed", HttpStatus.INTERNAL_SERVER_ERROR, "댓글 삭제에 실패했습니다."),
