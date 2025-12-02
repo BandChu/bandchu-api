@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Configuration
         version = "1.0.0"
     ),
     servers = [
+        Server(url = "https://bandchu.o-r.kr", description = "prod"),
         Server(url = "http://localhost:8080", description = "local"),
     ],
     security = [SecurityRequirement(name = "bearerAuth")]
