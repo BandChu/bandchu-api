@@ -92,13 +92,13 @@ class PostService(
     }
 
     // 게시글 생성
-    fun createPost(req: CreatePostRequest): CreatePostResponse {
+    fun createPost(memberId: Long, req: CreatePostRequest): CreatePostResponse {
         val post = postRepository.insertPost(
             type = req.postType,
             title = req.title,
+            memberId = memberId,
             content = req.content,
-            memberId = req.memberId
-        ) ?: throw BusinessException(ErrorCode.POST_INSERT_FAILED)
+        )
 
         return CreatePostResponse(
             id = post.id,
@@ -159,24 +159,29 @@ class PostService(
 
         val fileSize = file.size
         val saved = mediaRepository.save(postId, s3Url, fileSize)
-            ?: throw BusinessException(ErrorCode.MEDIA_INSERT_FAILED)
 
         return saved
     }
 
     // 게시글 업데이트
-    fun updatePost(postId: Long, req: UpdatePostRequest): PostDetailResponse {
+    fun updatePost(memberId: Long, postId: Long, req: UpdatePostRequest): PostDetailResponse {
         val post = postRepository.findById(postId)
             ?: throw BusinessException(ErrorCode.POST_NOT_FOUND)
 
+        if (memberId != postRepository.findUserIdById(postId)) {
+            throw BusinessException(ErrorCode.POST_FORBIDDEN)
+        }
+
         return postRepository.updatePost(postId, req)
-            ?: throw BusinessException(ErrorCode.POST_UPDATE_FAILED)
     }
 
     // 게시글 삭제
-    fun deletePost(postId: Long): Long {
+    fun deletePost(memberId: Long, postId: Long): Long {
         val post = postRepository.findById(postId)
             ?: throw BusinessException(ErrorCode.POST_NOT_FOUND)
+
+        if (post.memberId != memberId)
+            throw BusinessException(ErrorCode.POST_FORBIDDEN)
 
         val deletedRows = postRepository.deletePost(postId)
         if (deletedRows == 0L) {

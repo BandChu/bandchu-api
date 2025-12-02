@@ -10,6 +10,7 @@ import com.bandchu.api.domain.posts.dto.response.PostListResponse
 import com.bandchu.api.domain.posts.service.CommentService
 import com.bandchu.api.domain.posts.service.PostService
 import com.bandchu.api.global.response.ApiResponse
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -27,7 +28,7 @@ import org.springframework.web.multipart.MultipartFile
 @RequestMapping("/api/posts")
 class PostController(
     private val postService: PostService,
-    private val commentService: CommentService
+    private val commentService: CommentService,
 ) {
 
     // 모든 게시판의 최신 글 1개씩 조회
@@ -61,9 +62,10 @@ class PostController(
     // 게시글 생성
     @PostMapping
     fun createPost(
-        @RequestBody request: CreatePostRequest
+        @RequestBody request: CreatePostRequest,
+        @AuthenticationPrincipal memberId: Long,
     ): ApiResponse<CreatePostResponse> {
-        val result = postService.createPost(request) // Service 메서드명에 맞춤
+        val result = postService.createPost(memberId, request) // Service 메서드명에 맞춤
         return ApiResponse.success(
             data = result,
             message = "게시글이 성공적으로 생성되었습니다."
@@ -86,9 +88,10 @@ class PostController(
     @PatchMapping("/{postId}")
     fun updatePost(
         @PathVariable postId: Long,
-        @RequestBody request: UpdatePostRequest
+        @RequestBody request: UpdatePostRequest,
+        @AuthenticationPrincipal memberId: Long,
     ): ApiResponse<PostDetailResponse> {
-        val result = postService.updatePost(postId, request)
+        val result = postService.updatePost(memberId, postId, request)
         return ApiResponse.success(
             data = result,
             message = "게시글이 성공적으로 업데이트되었습니다."
@@ -98,9 +101,10 @@ class PostController(
     // 게시글 삭제
     @DeleteMapping("/{postId}")
     fun deletePost(
-        @PathVariable postId: Long
+        @PathVariable postId: Long,
+        @AuthenticationPrincipal memberId: Long,
     ): ApiResponse<Long> {
-        val result = postService.deletePost(postId)
+        val result = postService.deletePost(memberId, postId)
         return ApiResponse.success(
             data = result,
             message = "게시글이 성공적으로 삭제되었습니다."
@@ -125,10 +129,9 @@ class PostController(
     fun createComment(
         @RequestParam postId: Long,
         @RequestBody content: String,
-        //@AuthenticationPrincipal memberId: Long,
+        @AuthenticationPrincipal memberId: Long,
     ): ApiResponse<CommentResponse> {
 
-        val memberId = 2L; //테스트용
         val result = commentService.insertComment(memberId, postId, content)
         return ApiResponse.success(
             data = result,
@@ -140,8 +143,9 @@ class PostController(
     @DeleteMapping("/comments/{commentId}")
     fun deleteComment(
         @PathVariable commentId: Long,
+        @AuthenticationPrincipal memberId: Long,
     ): ApiResponse<Long> {
-        val result = commentService.deleteComment(commentId)
+        val result = commentService.deleteComment(memberId, commentId)
         return ApiResponse.success(
             data = result,
             message = "게시글의 댓글이 삭제되었습니다."
@@ -153,10 +157,10 @@ class PostController(
     fun updateComment(
         @RequestBody content: String,
         @PathVariable commentId: Long,
+        @AuthenticationPrincipal memberId: Long,
     ): ApiResponse<CommentResponse> {
 
-        val memberId = 1L; //테스트용
-        val result = commentService.updateComment(commentId, content)
+        val result = commentService.updateComment(memberId, commentId, content)
         return ApiResponse.success(
             data = result,
             message = "댓글이 작성되었습니다."
