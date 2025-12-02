@@ -51,9 +51,6 @@ dependencies {
 
     // Mockk
     testImplementation("io.mockk:mockk:1.13.13")
-    implementation("me.paulschwarz:spring-dotenv:4.0.0")
-
-
 }
 
 kotlin {
