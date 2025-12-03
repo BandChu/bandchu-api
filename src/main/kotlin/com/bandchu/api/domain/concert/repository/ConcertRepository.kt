@@ -225,15 +225,27 @@ class ConcertRepository {
 
         return@transaction groupedByArtist.map { (_, rows) ->
 
-            val profile = rows.first().toArtiProfileDomain()
-            val subscribedAt = rows.first()[SubscriptionTable.createdAt]
-            val concertId = rows.first()[ConcertTable.id].value
-            val groupedByConcert = rows.groupBy { it[ConcertTable.id] }
-            val concerts = groupedByConcert.map { (_, concertRows) ->
+            val firstRow = rows.first()
+            val profile = firstRow.toArtiProfileDomain()
+            val subscribedAt = firstRow[SubscriptionTable.createdAt]
+
+            val groupedByConcert = rows.groupBy { it.getOrNull(ConcertTable.id) }
+
+            val concerts = groupedByConcert.mapNotNull { (concertIdEntity, concertRows) ->
+
+                if (concertIdEntity == null) {
+                    return@mapNotNull null
+                }
+
+                val concertId = concertIdEntity.value
 
                 val schedules = concertRows
                     .mapNotNull { row ->
-                        if (row.hasValue(ConcertScheduleTable.date)) row.toConcertScheduleDomain(concertId) else null
+                        if (row.hasValue(ConcertScheduleTable.date)) {
+                            row.toConcertScheduleDomain(concertId)
+                        } else {
+                            null
+                        }
                     }
                     .distinct()
 
