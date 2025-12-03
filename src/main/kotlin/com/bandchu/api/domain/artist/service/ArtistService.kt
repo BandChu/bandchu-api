@@ -1,10 +1,16 @@
 package com.bandchu.api.domain.artist.service
 
+import com.bandchu.api.domain.album.dto.toAlbumSummaryResponse
+import com.bandchu.api.domain.album.repository.AlbumRepository
+import com.bandchu.api.domain.artist.dto.response.ArtistMeResponse
+import com.bandchu.api.domain.artist.dto.toArtistDetailResponse
 import com.bandchu.api.domain.artist.model.ArtiProfile
 import com.bandchu.api.domain.artist.repository.ArtiProfileRepository
 import com.bandchu.api.domain.artist.service.dto.CreateArtistDetailCommand
 import com.bandchu.api.domain.artist.service.dto.UpdateArtistDetailCommand
+import com.bandchu.api.domain.concert.dto.toConcertDetailResponse
 import com.bandchu.api.domain.concert.model.Concert
+import com.bandchu.api.domain.concert.repository.ConcertRepository
 import com.bandchu.api.domain.member.model.Role
 import com.bandchu.api.global.exception.BusinessException
 import com.bandchu.api.global.exception.ErrorCode
@@ -15,8 +21,10 @@ import org.springframework.stereotype.Service
 @Service
 class ArtistService(
     private val artistRepository: ArtiProfileRepository,
+    private val albumRepository: AlbumRepository,
+    private val concertRepository: ConcertRepository
 
-) {
+    ) {
     fun getAll(): List<ArtiProfile> {
         return artistRepository.findAll()
     }
@@ -47,5 +55,25 @@ class ArtistService(
 
         return artistRepository.updateProcess(command)
             ?: throw BusinessException(ErrorCode.ARTIST_NOT_FOUND)
+    }
+
+    fun getMyDetail(currentUserId: Long): ArtistMeResponse {
+        if (getCurrentUserRole() != Role.ARTIST) throw BusinessException(ErrorCode.ARTIST_INSUFFICIENT_ROLE)
+
+        val artiProfile: ArtiProfile = artistRepository.findByMemberId(currentUserId) ?: return ArtistMeResponse(
+            isExists = false,
+            artist = null
+        )
+
+        val artiProfileId = artiProfile.id
+        val albums = albumRepository.getAllSummaryByArtist(artiProfileId)
+        val concerts = concertRepository.getAllByArtist(artiProfileId)
+
+        return ArtistMeResponse(
+            isExists = true,
+            artist = artiProfile.toArtistDetailResponse(),
+            albums = albums.map { it.toAlbumSummaryResponse() },
+            concerts = concerts.map { it.toConcertDetailResponse() }
+        )
     }
 }
