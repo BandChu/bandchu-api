@@ -7,7 +7,9 @@ import java.time.OffsetDateTime
 
 data class PostDetailResponse(
     val postId: Long,
-    val artistId: Long,
+    val memberId: Long,
+    val memberName: String?,
+
     val postType: String,
     val title: String,
     val content: String,
@@ -23,7 +25,8 @@ fun ResultRow.toPostDetailResponse(
 ): PostDetailResponse {
     return PostDetailResponse(
         postId = this[PostTable.id],
-        artistId = this[PostTable.memberId],
+        memberId = this[PostTable.memberId],
+        memberName = null,
         postType = this[PostTable.postType].name,
         title = this[PostTable.title],
         content = this[PostTable.content],

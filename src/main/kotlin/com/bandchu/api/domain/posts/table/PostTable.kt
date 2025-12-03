@@ -1,6 +1,8 @@
 package com.bandchu.api.domain.posts.table
 
 import com.bandchu.api.domain.member.table.MemberTable
+import com.bandchu.api.domain.posts.dto.PostRow
+import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.datetime.timestampWithTimeZone
 
@@ -21,4 +23,16 @@ object PostTable : Table("posts") {
 
 
     override val primaryKey = PrimaryKey(id)
+}
+
+fun PostTable.from(row: ResultRow): PostRow {
+    return PostRow(
+        id = row[id],
+        memberId = row[memberId],
+        type = row[postType],
+        title = row[title],
+        content = row[content],
+        createdAt = row[createdAt],
+        updatedAt = row[updatedAt]
+    )
 }

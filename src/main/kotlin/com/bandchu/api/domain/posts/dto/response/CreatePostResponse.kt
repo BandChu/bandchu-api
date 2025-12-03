@@ -8,6 +8,7 @@ import java.time.OffsetDateTime
 data class CreatePostResponse(
     val id: Long,
     val memberId: Long,
+    val memberName: String? = null,
     val type: PostType,
     var title: String,
     val content: String,

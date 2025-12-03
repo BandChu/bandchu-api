@@ -1,8 +1,10 @@
 package com.bandchu.api.domain.posts.service
 
+import com.bandchu.api.domain.member.repository.MemberRepository
 import com.bandchu.api.domain.posts.dto.request.CreatePostRequest
 import com.bandchu.api.domain.posts.dto.response.CreatePostResponse
 import com.bandchu.api.domain.posts.dto.PostListItem
+import com.bandchu.api.domain.posts.dto.PostWithMember
 import com.bandchu.api.domain.posts.dto.request.UpdatePostRequest
 import com.bandchu.api.domain.posts.dto.response.CommentResponse
 import com.bandchu.api.domain.posts.dto.response.CreateMediaResponse
@@ -23,6 +25,7 @@ class PostService(
     private val postRepository: PostRepository,
     private val mediaRepository: MediaRepository,
     private val commentRepository: CommentRepository,
+    private val memberRepository: MemberRepository,
     private val s3Uploader: S3Uploader
 ) {
 
@@ -37,9 +40,8 @@ class PostService(
             PostType.DONGHAENG
         )
 
-        val posts = postTypes.mapNotNull { type ->
-            postRepository.findTopByPostTypeOrderByCreatedAtDesc(type)
-        }
+        // 🔥 JOIN 으로 memberName 포함된 조회
+        val posts: List<PostWithMember> = postRepository.findLatestPostWithMemberByTypes(postTypes)
 
         if (posts.isEmpty()) {
             throw BusinessException(ErrorCode.POST_NOT_FOUND)
@@ -48,8 +50,10 @@ class PostService(
         return PostListResponse(
             posts = posts.map {
                 PostListItem(
-                    postId = it.id,
-                    postType = it.type.name,
+                    postId = it.postId,
+                    postType = it.postType.name,
+                    memberId = it.memberId,
+                    memberName = it.memberName,
                     title = it.title,
                     createdAt = it.createdAt.toString(),
                     updatedAt = it.updatedAt.toString()
@@ -68,19 +72,19 @@ class PostService(
             throw BusinessException(ErrorCode.POST_TYPE_INVALID)
         }
 
-        val posts = postRepository.findPostsByType(postType, page, size)
+        val posts: List<PostWithMember> =
+            postRepository.findPostsWithMemberByType(postType, page, size)
+
         val totalElements = postRepository.countPostsByType(postType)
         val totalPages = if (totalElements == 0L) 0 else ((totalElements - 1) / size + 1).toInt()
-
-        if (posts.isEmpty()) {
-            throw BusinessException(ErrorCode.POST_NOT_FOUND)
-        }
 
         return PostListResponse(
             posts = posts.map {
                 PostListItem(
-                    postId = it.id,
-                    postType = it.type.name,
+                    postId = it.postId,
+                    postType = it.postType.name,
+                    memberId = it.memberId,
+                    memberName = it.memberName,
                     title = it.title,
                     createdAt = it.createdAt.toString(),
                     updatedAt = it.updatedAt.toString()
@@ -100,9 +104,12 @@ class PostService(
             content = req.content,
         )
 
+        val memberName = memberRepository.findMemberNameById(memberId)
+
         return CreatePostResponse(
             id = post.id,
             memberId = post.memberId,
+            memberName = memberName,
             title = post.title,
             content = post.content,
             createdAt = post.createdAt,
@@ -113,16 +120,18 @@ class PostService(
 
     // 게시글 상세 조회
     fun getPostDetail(postId: Long): PostDetailResponse {
-        val post = postRepository.findById(postId)
+        // 🔥 JOIN 포함한 단일 조회
+        val post: PostWithMember = postRepository.findPostWithMemberById(postId)
             ?: throw BusinessException(ErrorCode.POST_NOT_FOUND)
 
         val mediaList = mediaRepository.findByPostId(postId)
-        val comments = commentRepository.findByPostId(postId)
+        val comments = commentRepository.findByPostIdWithMember(postId)
 
         return PostDetailResponse(
-            postId = post.id,
-            artistId = postRepository.findUserIdById(post.id),
-            postType = post.type.name,
+            postId = post.postId,
+            memberId = post.memberId,
+            memberName = post.memberName,
+            postType = post.postType.name,
             title = post.title,
             content = post.content,
             createdAt = post.createdAt,
@@ -132,14 +141,15 @@ class PostService(
                     mediaId = it.mediaId,
                     s3Url = it.s3Url,
                     fileSize = it.fileSize,
-                    postId = post.id,
-                    createdAt = post.createdAt
+                    postId = postId,
+                    createdAt = it.createdAt
                 )
             },
             comments = comments.map {
                 CommentResponse(
                     postId = it.postId,
                     memberId = it.memberId,
+                    memberName = it.memberName,
                     commentId = it.commentId,
                     content = it.content,
                     createdAt = it.createdAt,

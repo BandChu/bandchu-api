@@ -6,6 +6,7 @@ import java.time.OffsetDateTime
 
 data class CommentResponse(
     val memberId: Long,
+    var memberName: String? = null,
     val postId: Long,
     val commentId: Long,
 
