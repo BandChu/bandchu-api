@@ -200,4 +200,12 @@ class ArtiProfileRepository {
 
         artistRow.toDomain(snsLinks = snsLinks)
     }
+
+    fun findByMemberId(memberId: Long): ArtiProfile? = transaction {
+        ArtiProfileTable
+            .selectAll()
+            .where { ArtiProfileTable.member eq memberId }
+            .singleOrNull()
+            ?.toDomain()
+    }
 }

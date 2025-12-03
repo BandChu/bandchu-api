@@ -4,6 +4,7 @@ import com.bandchu.api.domain.artist.dto.request.ArtistCreateRequest
 import com.bandchu.api.domain.artist.dto.request.ArtistUpdateRequest
 import com.bandchu.api.domain.artist.dto.response.ArtistDetailResponse
 import com.bandchu.api.domain.artist.dto.response.ArtistListResponse
+import com.bandchu.api.domain.artist.dto.response.ArtistMeResponse
 import com.bandchu.api.domain.artist.dto.response.ArtistSearchResponse
 import com.bandchu.api.domain.artist.model.ArtiProfile
 import com.bandchu.api.domain.artist.model.SnsLink
@@ -16,6 +17,21 @@ import java.net.URI
 /**
  *  Domain Model → Web Response
  */
+
+/* 내 아티 프로필 존재 여부 확인 및 상세 조회 */
+fun ArtiProfile?.toArtistMeResponse(): ArtistMeResponse {
+    return if (this != null) {
+        ArtistMeResponse(
+            isExists = true,
+            artist = this.toArtistDetailResponse()
+        )
+    } else {
+        ArtistMeResponse(
+            isExists = false,
+            artist = null
+        )
+    }
+}
 
 /* 아티스트 전체 목록 조회 */
 fun ArtiProfile.toArtistListItemDto(): ArtistListItemDto =
