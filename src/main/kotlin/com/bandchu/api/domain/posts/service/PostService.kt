@@ -122,7 +122,7 @@ class PostService(
         return PostDetailResponse(
             postId = post.id,
             artistId = postRepository.findUserIdById(post.id),
-            postType = post.type,
+            postType = post.type.name,
             title = post.title,
             content = post.content,
             createdAt = post.createdAt,
