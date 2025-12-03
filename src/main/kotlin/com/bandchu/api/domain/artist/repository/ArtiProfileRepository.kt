@@ -202,10 +202,22 @@ class ArtiProfileRepository {
     }
 
     fun findByMemberId(memberId: Long): ArtiProfile? = transaction {
-        ArtiProfileTable
+        val artistRow = ArtiProfileTable
             .selectAll()
             .where { ArtiProfileTable.member eq memberId }
             .singleOrNull()
-            ?.toDomain()
+
+        if (artistRow == null) {
+            return@transaction null
+        }
+
+        val artiProfileId = artistRow[ArtiProfileTable.id].value
+
+        val snsLinks = SnsLinkTable
+            .selectAll()
+            .where { SnsLinkTable.artiProfile eq artiProfileId }
+            .map { it.toSnsLinkDomain() }
+
+        artistRow.toDomain(snsLinks = snsLinks)
     }
 }
