@@ -67,6 +67,8 @@ fun List<ConcertSubscribedRead>.toConcertSubscribedResponse(): ConcertSubscribed
         SubscribedArtistDto(
             artistId = readModel.artists.id,
             name = readModel.artists.artistName,
+            description = readModel.artists.description,
+            genre = readModel.artists.genre.map { it.name },
             profileImageUrl = readModel.artists.profileImageUrl,
             subscribedAt = readModel.subscribedAt.toString(),
             concerts = concertResponses
