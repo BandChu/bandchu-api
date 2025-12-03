@@ -10,6 +10,7 @@ import com.bandchu.api.domain.posts.dto.response.PostListResponse
 import com.bandchu.api.domain.posts.service.CommentService
 import com.bandchu.api.domain.posts.service.PostService
 import com.bandchu.api.global.response.ApiResponse
+import com.bandchu.api.global.util.getCurrentUserId
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -63,8 +64,8 @@ class PostController(
     @PostMapping
     fun createPost(
         @RequestBody request: CreatePostRequest,
-        @AuthenticationPrincipal memberId: Long,
     ): ApiResponse<CreatePostResponse> {
+        val memberId = getCurrentUserId()
         val result = postService.createPost(memberId, request) // Service 메서드명에 맞춤
         return ApiResponse.success(
             data = result,
@@ -89,8 +90,8 @@ class PostController(
     fun updatePost(
         @PathVariable postId: Long,
         @RequestBody request: UpdatePostRequest,
-        @AuthenticationPrincipal memberId: Long,
     ): ApiResponse<PostDetailResponse> {
+        val memberId = getCurrentUserId()
         val result = postService.updatePost(memberId, postId, request)
         return ApiResponse.success(
             data = result,
@@ -102,8 +103,8 @@ class PostController(
     @DeleteMapping("/{postId}")
     fun deletePost(
         @PathVariable postId: Long,
-        @AuthenticationPrincipal memberId: Long,
     ): ApiResponse<Long> {
+        val memberId = getCurrentUserId()
         val result = postService.deletePost(memberId, postId)
         return ApiResponse.success(
             data = result,
@@ -129,9 +130,8 @@ class PostController(
     fun createComment(
         @RequestParam postId: Long,
         @RequestBody content: String,
-        @AuthenticationPrincipal memberId: Long,
     ): ApiResponse<CommentResponse> {
-
+        val memberId = getCurrentUserId()
         val result = commentService.insertComment(memberId, postId, content)
         return ApiResponse.success(
             data = result,
@@ -143,8 +143,8 @@ class PostController(
     @DeleteMapping("/comments/{commentId}")
     fun deleteComment(
         @PathVariable commentId: Long,
-        @AuthenticationPrincipal memberId: Long,
     ): ApiResponse<Long> {
+        val memberId = getCurrentUserId()
         val result = commentService.deleteComment(memberId, commentId)
         return ApiResponse.success(
             data = result,
@@ -157,9 +157,8 @@ class PostController(
     fun updateComment(
         @RequestBody content: String,
         @PathVariable commentId: Long,
-        @AuthenticationPrincipal memberId: Long,
     ): ApiResponse<CommentResponse> {
-
+        val memberId = getCurrentUserId()
         val result = commentService.updateComment(memberId, commentId, content)
         return ApiResponse.success(
             data = result,
