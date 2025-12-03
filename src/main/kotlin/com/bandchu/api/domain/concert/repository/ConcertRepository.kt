@@ -204,7 +204,7 @@ class ConcertRepository {
             )
             .join(
                 ConcertTable,
-                JoinType.INNER,
+                JoinType.LEFT,
                 onColumn = ArtiProfileTable.id,
                 otherColumn = ConcertTable.arti_profile
             )
