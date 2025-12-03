@@ -61,7 +61,8 @@ class ArtiProfileRepository {
     }
 
     fun searchArtistsAndConcerts(keyword: String): Pair<List<ArtiProfile>, List<Concert>> = transaction {
-        val pattern = "%$keyword%"
+        val lowerCaseKeyword = keyword.lowercase()
+        val pattern = "%$lowerCaseKeyword%"
 
         val artists = ArtiProfileTable
             .selectAll()
