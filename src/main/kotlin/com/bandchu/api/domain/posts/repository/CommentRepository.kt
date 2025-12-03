@@ -23,9 +23,10 @@ class CommentRepository {
             .where{ CommentTable.postId eq postId }
             .map { it.toCommentResponse() }
 
-        if (comments.isEmpty()) {
-            throw BusinessException(ErrorCode.COMMENT_NOT_FOUND)
-        }
+        // 게시글은 있는데 댓글이 없는 경우 404라 확인해봄
+//        if (comments.isEmpty()) {
+//            throw BusinessException(ErrorCode.COMMENT_NOT_FOUND)
+//        }
 
         comments
     }
