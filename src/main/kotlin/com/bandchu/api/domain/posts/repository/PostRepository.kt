@@ -13,7 +13,6 @@ import com.bandchu.api.domain.posts.table.CommentTable
 import com.bandchu.api.domain.posts.table.MediaTable
 import com.bandchu.api.domain.posts.table.PostTable
 import com.bandchu.api.domain.posts.table.PostType
-import com.bandchu.api.domain.posts.table.from
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
