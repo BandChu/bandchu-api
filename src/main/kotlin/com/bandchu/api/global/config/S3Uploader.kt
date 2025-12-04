@@ -1,6 +1,7 @@
 package com.bandchu.api.global.config
 
 import com.bandchu.api.global.config.S3Properties
+import com.bandchu.api.global.exception.BusinessException
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
 import software.amazon.awssdk.services.s3.S3Client
@@ -16,20 +17,27 @@ class S3Uploader(
 ) {
 
     fun upload(file: MultipartFile, dir: String): String {
-
-        val fileName = generateFileName(file.originalFilename!!)
+        val originalName = file.originalFilename ?: "unknown"
+        val fileName = generateFileName(originalName)
         val key = "$dir/$fileName"
 
         val putObjectRequest = PutObjectRequest.builder()
             .bucket(s3Properties.bucket)
             .key(key)
-            .contentType(file.contentType)
+            .contentType(file.contentType ?: "application/octet-stream")
             .build()
 
-        s3Client.putObject(putObjectRequest, software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.bytes))
+        file.inputStream.use { inputStream ->
+            s3Client.putObject(
+                putObjectRequest,
+                software.amazon.awssdk.core.sync.RequestBody.fromInputStream(inputStream, file.size)
+            )
+        }
 
         return getUrl(key)
+
     }
+
 
     fun delete(key: String) {
         val deleteObjectRequest = DeleteObjectRequest.builder()

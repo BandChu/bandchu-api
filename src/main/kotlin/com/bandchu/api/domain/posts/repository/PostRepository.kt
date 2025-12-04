@@ -1,5 +1,7 @@
 package com.bandchu.api.domain.posts.repository
 
+import com.bandchu.api.domain.member.table.MemberTable
+import com.bandchu.api.domain.posts.dto.PostWithMember
 import com.bandchu.api.domain.posts.dto.request.UpdatePostRequest
 import com.bandchu.api.domain.posts.dto.response.CommentResponse
 import com.bandchu.api.domain.posts.dto.response.CreateMediaResponse
@@ -11,10 +13,12 @@ import com.bandchu.api.domain.posts.table.CommentTable
 import com.bandchu.api.domain.posts.table.MediaTable
 import com.bandchu.api.domain.posts.table.PostTable
 import com.bandchu.api.domain.posts.table.PostType
+import com.bandchu.api.domain.posts.table.from
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
@@ -164,6 +168,104 @@ class PostRepository {
                 .deleteWhere { PostTable.id eq postId }
         }
         return postId;
+    }
+
+
+    fun findPostsWithMemberByType(type: PostType, page: Int, size: Int): List<PostWithMember> = transaction {
+        (PostTable leftJoin MemberTable)
+            .select(
+                PostTable.id,
+                PostTable.memberId,
+                PostTable.postType,
+                PostTable.title,
+                PostTable.content,
+                PostTable.createdAt,
+                PostTable.updatedAt,
+                MemberTable.nickname
+            )
+            .where { PostTable.postType eq type }
+            .orderBy(PostTable.createdAt, SortOrder.DESC)
+            .limit(size)
+            .offset ((page.toLong() - 1) * size)
+            .map { row ->
+                PostWithMember(
+                    postId = row[PostTable.id],
+                    memberId = row[PostTable.memberId],
+                    memberName = row[MemberTable.nickname] ?: "확인 안됨",
+                    postType = row[PostTable.postType],
+                    title = row[PostTable.title],
+                    content = row[PostTable.content],
+                    createdAt = row[PostTable.createdAt],
+                    updatedAt = row[PostTable.updatedAt]
+                )
+            }
+    }
+
+
+
+    fun findLatestPostWithMemberByTypes(types: List<PostType>): List<PostWithMember> = transaction{
+        val results = mutableListOf<PostWithMember>()
+
+        types.forEach { type ->
+            val row = (PostTable innerJoin MemberTable)
+                .select(
+                    PostTable.id,
+                    PostTable.memberId,
+                    PostTable.postType,
+                    PostTable.title,
+                    PostTable.content,
+                    PostTable.createdAt,
+                    PostTable.updatedAt,
+                    MemberTable.nickname
+                )
+                .where { PostTable.postType eq type }
+                .orderBy(PostTable.createdAt to SortOrder.DESC)
+                .limit(1)
+                .singleOrNull()
+
+            if (row != null) {
+                results += PostWithMember(
+                    postId = row[PostTable.id],
+                    memberId = row[PostTable.memberId],
+                    memberName = row[MemberTable.nickname],
+                    postType = row[PostTable.postType],
+                    title = row[PostTable.title],
+                    content = row[PostTable.content],
+                    createdAt = row[PostTable.createdAt],
+                    updatedAt = row[PostTable.updatedAt]
+                )
+            }
+        }
+
+        results
+    }
+
+    fun findPostWithMemberById(postId: Long): PostWithMember?  = transaction{
+        (PostTable innerJoin MemberTable)
+            .select(
+                PostTable.id,
+                PostTable.memberId,
+                PostTable.postType,
+                PostTable.title,
+                PostTable.content,
+                PostTable.createdAt,
+                PostTable.updatedAt,
+                MemberTable.nickname
+            )
+            .where { PostTable.id eq postId }
+            .map { row ->
+                PostWithMember(
+                    postId = row[PostTable.id],
+                    memberId = row[PostTable.memberId],
+                    memberName = row[MemberTable.nickname],
+                    postType = row[PostTable.postType],
+                    title = row[PostTable.title],
+                    content = row[PostTable.content],
+                    createdAt = row[PostTable.createdAt],
+                    updatedAt = row[PostTable.updatedAt]
+                )
+            }
+            .singleOrNull() // 단일 게시글 반환, 없으면 null
     }
 
 }

@@ -15,6 +15,11 @@ spring:
           google:
             jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
 
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
 oauth:
   google:
     client-id: ${GOOGLE_CLIENT_ID}
@@ -25,6 +30,6 @@ aws:
   s3:
     bucket: bandchu-bucket
   credentials:
-    accessKey: ${AWS_ACCESS_KEY}
-    secretKey: ${AWS_SECRET_KEY}
+    accessKey: ${AWS_CREDENTIAL_ACCESS_KEY}
+    secretKey: ${AWS_CREDENTIAL_SECRET_KEY}
     client-id: ${GOOGLE_CLIENT_ID}

@@ -2,6 +2,8 @@ package com.bandchu.api.domain.member.repository
 
 import com.bandchu.api.domain.member.model.Member
 import com.bandchu.api.domain.member.table.MemberTable
+import com.bandchu.api.global.exception.BusinessException
+import com.bandchu.api.global.exception.ErrorCode
 import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.jdbc.*
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
@@ -121,6 +123,14 @@ class MemberRepository {
             profileImageUrl = row[MemberTable.profileImageUrl],
             createdAt = localDateTime
         )
+    }
+
+    fun findMemberNameById(memberId: Long): String = transaction{
+        MemberTable
+            .selectAll()
+            .where{ MemberTable.id eq memberId }
+            .map { it[MemberTable.nickname] }
+            .single()
     }
 }
 

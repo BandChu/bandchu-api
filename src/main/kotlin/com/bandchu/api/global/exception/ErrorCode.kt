@@ -79,6 +79,12 @@ enum class ErrorCode(
     // album
     ALBUM_NOT_FOUND("album-not-found", HttpStatus.NOT_FOUND, "요청한 앨범을 찾을 수 없습니다."),
 
+    // ===== friend =====
+    FRIEND_SELF_REQUEST("friend-self-request", HttpStatus.BAD_REQUEST, "자기 자신에게는 친구 요청을 보낼 수 없습니다."),
+    FRIEND_REQUEST_DUPLICATED("friend-request-duplicated", HttpStatus.CONFLICT, "이미 존재하는 친구 요청입니다."),
+    FRIEND_REQUEST_ACCEPT_FAIL("friend-request-accept-fail", HttpStatus.BAD_REQUEST, "친구 요청을 수락할 수 없습니다."),
+    FRIEND_REQUEST_REJECT_FAIL("friend-request-reject-fail", HttpStatus.BAD_REQUEST, "친구 요청을 거절할 수 없습니다.")
+
     ;
 
     val code: String
