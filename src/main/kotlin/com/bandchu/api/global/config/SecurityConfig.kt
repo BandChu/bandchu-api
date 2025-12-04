@@ -50,7 +50,8 @@ class SecurityConfig(
                     "/api/members/login",
                     "/api/members/token/refresh",
                     "/api/members/oauth/google",
-                    "/api/members/oauth/verify"
+                    "/api/members/oauth/verify",
+                    "/api/config/google-client-id"
                 ).permitAll()
 
                 // ===== chat & ws 엔드포인트 =====
