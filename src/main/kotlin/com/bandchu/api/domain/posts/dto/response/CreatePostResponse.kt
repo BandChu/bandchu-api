@@ -18,7 +18,7 @@ data class CreatePostResponse(
 
 fun ResultRow.toPostResponse(): CreatePostResponse = CreatePostResponse(
     id = this[PostTable.id],
-    memberId = this[PostTable.memberId],
+    memberId = this[PostTable.memberId].value,
     type = this[PostTable.postType],
     title = this[PostTable.title],
     content = this[PostTable.content],

@@ -25,7 +25,7 @@ fun ResultRow.toPostDetailResponse(
 ): PostDetailResponse {
     return PostDetailResponse(
         postId = this[PostTable.id],
-        memberId = this[PostTable.memberId],
+        memberId = this[PostTable.memberId].value,
         memberName = null,
         postType = this[PostTable.postType].name,
         title = this[PostTable.title],

@@ -44,7 +44,7 @@ class MemberChatRoomRepository {
     fun findMemberIdsByRoomId(roomId: Long): List<Long> {
         return MemberChatRoomTable.selectAll()
             .where { MemberChatRoomTable.roomId eq roomId }
-            .map { it[MemberChatRoomTable.memberId] }
+            .map { it[MemberChatRoomTable.memberId].value }
     }
 
     /**

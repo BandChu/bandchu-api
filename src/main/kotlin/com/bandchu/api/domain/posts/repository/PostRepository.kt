@@ -100,7 +100,7 @@ class PostRepository {
         PostTable
             .selectAll()
             .where(PostTable.id eq postId)
-            .single()[PostTable.memberId]
+            .single()[PostTable.memberId].value
     }
 
     fun updatePost(id: Long, req: UpdatePostRequest): PostDetailResponse =
@@ -141,7 +141,7 @@ class PostRepository {
                 .map { row ->
                     CommentResponse(
                         postId = row[CommentTable.postId],
-                        memberId = row[CommentTable.memberId],
+                        memberId = row[CommentTable.memberId].value,
                         commentId = row[CommentTable.id],
                         content = row[CommentTable.content],
                         createdAt = row[CommentTable.createdAt],
@@ -189,7 +189,7 @@ class PostRepository {
             .map { row ->
                 PostWithMember(
                     postId = row[PostTable.id],
-                    memberId = row[PostTable.memberId],
+                    memberId = row[PostTable.memberId].value,
                     memberName = row[MemberTable.nickname] ?: "확인 안됨",
                     postType = row[PostTable.postType],
                     title = row[PostTable.title],
@@ -225,7 +225,7 @@ class PostRepository {
             if (row != null) {
                 results += PostWithMember(
                     postId = row[PostTable.id],
-                    memberId = row[PostTable.memberId],
+                    memberId = row[PostTable.memberId].value,
                     memberName = row[MemberTable.nickname],
                     postType = row[PostTable.postType],
                     title = row[PostTable.title],
@@ -255,7 +255,7 @@ class PostRepository {
             .map { row ->
                 PostWithMember(
                     postId = row[PostTable.id],
-                    memberId = row[PostTable.memberId],
+                    memberId = row[PostTable.memberId].value,
                     memberName = row[MemberTable.nickname],
                     postType = row[PostTable.postType],
                     title = row[PostTable.title],

@@ -94,7 +94,7 @@ class CommentRepository {
                 CommentWithMember(
                     commentId = row[CommentTable.id],
                     postId = row[CommentTable.postId],
-                    memberId = row[CommentTable.memberId],
+                    memberId = row[CommentTable.memberId].value,
                     memberName = row[MemberTable.nickname],
                     content = row[CommentTable.content],
                     createdAt = row[CommentTable.createdAt],

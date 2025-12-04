@@ -17,7 +17,7 @@ data class CommentResponse(
 
 fun ResultRow.toCommentResponse() :CommentResponse {
     return CommentResponse(
-        memberId = this[CommentTable.memberId],
+        memberId = this[CommentTable.memberId].value,
         postId = this[CommentTable.postId],
         commentId = this[CommentTable.id],
         

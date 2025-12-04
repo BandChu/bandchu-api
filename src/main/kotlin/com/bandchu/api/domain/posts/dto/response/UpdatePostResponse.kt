@@ -17,7 +17,7 @@ data class UpdatePostResponse(
 
 fun ResultRow.toUpdatePostResponse(): UpdatePostResponse = UpdatePostResponse(
     id = this[PostTable.id],
-    memberId = this[PostTable.memberId],
+    memberId = this[PostTable.memberId].value,
     type = this[PostTable.postType],
     title = this[PostTable.title],
     content = this[PostTable.content],

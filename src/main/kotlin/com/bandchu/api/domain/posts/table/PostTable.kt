@@ -2,6 +2,7 @@ package com.bandchu.api.domain.posts.table
 
 import com.bandchu.api.domain.member.table.MemberTable
 import com.bandchu.api.domain.posts.dto.PostRow
+import org.jetbrains.exposed.v1.core.ReferenceOption
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.datetime.timestampWithTimeZone
@@ -10,8 +11,7 @@ object PostTable : Table("posts") {
 
     val id = long("post_id").autoIncrement()
 
-    val memberId = long("member_id")
-        .references(MemberTable.id)
+    val memberId = reference("member_id", MemberTable.id, onDelete = ReferenceOption.CASCADE)
 
     val postType = enumerationByName("post_type", 20, PostType::class) // FREE, MARKET, JOIN, REVIEW, ARTIST
 
@@ -28,7 +28,7 @@ object PostTable : Table("posts") {
 fun PostTable.from(row: ResultRow): PostRow {
     return PostRow(
         id = row[id],
-        memberId = row[memberId],
+        memberId = row[memberId].value,
         type = row[postType],
         title = row[title],
         content = row[content],
