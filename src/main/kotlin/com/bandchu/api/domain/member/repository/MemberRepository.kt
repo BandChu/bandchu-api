@@ -125,8 +125,8 @@ class MemberRepository {
         )
     }
 
-    fun findMemberNameById(memberId: Long): String {
-        return MemberTable
+    fun findMemberNameById(memberId: Long): String = transaction{
+        MemberTable
             .selectAll()
             .where{ MemberTable.id eq memberId }
             .map { it[MemberTable.nickname] }
