@@ -49,3 +49,6 @@ application-secret.yml
 
 ### 배포 서버 접속 문서 (개인 환경별) ###
 docs/DEPLOYMENT.md
+
+### MAC OS ###
+.DS_Store
