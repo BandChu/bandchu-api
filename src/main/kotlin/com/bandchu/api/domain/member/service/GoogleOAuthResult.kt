@@ -5,6 +5,7 @@ data class GoogleOAuthResult(
     val refreshToken: String,
     val isNewMember: Boolean,
     val memberId: Long,
-    val nickname: String
+    val nickname: String,
+    val isProfileCompleted: Boolean
 )
 

@@ -19,6 +19,17 @@ spring:
     multipart:
       max-file-size: 50MB
       max-request-size: 50MB
+  # JSON 요청 크기 제한 (base64 데이터 URL 저장을 위해 증가)
+  http:
+    encoding:
+      enabled: true
+      charset: UTF-8
+      force: true
+
+server:
+  # HTTP 요청 크기 제한 (base64 데이터 URL 저장을 위해 증가)
+  max-http-header-size: 1MB
+  max-http-post-size: 10MB
 
 oauth:
   google:

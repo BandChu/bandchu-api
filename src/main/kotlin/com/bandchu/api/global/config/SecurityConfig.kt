@@ -21,7 +21,7 @@ class SecurityConfig(
     @Bean // CORS 설정 - 채팅 및 프론트엔드와의 통신을 위해 추가했음. 
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration()
-        configuration.allowedOrigins = listOf("http://localhost:3000", "http://localhost:5173", "https://bandchu-front.vercel.app")
+        configuration.allowedOrigins = listOf("http://localhost:3000", "http://localhost:5173", "http://localhost:8000", "https://bandchu-front.vercel.app")
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
         configuration.allowedHeaders = listOf("*")
         configuration.allowCredentials = true
@@ -50,7 +50,8 @@ class SecurityConfig(
                     "/api/members/login",
                     "/api/members/token/refresh",
                     "/api/members/oauth/google",
-                    "/api/members/oauth/verify"
+                    "/api/members/oauth/verify",
+                    "/api/config/google-client-id"
                 ).permitAll()
 
                 // ===== chat & ws 엔드포인트 =====

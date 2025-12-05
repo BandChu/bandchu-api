@@ -27,12 +27,13 @@ class MemberService(
             throw BusinessException(ErrorCode.USER_EMAIL_DUPLICATED)
         }
 
-        // 회원 생성
+        // 회원 생성 (일반 회원가입은 프로필 정보를 이미 받으므로 완료 상태로 설정)
         val member = Member(
             email = request.email,
             password = request.password, // TODO: 비밀번호 암호화 추가 필요
             nickname = request.nickname,
-            role = request.role
+            role = request.role,
+            isProfileCompleted = true
         )
 
         return memberRepository.save(member)
@@ -144,13 +145,14 @@ class MemberService(
                 existingMember
             }
         } else {
-            // 신규 회원인 경우 자동 가입
+            // 신규 회원인 경우 자동 가입 (프로필 미완료 상태로 생성)
             val newMember = Member(
                 email = googleUserInfo.email,
                 password = "", // OAuth 회원은 비밀번호 없음
                 nickname = googleUserInfo.name,
                 role = Role.FAN, // 기본 역할은 FAN
-                googleId = googleUserInfo.googleId
+                googleId = googleUserInfo.googleId,
+                isProfileCompleted = false // 구글 OAuth 회원가입은 프로필 설정 전까지 미완료 상태
             )
             memberRepository.save(newMember)
         }
@@ -169,7 +171,8 @@ class MemberService(
             refreshToken = refreshToken,
             isNewMember = isNewMember,
             memberId = memberId,
-            nickname = member.nickname
+            nickname = member.nickname,
+            isProfileCompleted = member.isProfileCompleted
         )
     }
 
@@ -270,6 +273,26 @@ class MemberService(
 
         // 프로필 업데이트
         return memberRepository.updateProfile(memberId, nickname, profileImageUrl)
+    }
+
+    fun updateRole(memberId: Long, role: Role): Member {
+        // 회원 존재 확인
+        memberRepository.findById(memberId)
+            ?: run {
+                log.error("Critical: Member not found by ID. MemberId: $memberId")
+                throw IllegalStateException("회원을 찾을 수 없습니다.")
+            }
+
+        // 역할 업데이트
+        return memberRepository.updateRole(memberId, role)
+    }
+
+    fun getMemberInfo(memberId: Long): Member {
+        return memberRepository.findById(memberId)
+            ?: run {
+                log.error("Critical: Member not found by ID. MemberId: $memberId")
+                throw IllegalStateException("회원을 찾을 수 없습니다.")
+            }
     }
 }
 

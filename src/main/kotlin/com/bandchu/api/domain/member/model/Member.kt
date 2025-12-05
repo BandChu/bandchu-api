@@ -10,5 +10,6 @@ data class Member(
     val role: Role,
     val googleId: String? = null,
     val profileImageUrl: String? = null,
+    val isProfileCompleted: Boolean = false,
     val createdAt: LocalDateTime? = null
 )

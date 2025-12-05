@@ -24,6 +24,7 @@ class MemberRepository {
                 it[role] = member.role
                 it[googleId] = member.googleId
                 it[profileImageUrl] = member.profileImageUrl
+                it[isProfileCompleted] = member.isProfileCompleted
                 it[createdAt] = OffsetDateTime.now(ZoneOffset.UTC)
             }
 
@@ -99,6 +100,21 @@ class MemberRepository {
             MemberTable.update({ MemberTable.id eq memberId }) {
                 it[MemberTable.nickname] = nickname
                 it[MemberTable.profileImageUrl] = profileImageUrl
+                it[MemberTable.isProfileCompleted] = true
+            }
+            
+            MemberTable
+                .selectAll()
+                .where { MemberTable.id eq memberId }
+                .single()
+                .let { toMember(it) }
+        }
+    }
+
+    fun updateRole(memberId: Long, role: com.bandchu.api.domain.member.model.Role): Member {
+        return transaction {
+            MemberTable.update({ MemberTable.id eq memberId }) {
+                it[MemberTable.role] = role
             }
             
             MemberTable
@@ -121,6 +137,7 @@ class MemberRepository {
             role = row[MemberTable.role],
             googleId = row[MemberTable.googleId],
             profileImageUrl = row[MemberTable.profileImageUrl],
+            isProfileCompleted = row[MemberTable.isProfileCompleted],
             createdAt = localDateTime
         )
     }
