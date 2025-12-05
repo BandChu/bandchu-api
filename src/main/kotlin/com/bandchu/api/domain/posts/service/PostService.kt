@@ -65,7 +65,11 @@ class PostService(
     }
 
     // 특정 게시판 타입별 게시글 조회 (페이징)
-    fun getPostByType(type: String, page: Int, size: Int): PostListResponse {
+    fun getPostByType(currentMemberId: Long?, type: String, page: Int, size: Int): PostListResponse {
+        if (currentMemberId == null && type == PostType.ARTIST.name) {
+            throw BusinessException(ErrorCode.POST_FORBIDDEN)
+        }
+
         val postType = try {
             PostType.valueOf(type.uppercase())
         } catch (e: IllegalArgumentException) {
@@ -73,7 +77,7 @@ class PostService(
         }
 
         val posts: List<PostWithMember> =
-            postRepository.findPostsWithMemberByType(postType, page, size)
+            postRepository.findPostsWithMemberByType(postType, page, size, currentMemberId)
 
         val totalElements = postRepository.countPostsByType(postType)
         val totalPages = if (totalElements == 0L) 0 else ((totalElements - 1) / size + 1).toInt()

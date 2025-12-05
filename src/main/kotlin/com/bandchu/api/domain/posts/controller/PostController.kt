@@ -48,7 +48,7 @@ class PostController(
         @RequestParam(required = false, defaultValue = "1") page: Int,
         @RequestParam(required = false, defaultValue = "10") size: Int,
     ): ApiResponse<PostListResponse> {
-        val result = postService.getPostByType(
+        val result = postService.getPostByType(getCurrentUserId(),
             type = type,
             page = page,
             size = size

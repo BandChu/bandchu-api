@@ -16,9 +16,12 @@ import com.bandchu.api.domain.posts.table.PostTable
 import com.bandchu.api.domain.posts.table.PostType
 import com.bandchu.api.domain.posts.table.from
 import com.bandchu.api.domain.subscription.table.SubscriptionTable
+import com.bandchu.api.global.exception.BusinessException
+import com.bandchu.api.global.exception.ErrorCode
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.select
@@ -72,6 +75,19 @@ class PostRepository {
     // 게시글 삽입 후 반환
     fun insertPost(memberId: Long, type: PostType, title: String, content: String): CreatePostResponse {
         return transaction {
+            // ARTIST 게시판에 글 작성 시 아티스트 검증
+            if (type == PostType.ARTIST) {
+                val isArtist = ArtiProfileTable
+                    .selectAll()
+                    .where{ ArtiProfileTable.id eq memberId }
+                    .empty()
+                    .not()
+
+                if (!isArtist) {
+                    throw BusinessException(ErrorCode.NO_ARTIST_PERMISSION)
+                }
+            }
+
             val now = OffsetDateTime.now()
             val insertedRow = PostTable.insert { row ->
                 row[PostTable.postType] = type
@@ -174,8 +190,25 @@ class PostRepository {
     }
 
 
-    fun findPostsWithMemberByType(type: PostType, page: Int, size: Int): List<PostWithMember> = transaction {
-        (PostTable leftJoin MemberTable)
+    fun findPostsWithMemberByType(
+        type: PostType,
+        page: Int,
+        size: Int,
+        currentMemberId: Long?
+    ): List<PostWithMember> = transaction {
+
+        // ARTIST 게시판일 때만 필터링 적용
+        val artistIds: List<Long> = if (type == PostType.ARTIST && currentMemberId != null) {
+            (SubscriptionTable innerJoin ArtiProfileTable)
+                .select(ArtiProfileTable.id)
+                .where{ SubscriptionTable.member eq currentMemberId }
+                .map { it[ArtiProfileTable.id].value }
+        } else {
+            emptyList()
+        }
+
+        // 기본 쿼리
+        val baseQuery = (PostTable leftJoin MemberTable)
             .select(
                 PostTable.id,
                 PostTable.memberId,
@@ -186,22 +219,31 @@ class PostRepository {
                 PostTable.updatedAt,
                 MemberTable.nickname
             )
-            .where { PostTable.postType eq type }
+            .where {
+                if (artistIds.isNotEmpty()) {
+                    // 아티스트 게시판 + 구독한 아티스트만
+                    (PostTable.postType eq type) and (PostTable.memberId inList artistIds)
+                } else {
+                    PostTable.postType eq type
+                }
+            }
             .orderBy(PostTable.createdAt, SortOrder.DESC)
             .limit(size)
-            .offset ((page.toLong() - 1) * size)
-            .map { row ->
-                PostWithMember(
-                    postId = row[PostTable.id],
-                    memberId = row[PostTable.memberId],
-                    memberName = row[MemberTable.nickname] ?: "확인 안됨",
-                    postType = row[PostTable.postType],
-                    title = row[PostTable.title],
-                    content = row[PostTable.content],
-                    createdAt = row[PostTable.createdAt],
-                    updatedAt = row[PostTable.updatedAt]
-                )
-            }
+            .offset((page.toLong() - 1) * size)
+
+        // 결과 매핑
+        baseQuery.map { row ->
+            PostWithMember(
+                postId = row[PostTable.id],
+                memberId = row[PostTable.memberId],
+                memberName = row[MemberTable.nickname] ?: "확인 안됨",
+                postType = row[PostTable.postType],
+                title = row[PostTable.title],
+                content = row[PostTable.content],
+                createdAt = row[PostTable.createdAt],
+                updatedAt = row[PostTable.updatedAt]
+            )
+        }
     }
 
 
