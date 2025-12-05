@@ -41,19 +41,22 @@ class MemberController(
 
     @PostMapping("/signup")
     fun signup(@Valid @RequestBody request: SignupRequest): ResponseEntity<ApiResponse<SignupResponse>> {
-        val savedMember = memberService.signup(request)
+        val signupResult = memberService.signup(request)
         
-        val memberId = savedMember.id ?: run {
-            log.error("Critical: Member ID is null after save. Email: ${savedMember.email}")
+        val member = signupResult.member
+        val memberId = member.id ?: run {
+            log.error("Critical: Member ID is null after save. Email: ${member.email}")
             throw IllegalStateException("회원 저장 후 ID가 없습니다.")
         }
         
         val response = SignupResponse(
             memberId = memberId,
-            email = savedMember.email,
-            nickname = savedMember.nickname,
-            role = savedMember.role,
-            createdAt = savedMember.createdAt?.toOffsetDateTime() ?: OffsetDateTime.now(ZoneOffset.UTC)
+            email = member.email,
+            nickname = member.nickname,
+            role = member.role,
+            accessToken = signupResult.accessToken,
+            refreshToken = signupResult.refreshToken,
+            createdAt = member.createdAt?.toOffsetDateTime() ?: OffsetDateTime.now(ZoneOffset.UTC)
         )
         
         return ResponseEntity
