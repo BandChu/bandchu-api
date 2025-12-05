@@ -202,9 +202,12 @@ class PostRepository {
         // ARTIST 게시판일 때만 필터링 적용
         val artistIds: List<Long> = if (type == PostType.ARTIST && currentMemberId != null) {
             (SubscriptionTable innerJoin ArtiProfileTable)
-                .select(ArtiProfileTable.id)
-                .where{ SubscriptionTable.member eq currentMemberId }
-                .map { it[ArtiProfileTable.id].value }
+                .select(ArtiProfileTable.member)
+                .where{ 
+                    (SubscriptionTable.member eq currentMemberId) and
+                    (ArtiProfileTable.member.isNotNull())
+                }
+                .map { it[ArtiProfileTable.member]!!.value }
         } else {
             emptyList()
         }
