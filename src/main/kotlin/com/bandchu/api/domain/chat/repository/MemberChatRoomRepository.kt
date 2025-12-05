@@ -4,8 +4,12 @@ import com.bandchu.api.domain.chat.table.ChatRoomTable
 import com.bandchu.api.domain.chat.table.MemberChatRoomTable
 import com.bandchu.api.domain.chat.table.RoomType
 import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.count
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.inList
+import org.jetbrains.exposed.v1.core.innerJoin
 import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.update
 import org.springframework.stereotype.Repository
@@ -80,19 +84,16 @@ class MemberChatRoomRepository {
      * 두 사용자 간 공통 채팅방 찾기 (1:1 채팅방 중복 체크용)
      */
     fun findCommonDirectRoom(member1Id: Long, member2Id: Long): Long? {
-        val member1Rooms = findRoomIdsByMemberId(member1Id).toSet()
-        val member2Rooms = findRoomIdsByMemberId(member2Id).toSet()
-
-        val commonRoomIds = member1Rooms.intersect(member2Rooms)
-
-        // 공통된 방들 중에서 RoomType == DIRECT 인 방만 찾아서 반환
-        return commonRoomIds.firstOrNull { roomId ->
-            val room = ChatRoomTable
-                .selectAll()
-                .where { ChatRoomTable.id eq roomId }
-                .singleOrNull()
-
-            room != null && room[ChatRoomTable.roomType] == RoomType.DIRECT
-        }
+        return MemberChatRoomTable
+            .innerJoin(ChatRoomTable, { MemberChatRoomTable.roomId }, { ChatRoomTable.id })
+            .select(ChatRoomTable.id)
+            .where {
+                (ChatRoomTable.roomType eq RoomType.DIRECT) and
+                        (MemberChatRoomTable.memberId inList listOf(member1Id, member2Id))
+            }
+            .groupBy(ChatRoomTable.id)
+            .having { MemberChatRoomTable.memberId.count() eq 2 }
+            .map { it[ChatRoomTable.id] }
+            .firstOrNull()
     }
 }
