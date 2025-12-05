@@ -41,23 +41,37 @@ class ChatRoomService(
                 if (request.memberIds.size != 1) {
                     throw BusinessException(ErrorCode.CHATROOM_INVALID_REQUEST)
                 }
-                
                 val partnerId = request.memberIds.first()
+
                 val existingRoomId = memberChatRoomRepository.findCommonDirectRoom(currentUserId, partnerId)
-                
                 if (existingRoomId != null) {
                     throw BusinessException(ErrorCode.CHATROOM_DUPLICATE_DIRECT)
                 }
             }
 
             val now = OffsetDateTime.now(ZoneOffset.UTC)
-            
+
+            // DIRECT 채팅방 이름 자동 생성
+            val roomName = when (request.roomType) {
+                RoomType.DIRECT -> {
+                    // 파트너 이름을 조회해서 설정하거나
+                    val partnerId = request.memberIds.first()
+                    "Direct Chat" // 또는 실제 파트너 이름
+                }
+                RoomType.GROUP -> request.name ?: "Unnamed Group"
+                else -> request.name ?: "Unnamed Room"
+            }
+
             // 채팅방 생성
-            val roomId = chatRoomRepository.create(
-                name = request.name,
-                roomType = request.roomType,
-                createdAt = now
-            )
+            val roomId = try {
+                chatRoomRepository.create(
+                    name = roomName,
+                    roomType = request.roomType,
+                    createdAt = now
+                )
+            } catch (e: Exception) {
+                throw BusinessException(ErrorCode.CHATROOM_CREATE_FAILED)
+            }
 
             // 본인 추가
             memberChatRoomRepository.addMember(
@@ -80,7 +94,7 @@ class ChatRoomService(
             CreateChatRoomResponse(
                 roomId = roomId,
                 roomType = request.roomType,
-                name = request.name,
+                name = roomName,
                 createdAt = now
             )
         }
