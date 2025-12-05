@@ -3,6 +3,8 @@ package com.bandchu.api.domain.chat.repository
 import com.bandchu.api.domain.chat.table.ChatRoomTable
 import com.bandchu.api.domain.chat.table.MemberChatRoomTable
 import com.bandchu.api.domain.chat.table.RoomType
+import com.bandchu.api.domain.member.dto.MemberInfo
+import com.bandchu.api.domain.member.table.MemberTable
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.count
 import org.jetbrains.exposed.v1.core.eq
@@ -95,5 +97,23 @@ class MemberChatRoomRepository {
             .having { MemberChatRoomTable.memberId.count() eq 2 }
             .map { it[ChatRoomTable.id] }
             .firstOrNull()
+    }
+
+    fun findMembersByRoomId(roomId: Long): List<MemberInfo> {
+        return MemberChatRoomTable
+            .innerJoin(MemberTable, { MemberChatRoomTable.memberId }, { MemberTable.id })
+            .select(
+                MemberTable.id,
+                MemberTable.nickname,
+                MemberTable.profileImageUrl
+            )
+            .where { MemberChatRoomTable.roomId eq roomId }
+            .map { row ->
+                MemberInfo(
+                    userId = row[MemberTable.id].value,
+                    username = row[MemberTable.nickname],
+                    profileImageUrl = row[MemberTable.profileImageUrl]
+                )
+            }
     }
 }
