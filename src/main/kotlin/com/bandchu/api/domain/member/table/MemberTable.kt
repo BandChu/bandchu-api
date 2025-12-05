@@ -11,5 +11,6 @@ object MemberTable : LongIdTable("members") {
     val role = enumerationByName("role", 20, Role::class)
     val googleId = varchar("google_id", 255).nullable().uniqueIndex()
     val profileImageUrl = varchar("profile_image_url", 500).nullable()
+    val isProfileCompleted = bool("is_profile_completed").default(false)
     val createdAt = timestampWithTimeZone("created_at")
 }
