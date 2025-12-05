@@ -30,6 +30,6 @@ aws:
   s3:
     bucket: bandchu-bucket
   credentials:
-    accessKey: ${AWS_ACCESS_KEY}
-    secretKey: ${AWS_SECRET_KEY}
+    accessKey: ${AWS_CREDENTIAL_ACCESS_KEY}
+    secretKey: ${AWS_CREDENTIAL_SECRET_KEY}
     client-id: ${GOOGLE_CLIENT_ID}

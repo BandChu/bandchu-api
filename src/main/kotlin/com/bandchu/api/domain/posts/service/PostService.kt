@@ -124,7 +124,6 @@ class PostService(
 
     // 게시글 상세 조회
     fun getPostDetail(postId: Long): PostDetailResponse {
-        // 🔥 JOIN 포함한 단일 조회
         val post: PostWithMember = postRepository.findPostWithMemberById(postId)
             ?: throw BusinessException(ErrorCode.POST_NOT_FOUND)
 

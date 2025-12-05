@@ -61,6 +61,7 @@ enum class ErrorCode(
     CHATROOM_NOT_FOUND("chatroom-not-found", HttpStatus.NOT_FOUND, "해당 채팅방을 찾을 수 없습니다."),
     NOT_CHATROOM_MEMBER("not-chatroom-member", HttpStatus.FORBIDDEN, "해당 채팅방의 참여자가 아닙니다."),
     CHATROOM_INVALID_REQUEST("chatroom-invalid-request", HttpStatus.BAD_REQUEST, "잘못된 채팅방 요청입니다."),
+    CHATROOM_CREATE_FAILED ("chatroom-created-failed", HttpStatus.PRECONDITION_FAILED, "채팅방 생성에 실패하였습니다."),
 
     // ===== subscription =====
     SUBSCRIPTION_DUPLICATED("subscription-duplicated", HttpStatus.CONFLICT, "이미 구독 중인 아티스트입니다."),

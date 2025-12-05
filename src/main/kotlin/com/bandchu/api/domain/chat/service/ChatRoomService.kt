@@ -36,25 +36,39 @@ class ChatRoomService(
      */
     fun createChatRoom(request: CreateChatRoomRequest, currentUserId: Long): CreateChatRoomResponse {
         return transaction {
-            // DIRECT 타입인 경우 중복 체크
             if (request.roomType == RoomType.DIRECT) {
                 if (request.memberIds.size != 1) {
                     throw BusinessException(ErrorCode.CHATROOM_INVALID_REQUEST)
                 }
-                
+
                 val partnerId = request.memberIds.first()
                 val existingRoomId = memberChatRoomRepository.findCommonDirectRoom(currentUserId, partnerId)
-                
+
+                // 🔥 이미 있으면 그냥 그 방 정보 반환
                 if (existingRoomId != null) {
-                    throw BusinessException(ErrorCode.CHATROOM_DUPLICATE_DIRECT)
+                    val existingRoom = chatRoomRepository.findById(existingRoomId)
+                        ?: throw BusinessException(ErrorCode.CHATROOM_NOT_FOUND)
+
+                    return@transaction CreateChatRoomResponse(
+                        roomId = existingRoomId,
+                        roomType = RoomType.DIRECT,
+                        name = existingRoom.name,
+                        createdAt = existingRoom.createdAt
+                    )
                 }
             }
 
             val now = OffsetDateTime.now(ZoneOffset.UTC)
-            
-            // 채팅방 생성
+
+            // 새 채팅방 생성
+            val roomName = when (request.roomType) {
+                RoomType.DIRECT -> null
+                RoomType.GROUP -> request.name ?: "Unnamed Group"
+                else -> request.name ?: "Unnamed Room"
+            }
+
             val roomId = chatRoomRepository.create(
-                name = request.name,
+                name = roomName,
                 roomType = request.roomType,
                 createdAt = now
             )
@@ -80,7 +94,7 @@ class ChatRoomService(
             CreateChatRoomResponse(
                 roomId = roomId,
                 roomType = request.roomType,
-                name = request.name,
+                name = roomName,
                 createdAt = now
             )
         }
@@ -95,7 +109,7 @@ class ChatRoomService(
         return transaction {
             // 내가 속한 채팅방 ID 목록
             val roomIds = memberChatRoomRepository.findRoomIdsByMemberId(currentUserId)
-            
+
             if (roomIds.isEmpty()) {
                 return@transaction ChatRoomListResponse(emptyList())
             }
@@ -105,12 +119,23 @@ class ChatRoomService(
 
             // 각 방의 요약 정보 생성
             val summaries = chatRooms.map { room ->
+                // 채팅방 멤버 조회
+                val members = memberChatRoomRepository.findMembersByRoomId(room.id)
+
+                // DIRECT 채팅방은 상대방 이름으로 표시
+                val displayName = if (room.roomType == RoomType.DIRECT) {
+                    val partner = members.find { it.userId != currentUserId }
+                    partner?.username ?: "알 수 없는 사용자"
+                } else {
+                    room.name ?: "Unnamed Room"
+                }
+
                 // 마지막 메시지 조회
                 val lastMessage = chatMessageRepository.findLastMessageByRoomId(room.id)
-                
+
                 // 마지막으로 읽은 메시지 ID
                 val lastReadMessageId = memberChatRoomRepository.findLastReadMessageId(room.id, currentUserId)
-                
+
                 // 읽지 않은 메시지 개수 계산
                 val unreadCount = if (lastReadMessageId != null) {
                     chatMessageRepository.countUnreadMessages(
@@ -126,14 +151,16 @@ class ChatRoomService(
                 ChatRoomSummary(
                     roomId = room.id,
                     roomType = room.roomType,
-                    name = room.name,
+                    name = displayName,
                     lastMessage = lastMessage?.content,
                     unreadCount = unreadCount,
                     updatedAt = lastMessage?.createdAt
                 )
             }
 
-            ChatRoomListResponse(rooms = summaries)
+            ChatRoomListResponse(
+                rooms = summaries.sortedByDescending { it.updatedAt }
+            )
         }
     }
 
