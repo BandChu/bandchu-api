@@ -1,5 +1,6 @@
 package com.bandchu.api.domain.chat.controller
 
+import com.bandchu.api.domain.chat.dto.ChatRoomDetailResponse
 import com.bandchu.api.domain.chat.dto.ChatRoomListResponse
 import com.bandchu.api.domain.chat.dto.CreateChatRoomRequest
 import com.bandchu.api.domain.chat.dto.CreateChatRoomResponse
@@ -38,6 +39,17 @@ class ChatRoomController(private val chatRoomService: ChatRoomService) {
         val chatRooms = chatRoomService.getChatRoomList(currentUserId)
 
         return ApiResponse.success(data = chatRooms, message = "요청이 성공적으로 처리되었습니다.")
+    }
+
+    @GetMapping("/{roomId}")
+    fun getChatRoomDetail(@PathVariable roomId: Long): ApiResponse<ChatRoomDetailResponse> {
+        // SecurityContext에서 memberId 가져오기
+        val authentication = SecurityContextHolder.getContext().authentication
+        val currentUserId = authentication.principal as Long
+
+        val chatRoomDetail = chatRoomService.getChatRoomDetail(roomId, currentUserId)
+
+        return ApiResponse.success(data = chatRoomDetail, message = "요청이 성공적으로 처리되었습니다.")
     }
 
     @PutMapping("/{roomId}/read-status")
