@@ -22,5 +22,13 @@ data class ChatRoomSummary(
     val name: String?,
     val lastMessage: String?,
     val unreadCount: Int,
-    val updatedAt: OffsetDateTime?
+    val updatedAt: OffsetDateTime?,
+
+    val members: List<ChatRoomMemberInfo>? = null  // 멤버 정보 추가
+)
+
+data class ChatRoomMemberInfo(
+    val userId: Long,
+    val username: String,
+    val profileImage: String?
 )
