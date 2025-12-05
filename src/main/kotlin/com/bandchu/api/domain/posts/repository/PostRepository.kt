@@ -1,6 +1,5 @@
 package com.bandchu.api.domain.posts.repository
 
-import com.bandchu.api.domain.album.table.AlbumTable
 import com.bandchu.api.domain.artist.table.ArtiProfileTable
 import com.bandchu.api.domain.member.table.MemberTable
 import com.bandchu.api.domain.posts.dto.PostWithMember
