@@ -10,7 +10,7 @@ object MemberTable : LongIdTable("members") {
     val nickname = varchar("nickname", 50)
     val role = enumerationByName("role", 20, Role::class)
     val googleId = varchar("google_id", 255).nullable().uniqueIndex()
-    val profileImageUrl = varchar("profile_image_url", 500).nullable()
+    val profileImageUrl = text("profile_image_url").nullable() // base64 데이터 URL 저장을 위해 TEXT로 변경
     val isProfileCompleted = bool("is_profile_completed").default(false)
     val createdAt = timestampWithTimeZone("created_at")
 }
