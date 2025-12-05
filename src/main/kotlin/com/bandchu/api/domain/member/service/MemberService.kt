@@ -171,7 +171,8 @@ class MemberService(
             refreshToken = refreshToken,
             isNewMember = isNewMember,
             memberId = memberId,
-            nickname = member.nickname
+            nickname = member.nickname,
+            isProfileCompleted = member.isProfileCompleted
         )
     }
 

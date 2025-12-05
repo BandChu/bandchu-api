@@ -110,9 +110,16 @@ class MemberController(
             nickname = googleOAuthResult.nickname
         )
         
+        // 프로필 완료 상태에 따라 메시지 변경
+        val message = if (googleOAuthResult.isProfileCompleted) {
+            "구글 로그인에 성공했습니다."
+        } else {
+            "회원 유형을 선택해주세요."
+        }
+        
         return ResponseEntity
             .status(HttpStatus.OK)
-            .body(ApiResponse.success(response, "구글 로그인에 성공했습니다."))
+            .body(ApiResponse.success(response, message))
     }
 
     @PostMapping("/oauth/verify")
