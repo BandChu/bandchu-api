@@ -291,7 +291,7 @@ class PostRepository {
     //구독한 아티스트의 게시물 하나 조회
     fun findLatestSubArtistPost(currentMemberId: Long): PostWithMember? = transaction {
         val row = SubscriptionTable
-            .innerJoin(ArtiProfileTable, { AlbumTable.artiProfile }, { id })
+            .innerJoin(ArtiProfileTable, { SubscriptionTable.artiProfile }, { id })
             .innerJoin(PostTable, { ArtiProfileTable.member }, { memberId })
             .innerJoin(MemberTable, { PostTable.memberId }, { id })
             .select(
