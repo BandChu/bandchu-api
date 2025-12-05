@@ -31,6 +31,7 @@ enum class ErrorCode(
     POST_UPDATE_FAILED("post-update-failed", HttpStatus.INTERNAL_SERVER_ERROR, "게시글 수정에 실패했습니다."),
     POST_DELETE_FAILED("post-delete-failed", HttpStatus.INTERNAL_SERVER_ERROR, "게시글 삭제에 실패했습니다."),
     POST_TYPE_INVALID("post-type-invalid", HttpStatus.BAD_REQUEST, "유효하지 않은 게시판 타입입니다."),
+    NO_ARTIST_PERMISSION("no-artist-permission", HttpStatus.FORBIDDEN, "아티스트가 아닌 사용자는 아티스트 게시판에 작성 불가능합니다."),
 
     // ===== media =====
     MEDIA_UPLOAD_FAILED("media-upload-failed", HttpStatus.INTERNAL_SERVER_ERROR, "S3 업로드에 실패했습니다."),

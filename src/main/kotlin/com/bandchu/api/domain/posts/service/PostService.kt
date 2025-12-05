@@ -17,6 +17,7 @@ import com.bandchu.api.domain.posts.repository.PostRepository
 import com.bandchu.api.global.config.S3Uploader
 import com.bandchu.api.global.exception.BusinessException
 import com.bandchu.api.global.exception.ErrorCode
+import com.bandchu.api.global.util.getCurrentUserId
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 
@@ -29,22 +30,22 @@ class PostService(
     private val s3Uploader: S3Uploader
 ) {
 
-    // 모든 게시판의 최신 글 1개씩 조회
-    fun getAllPosts(): PostListResponse {
+    fun getAllPosts(currentMemberId: Long?): PostListResponse {
         val postTypes = listOf(
             PostType.FREE,
             PostType.MARKET,
             PostType.JOIN,
             PostType.REVIEW,
-            PostType.ARTIST,
-            PostType.DONGHAENG
+            PostType.DONGHAENG,
+            // PostType.ARTIST   // ARTIST는 구독한 아티스트 게시글로 별도 처리
         )
 
-        val posts: List<PostWithMember> = postRepository.findLatestPostWithMemberByTypes(postTypes)
+        val posts = postRepository.findLatestPostWithMemberByTypes(postTypes).toMutableList()
 
-//        if (posts.isEmpty()) {
-//            throw BusinessException(ErrorCode.POST_NOT_FOUND)
-//        }
+        // 구독한 아티스트 최신 게시글 1개 추가
+        currentMemberId?.let { postRepository.findLatestSubArtistPost(it) }?.let {
+            posts.add(it)
+        }
 
         return PostListResponse(
             posts = posts.map {
@@ -64,7 +65,11 @@ class PostService(
     }
 
     // 특정 게시판 타입별 게시글 조회 (페이징)
-    fun getPostByType(type: String, page: Int, size: Int): PostListResponse {
+    fun getPostByType(currentMemberId: Long?, type: String, page: Int, size: Int): PostListResponse {
+        if (currentMemberId == null && type == PostType.ARTIST.name) {
+            throw BusinessException(ErrorCode.POST_FORBIDDEN)
+        }
+
         val postType = try {
             PostType.valueOf(type.uppercase())
         } catch (e: IllegalArgumentException) {
@@ -72,7 +77,7 @@ class PostService(
         }
 
         val posts: List<PostWithMember> =
-            postRepository.findPostsWithMemberByType(postType, page, size)
+            postRepository.findPostsWithMemberByType(postType, page, size, currentMemberId)
 
         val totalElements = postRepository.countPostsByType(postType)
         val totalPages = if (totalElements == 0L) 0 else ((totalElements - 1) / size + 1).toInt()
