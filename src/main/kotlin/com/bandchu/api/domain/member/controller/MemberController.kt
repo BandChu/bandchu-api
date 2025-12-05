@@ -8,6 +8,7 @@ import com.bandchu.api.domain.member.dto.OAuthLinkRequest
 import com.bandchu.api.domain.member.dto.OAuthLinkResponse
 import com.bandchu.api.domain.member.dto.OAuthVerifyRequest
 import com.bandchu.api.domain.member.dto.OAuthVerifyResponse
+import com.bandchu.api.domain.member.dto.MemberInfoResponse
 import com.bandchu.api.domain.member.dto.ProfileSetupRequest
 import com.bandchu.api.domain.member.dto.ProfileSetupResponse
 import com.bandchu.api.domain.member.dto.RefreshTokenRequest
@@ -153,6 +154,33 @@ class MemberController(
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(ApiResponse.success(response, "소셜 계정이 연결되었습니다."))
+    }
+
+    @GetMapping("/me")
+    fun getMemberInfo(): ResponseEntity<ApiResponse<MemberInfoResponse>> {
+        // SecurityContext에서 인증된 회원 ID 가져오기
+        val authentication: Authentication = SecurityContextHolder.getContext().authentication
+            ?: throw BusinessException(ErrorCode.INVALID_TOKEN)
+        val memberId = authentication.principal as Long
+
+        val member = memberService.getMemberInfo(memberId)
+        
+        val memberIdValue = member.id ?: run {
+            log.error("Critical: Member ID is null. Email: ${member.email}")
+            throw IllegalStateException("회원 ID가 없습니다.")
+        }
+        
+        val response = MemberInfoResponse(
+            memberId = memberIdValue,
+            email = member.email,
+            nickname = member.nickname,
+            role = member.role,
+            profileImageUrl = member.profileImageUrl
+        )
+        
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(ApiResponse.success(response, "사용자 정보 조회에 성공했습니다."))
     }
 
     @DeleteMapping("/me")
