@@ -17,6 +17,7 @@ import com.bandchu.api.domain.posts.repository.PostRepository
 import com.bandchu.api.global.config.S3Uploader
 import com.bandchu.api.global.exception.BusinessException
 import com.bandchu.api.global.exception.ErrorCode
+import com.bandchu.api.global.util.getCurrentUserId
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 
@@ -29,22 +30,21 @@ class PostService(
     private val s3Uploader: S3Uploader
 ) {
 
-    // 모든 게시판의 최신 글 1개씩 조회
-    fun getAllPosts(): PostListResponse {
+    fun getAllPosts(currentMemberId: Long?): PostListResponse {
         val postTypes = listOf(
             PostType.FREE,
             PostType.MARKET,
             PostType.JOIN,
             PostType.REVIEW,
-            PostType.ARTIST,
-            PostType.DONGHAENG
+            PostType.DONGHAENG,
+            // PostType.ARTIST   // ARTIST는 구독한 아티스트 게시글로 별도 처리
         )
 
-        // 🔥 JOIN 으로 memberName 포함된 조회
-        val posts: List<PostWithMember> = postRepository.findLatestPostWithMemberByTypes(postTypes)
+        val posts = postRepository.findLatestPostWithMemberByTypes(postTypes).toMutableList()
 
-        if (posts.isEmpty()) {
-            throw BusinessException(ErrorCode.POST_NOT_FOUND)
+        // 구독한 아티스트 최신 게시글 1개 추가
+        currentMemberId?.let { postRepository.findLatestSubArtistPost(it) }?.let {
+            posts.add(it)
         }
 
         return PostListResponse(

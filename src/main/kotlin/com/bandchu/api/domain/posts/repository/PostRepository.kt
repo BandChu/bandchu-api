@@ -1,5 +1,6 @@
 package com.bandchu.api.domain.posts.repository
 
+import com.bandchu.api.domain.artist.table.ArtiProfileTable
 import com.bandchu.api.domain.member.table.MemberTable
 import com.bandchu.api.domain.posts.dto.PostWithMember
 import com.bandchu.api.domain.posts.dto.request.UpdatePostRequest
@@ -14,7 +15,9 @@ import com.bandchu.api.domain.posts.table.MediaTable
 import com.bandchu.api.domain.posts.table.PostTable
 import com.bandchu.api.domain.posts.table.PostType
 import com.bandchu.api.domain.posts.table.from
+import com.bandchu.api.domain.subscription.table.SubscriptionTable
 import org.jetbrains.exposed.v1.core.SortOrder
+import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
@@ -239,6 +242,47 @@ class PostRepository {
 
         results
     }
+
+    //구독한 아티스트의 게시물 하나 조회
+    fun findLatestSubArtistPost(currentMemberId: Long): PostWithMember? = transaction {
+        val row = (PostTable
+                innerJoin MemberTable
+                innerJoin ArtiProfileTable
+                innerJoin SubscriptionTable)
+            .select(
+                PostTable.id,
+                PostTable.memberId,
+                PostTable.postType,
+                PostTable.title,
+                PostTable.content,
+                PostTable.createdAt,
+                PostTable.updatedAt,
+                MemberTable.nickname
+            )
+            .where {
+                (SubscriptionTable.member eq currentMemberId) and
+                        (SubscriptionTable.artiProfile eq ArtiProfileTable.id) and
+                        (ArtiProfileTable.id eq PostTable.memberId) and
+                        (PostTable.postType eq PostType.ARTIST)
+            }
+            .orderBy(PostTable.createdAt to SortOrder.DESC)
+            .limit(1)
+            .singleOrNull()
+
+        row?.let {
+            PostWithMember(
+                postId = it[PostTable.id],
+                memberId = it[PostTable.memberId],
+                memberName = it[MemberTable.nickname],
+                postType = it[PostTable.postType],
+                title = it[PostTable.title],
+                content = it[PostTable.content],
+                createdAt = it[PostTable.createdAt],
+                updatedAt = it[PostTable.updatedAt]
+            )
+        }
+    }
+
 
     fun findPostWithMemberById(postId: Long): PostWithMember?  = transaction{
         (PostTable innerJoin MemberTable)
