@@ -40,12 +40,11 @@ class PostService(
             PostType.DONGHAENG
         )
 
-        // 🔥 JOIN 으로 memberName 포함된 조회
         val posts: List<PostWithMember> = postRepository.findLatestPostWithMemberByTypes(postTypes)
 
-        if (posts.isEmpty()) {
-            throw BusinessException(ErrorCode.POST_NOT_FOUND)
-        }
+//        if (posts.isEmpty()) {
+//            throw BusinessException(ErrorCode.POST_NOT_FOUND)
+//        }
 
         return PostListResponse(
             posts = posts.map {
