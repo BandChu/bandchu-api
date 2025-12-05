@@ -235,7 +235,7 @@ class PostRepository {
         baseQuery.map { row ->
             PostWithMember(
                 postId = row[PostTable.id],
-                memberId = row[PostTable.memberId],
+                memberId = row[PostTable.memberId].value,
                 memberName = row[MemberTable.nickname] ?: "확인 안됨",
                 postType = row[PostTable.postType],
                 title = row[PostTable.title],
