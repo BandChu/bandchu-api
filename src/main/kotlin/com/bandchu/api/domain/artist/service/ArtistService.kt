@@ -58,7 +58,19 @@ class ArtistService(
     }
 
     fun getMyDetail(currentUserId: Long): ArtistMeResponse {
-        if (getCurrentUserRole() != Role.ARTIST) throw BusinessException(ErrorCode.ARTIST_INSUFFICIENT_ROLE)
+        // 역할 체크를 try-catch로 감싸서 안전하게 처리
+        try {
+            val currentRole = getCurrentUserRole()
+            if (currentRole != Role.ARTIST) {
+                throw BusinessException(ErrorCode.ARTIST_INSUFFICIENT_ROLE)
+            }
+        } catch (e: BusinessException) {
+            // 이미 BusinessException이면 그대로 던짐
+            throw e
+        } catch (e: Exception) {
+            // 다른 예외(예: USER_INVALID_CREDENTIAL)는 그대로 던짐
+            throw BusinessException(ErrorCode.USER_INVALID_CREDENTIAL)
+        }
 
         val artiProfile: ArtiProfile = artistRepository.findByMemberId(currentUserId) ?: return ArtistMeResponse(
             isExists = false,
