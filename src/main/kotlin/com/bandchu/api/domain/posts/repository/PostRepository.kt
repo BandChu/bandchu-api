@@ -1,5 +1,6 @@
 package com.bandchu.api.domain.posts.repository
 
+import com.bandchu.api.domain.album.table.AlbumTable
 import com.bandchu.api.domain.artist.table.ArtiProfileTable
 import com.bandchu.api.domain.member.table.MemberTable
 import com.bandchu.api.domain.posts.dto.PostWithMember
@@ -22,6 +23,8 @@ import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.inList
+import org.jetbrains.exposed.v1.core.innerJoin
+import org.jetbrains.exposed.v1.core.isNotNull
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.select
@@ -235,7 +238,7 @@ class PostRepository {
         baseQuery.map { row ->
             PostWithMember(
                 postId = row[PostTable.id],
-                memberId = row[PostTable.memberId],
+                memberId = row[PostTable.memberId].value,
                 memberName = row[MemberTable.nickname] ?: "확인 안됨",
                 postType = row[PostTable.postType],
                 title = row[PostTable.title],
@@ -287,10 +290,10 @@ class PostRepository {
 
     //구독한 아티스트의 게시물 하나 조회
     fun findLatestSubArtistPost(currentMemberId: Long): PostWithMember? = transaction {
-        val row = (PostTable
-                innerJoin MemberTable
-                innerJoin ArtiProfileTable
-                innerJoin SubscriptionTable)
+        val row = SubscriptionTable
+            .innerJoin(ArtiProfileTable, { AlbumTable.artiProfile }, { id })
+            .innerJoin(PostTable, { ArtiProfileTable.member }, { memberId })
+            .innerJoin(MemberTable, { PostTable.memberId }, { id })
             .select(
                 PostTable.id,
                 PostTable.memberId,
@@ -303,9 +306,8 @@ class PostRepository {
             )
             .where {
                 (SubscriptionTable.member eq currentMemberId) and
-                        (SubscriptionTable.artiProfile eq ArtiProfileTable.id) and
-                        (ArtiProfileTable.id eq PostTable.memberId) and
-                        (PostTable.postType eq PostType.ARTIST)
+                        (PostTable.postType eq PostType.ARTIST) and
+                        (ArtiProfileTable.member.isNotNull())
             }
             .orderBy(PostTable.createdAt to SortOrder.DESC)
             .limit(1)
@@ -314,7 +316,7 @@ class PostRepository {
         row?.let {
             PostWithMember(
                 postId = it[PostTable.id],
-                memberId = it[PostTable.memberId],
+                memberId = it[PostTable.memberId].value,
                 memberName = it[MemberTable.nickname],
                 postType = it[PostTable.postType],
                 title = it[PostTable.title],
