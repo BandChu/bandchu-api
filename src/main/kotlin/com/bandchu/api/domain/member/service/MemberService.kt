@@ -271,5 +271,17 @@ class MemberService(
         // 프로필 업데이트
         return memberRepository.updateProfile(memberId, nickname, profileImageUrl)
     }
+
+    fun updateRole(memberId: Long, role: Role): Member {
+        // 회원 존재 확인
+        memberRepository.findById(memberId)
+            ?: run {
+                log.error("Critical: Member not found by ID. MemberId: $memberId")
+                throw IllegalStateException("회원을 찾을 수 없습니다.")
+            }
+
+        // 역할 업데이트
+        return memberRepository.updateRole(memberId, role)
+    }
 }
 

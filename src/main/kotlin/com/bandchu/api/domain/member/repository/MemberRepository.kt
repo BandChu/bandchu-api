@@ -109,6 +109,20 @@ class MemberRepository {
         }
     }
 
+    fun updateRole(memberId: Long, role: com.bandchu.api.domain.member.model.Role): Member {
+        return transaction {
+            MemberTable.update({ MemberTable.id eq memberId }) {
+                it[MemberTable.role] = role
+            }
+            
+            MemberTable
+                .selectAll()
+                .where { MemberTable.id eq memberId }
+                .single()
+                .let { toMember(it) }
+        }
+    }
+
     private fun toMember(row: ResultRow): Member {
         val offsetDateTime = row[MemberTable.createdAt]
         val localDateTime = offsetDateTime.toKotlinLocalDateTime()

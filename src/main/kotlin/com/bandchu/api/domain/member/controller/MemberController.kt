@@ -12,6 +12,8 @@ import com.bandchu.api.domain.member.dto.ProfileSetupRequest
 import com.bandchu.api.domain.member.dto.ProfileSetupResponse
 import com.bandchu.api.domain.member.dto.RefreshTokenRequest
 import com.bandchu.api.domain.member.dto.RefreshTokenResponse
+import com.bandchu.api.domain.member.dto.RoleUpdateRequest
+import com.bandchu.api.domain.member.dto.RoleUpdateResponse
 import com.bandchu.api.domain.member.dto.SignupRequest
 import com.bandchu.api.domain.member.dto.SignupResponse
 import com.bandchu.api.domain.member.service.MemberService
@@ -183,6 +185,30 @@ class MemberController(
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(ApiResponse.success(response, "프로필 초기 설정이 완료되었습니다."))
+    }
+
+    @PatchMapping("/me/role")
+    fun updateRole(@Valid @RequestBody request: RoleUpdateRequest): ResponseEntity<ApiResponse<RoleUpdateResponse>> {
+        // SecurityContext에서 인증된 회원 ID 가져오기
+        val authentication: Authentication = SecurityContextHolder.getContext().authentication
+            ?: throw BusinessException(ErrorCode.INVALID_TOKEN)
+        val memberId = authentication.principal as Long
+
+        val updatedMember = memberService.updateRole(memberId, request.role)
+        
+        val memberIdValue = updatedMember.id ?: run {
+            log.error("Critical: Member ID is null after role update. Email: ${updatedMember.email}")
+            throw IllegalStateException("회원 ID가 없습니다.")
+        }
+        
+        val response = RoleUpdateResponse(
+            memberId = memberIdValue,
+            role = updatedMember.role
+        )
+        
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(ApiResponse.success(response, "역할이 업데이트되었습니다."))
     }
 }
 
