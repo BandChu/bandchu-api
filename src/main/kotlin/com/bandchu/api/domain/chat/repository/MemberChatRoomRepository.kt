@@ -116,4 +116,28 @@ class MemberChatRoomRepository {
                 )
             }
     }
+
+    /**
+     * 채팅방 멤버 상세 정보 조회 (role 포함)
+     */
+    fun findMembersWithRoleByRoomId(roomId: Long): List<Pair<MemberInfo, String?>> {
+        return MemberChatRoomTable
+            .innerJoin(MemberTable, { MemberChatRoomTable.memberId }, { MemberTable.id })
+            .select(
+                MemberTable.id,
+                MemberTable.nickname,
+                MemberTable.profileImageUrl,
+                MemberChatRoomTable.role
+            )
+            .where { MemberChatRoomTable.roomId eq roomId }
+            .map { row ->
+                val memberInfo = MemberInfo(
+                    userId = row[MemberTable.id].value,
+                    username = row[MemberTable.nickname],
+                    profileImageUrl = row[MemberTable.profileImageUrl]
+                )
+                val role = row[MemberChatRoomTable.role]
+                Pair(memberInfo, role)
+            }
+    }
 }

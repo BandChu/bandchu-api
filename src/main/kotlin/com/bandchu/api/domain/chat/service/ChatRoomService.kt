@@ -1,6 +1,8 @@
 package com.bandchu.api.domain.chat.service
 
+import com.bandchu.api.domain.chat.dto.ChatRoomDetailResponse
 import com.bandchu.api.domain.chat.dto.ChatRoomListResponse
+import com.bandchu.api.domain.chat.dto.ChatRoomMemberDetail
 import com.bandchu.api.domain.chat.dto.ChatRoomSummary
 import com.bandchu.api.domain.chat.dto.CreateChatRoomRequest
 import com.bandchu.api.domain.chat.dto.CreateChatRoomResponse
@@ -160,6 +162,51 @@ class ChatRoomService(
 
             ChatRoomListResponse(
                 rooms = summaries.sortedByDescending { it.updatedAt }
+            )
+        }
+    }
+
+    /**
+     * 4. 채팅방 상세 조회
+     * - 특정 채팅방의 상세 정보와 멤버 목록 반환
+     */
+    fun getChatRoomDetail(roomId: Long, currentUserId: Long): ChatRoomDetailResponse {
+        return transaction {
+            // 채팅방 존재 확인
+            val chatRoom = chatRoomRepository.findById(roomId)
+                ?: throw BusinessException(ErrorCode.CHATROOM_NOT_FOUND)
+
+            // 사용자가 해당 채팅방의 참여자인지 확인
+            val memberIds = memberChatRoomRepository.findMemberIdsByRoomId(roomId)
+            if (!memberIds.contains(currentUserId)) {
+                throw BusinessException(ErrorCode.NOT_CHATROOM_MEMBER)
+            }
+
+            // 채팅방 멤버 조회 (role 포함)
+            val membersWithRole = memberChatRoomRepository.findMembersWithRoleByRoomId(roomId)
+            val members = membersWithRole.map { (memberInfo, role) ->
+                ChatRoomMemberDetail(
+                    userId = memberInfo.userId,
+                    username = memberInfo.username,
+                    profileImage = memberInfo.profileImageUrl,
+                    role = role
+                )
+            }
+
+            // DIRECT 채팅방은 상대방 이름으로 표시
+            val displayName = if (chatRoom.roomType == RoomType.DIRECT) {
+                val partner = members.find { it.userId != currentUserId }
+                partner?.username ?: "알 수 없는 사용자"
+            } else {
+                chatRoom.name ?: "Unnamed Room"
+            }
+
+            ChatRoomDetailResponse(
+                roomId = chatRoom.id,
+                roomType = chatRoom.roomType,
+                name = displayName,
+                members = members,
+                createdAt = chatRoom.createdAt
             )
         }
     }
