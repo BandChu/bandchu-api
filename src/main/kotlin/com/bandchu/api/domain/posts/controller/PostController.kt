@@ -34,7 +34,7 @@ class PostController(
     // 모든 게시판의 최신 글 1개씩 조회
     @GetMapping
     fun getAllPosts(): ApiResponse<PostListResponse> {
-        val result = postService.getAllPosts() // Service 메서드명에 맞춤
+        val result = postService.getAllPosts(getCurrentUserId())
         return ApiResponse.success(
             data = result,
             message = "해당 회원이 볼 수 있는 모든 게시글을 보여줍니다."
@@ -48,7 +48,7 @@ class PostController(
         @RequestParam(required = false, defaultValue = "1") page: Int,
         @RequestParam(required = false, defaultValue = "10") size: Int,
     ): ApiResponse<PostListResponse> {
-        val result = postService.getPostByType(
+        val result = postService.getPostByType(getCurrentUserId(),
             type = type,
             page = page,
             size = size
