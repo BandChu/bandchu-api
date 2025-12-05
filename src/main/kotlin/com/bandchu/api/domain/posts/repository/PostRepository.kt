@@ -314,7 +314,7 @@ class PostRepository {
         row?.let {
             PostWithMember(
                 postId = it[PostTable.id],
-                memberId = it[PostTable.memberId],
+                memberId = it[PostTable.memberId].value,
                 memberName = it[MemberTable.nickname],
                 postType = it[PostTable.postType],
                 title = it[PostTable.title],
