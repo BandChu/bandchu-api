@@ -82,7 +82,7 @@ class PostRepository {
             if (type == PostType.ARTIST) {
                 val isArtist = ArtiProfileTable
                     .selectAll()
-                    .where{ ArtiProfileTable.id eq memberId }
+                    .where{ ArtiProfileTable.member eq memberId }
                     .empty()
                     .not()
 
