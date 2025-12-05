@@ -1,5 +1,6 @@
 package com.bandchu.api.domain.posts.service
 
+import com.bandchu.api.domain.artist.table.ArtiProfileTable
 import com.bandchu.api.domain.member.repository.MemberRepository
 import com.bandchu.api.domain.posts.dto.request.CreatePostRequest
 import com.bandchu.api.domain.posts.dto.response.CreatePostResponse
@@ -18,6 +19,9 @@ import com.bandchu.api.global.config.S3Uploader
 import com.bandchu.api.global.exception.BusinessException
 import com.bandchu.api.global.exception.ErrorCode
 import com.bandchu.api.global.util.getCurrentUserId
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 
@@ -183,6 +187,21 @@ class PostService(
 
         if (memberId != postRepository.findUserIdById(postId)) {
             throw BusinessException(ErrorCode.POST_FORBIDDEN)
+        }
+
+        // ARTIST 게시판 수정 시 아티스트 검증
+        if (post.type == PostType.ARTIST) {
+            val isArtist = transaction {
+                ArtiProfileTable
+                    .selectAll()
+                    .where { ArtiProfileTable.member eq memberId }
+                    .empty()
+                    .not()
+            }
+
+            if (!isArtist) {
+                throw BusinessException(ErrorCode.NO_ARTIST_PERMISSION)
+            }
         }
 
         return postRepository.updatePost(postId, req)
