@@ -1,6 +1,8 @@
 package com.bandchu.api.domain.chat.repository
 
+import com.bandchu.api.domain.chat.table.ChatRoomTable
 import com.bandchu.api.domain.chat.table.MemberChatRoomTable
+import com.bandchu.api.domain.chat.table.RoomType
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.insert
@@ -80,9 +82,17 @@ class MemberChatRoomRepository {
     fun findCommonDirectRoom(member1Id: Long, member2Id: Long): Long? {
         val member1Rooms = findRoomIdsByMemberId(member1Id).toSet()
         val member2Rooms = findRoomIdsByMemberId(member2Id).toSet()
-        
-        return member1Rooms.intersect(member2Rooms).firstOrNull { roomId ->
-            findMemberIdsByRoomId(roomId).size == 2
+
+        val commonRoomIds = member1Rooms.intersect(member2Rooms)
+
+        // 공통된 방들 중에서 RoomType == DIRECT 인 방만 찾아서 반환
+        return commonRoomIds.firstOrNull { roomId ->
+            val room = ChatRoomTable
+                .selectAll()
+                .where { ChatRoomTable.id eq roomId }
+                .singleOrNull()
+
+            room != null && room[ChatRoomTable.roomType] == RoomType.DIRECT
         }
     }
 }
