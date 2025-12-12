@@ -37,6 +37,7 @@ import org.springframework.context.annotation.FilterType
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.transaction.annotation.Transactional
@@ -47,6 +48,7 @@ import java.time.OffsetDateTime
 
 @SpringBootTest
 @Transactional
+@ActiveProfiles("test")
 @AutoConfigureMockMvc
 @Import(PostTestConfig::class)
 
