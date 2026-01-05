@@ -279,7 +279,8 @@ class MemberControllerTest(
                     refreshToken = "refresh-token",
                     isNewMember = false,
                     memberId = 1L,
-                    nickname = "GoogleUser"
+                    nickname = "GoogleUser",
+                    isProfileCompleted = true
                 )
 
                 every { memberService.googleLogin(request.idToken) } returns googleOAuthResult
@@ -312,7 +313,8 @@ class MemberControllerTest(
                     refreshToken = "refresh-token",
                     isNewMember = true,
                     memberId = 2L,
-                    nickname = "NewGoogleUser"
+                    nickname = "NewGoogleUser",
+                    isProfileCompleted = false
                 )
 
                 every { memberService.googleLogin(request.idToken) } returns googleOAuthResult

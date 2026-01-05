@@ -90,26 +90,20 @@ class MemberService(
             throw BusinessException(ErrorCode.INVALID_REFRESH_TOKEN)
         }
 
-        // 회원 ID와 역할 추출
+        // 회원 ID 추출
         val memberId = try {
             jwtService.getMemberIdFromToken(refreshToken)
         } catch (e: Exception) {
             throw BusinessException(ErrorCode.INVALID_REFRESH_TOKEN)
         }
 
-        val role = try {
-            jwtService.getRoleFromToken(refreshToken)
-        } catch (e: Exception) {
-            throw BusinessException(ErrorCode.INVALID_REFRESH_TOKEN)
-        }
-
-        // 회원 존재 확인
-        memberRepository.findById(memberId)
+        // 회원 존재 확인 및 최신 역할 정보 조회
+        val member = memberRepository.findById(memberId)
             ?: throw BusinessException(ErrorCode.INVALID_REFRESH_TOKEN)
 
-        // 새로운 토큰 발급
-        val newAccessToken = jwtService.generateAccessToken(memberId, role)
-        val newRefreshToken = jwtService.generateRefreshToken(memberId, role)
+        // 새로운 토큰 발급 (DB에서 조회한 최신 역할 사용)
+        val newAccessToken = jwtService.generateAccessToken(memberId, member.role)
+        val newRefreshToken = jwtService.generateRefreshToken(memberId, member.role)
 
         return TokenPair(
             accessToken = newAccessToken,

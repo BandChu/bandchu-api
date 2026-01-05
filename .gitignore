@@ -52,3 +52,7 @@ docs/DEPLOYMENT.md
 
 ### MAC OS ###
 .DS_Store
+
+### Local Test Data ###
+data/
+test-role-refresh.sh
