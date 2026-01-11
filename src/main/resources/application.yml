@@ -29,7 +29,7 @@ spring:
 server:
   # HTTP 요청 크기 제한 (base64 데이터 URL 저장을 위해 증가)
   max-http-header-size: 1MB
-  max-http-post-size: 10MB
+  max-http-post-size: 10MBㄴ
 
 oauth:
   google:

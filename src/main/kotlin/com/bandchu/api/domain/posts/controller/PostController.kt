@@ -11,6 +11,8 @@ import com.bandchu.api.domain.posts.service.CommentService
 import com.bandchu.api.domain.posts.service.PostService
 import com.bandchu.api.global.response.ApiResponse
 import com.bandchu.api.global.util.getCurrentUserId
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -26,11 +28,12 @@ import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/api/posts")
+@Tag(name = "Post", description = "게시판 관련 API")
 class PostController(
     private val postService: PostService,
     private val commentService: CommentService,
 ) {
-
+    @Operation(summary = "앨범 일부 삭제", description = "앨범을 앨범 ID를 통해 삭제합니다")
     // 모든 게시판의 최신 글 1개씩 조회
     @GetMapping
     fun getAllPosts(): ApiResponse<PostListResponse> {
@@ -40,7 +43,7 @@ class PostController(
             message = "해당 회원이 볼 수 있는 모든 게시글을 보여줍니다."
         )
     }
-
+    @Operation(summary = "앨범 일부 삭제", description = "앨범을 앨범 ID를 통해 삭제합니다")
     // 특정 게시판 타입별 게시글 조회 (페이징)
     @GetMapping("/postType")
     fun getPostsByType(
@@ -58,7 +61,7 @@ class PostController(
             message = "특정 게시판의 주어진 분량에 대한 글이 성공적으로 전송되었습니다."
         )
     }
-
+    @Operation(summary = "앨범 일부 삭제", description = "앨범을 앨범 ID를 통해 삭제합니다")
     // 게시글 생성
     @PostMapping
     fun createPost(
@@ -71,7 +74,7 @@ class PostController(
             message = "게시글이 성공적으로 생성되었습니다."
         )
     }
-
+    @Operation(summary = "앨범 일부 삭제", description = "앨범을 앨범 ID를 통해 삭제합니다")
     // 게시글 상세 조회
     @GetMapping("/{postId}")
     fun getPostDetail(
@@ -83,7 +86,7 @@ class PostController(
             message = "해당 게시글 상세 정보를 불러왔습니다."
         )
     }
-
+    @Operation(summary = "앨범 일부 삭제", description = "앨범을 앨범 ID를 통해 삭제합니다")
     // 게시글 수정
     @PatchMapping("/{postId}")
     fun updatePost(
@@ -97,7 +100,7 @@ class PostController(
             message = "게시글이 성공적으로 업데이트되었습니다."
         )
     }
-
+    @Operation(summary = "앨범 일부 삭제", description = "앨범을 앨범 ID를 통해 삭제합니다")
     // 게시글 삭제
     @DeleteMapping("/{postId}")
     fun deletePost(
@@ -110,7 +113,7 @@ class PostController(
             message = "게시글이 성공적으로 삭제되었습니다."
         )
     }
-
+    @Operation(summary = "앨범 일부 삭제", description = "앨범을 앨범 ID를 통해 삭제합니다")
     // 미디어 업로드
     @PostMapping("/create/media/{postId}", consumes = ["multipart/form-data"])
     fun uploadMedia(
@@ -123,7 +126,7 @@ class PostController(
             message = "미디어가 업로드되었습니다."
         )
     }
-
+    @Operation(summary = "앨범 일부 삭제", description = "앨범을 앨범 ID를 통해 삭제합니다")
     // 댓글 생성
     @PostMapping("/comments")
     fun createComment(
@@ -137,7 +140,7 @@ class PostController(
             message = "댓글이 작성되었습니다."
         )
     }
-
+    @Operation(summary = "앨범 일부 삭제", description = "앨범을 앨범 ID를 통해 삭제합니다")
     // 댓글 삭제
     @DeleteMapping("/comments/{commentId}")
     fun deleteComment(
@@ -150,7 +153,7 @@ class PostController(
             message = "게시글의 댓글이 삭제되었습니다."
         )
     }
-    
+    @Operation(summary = "앨범 일부 삭제", description = "앨범을 앨범 ID를 통해 삭제합니다")
     //댓글 수정
     @PutMapping("/comments/{commentId}")
     fun updateComment(
