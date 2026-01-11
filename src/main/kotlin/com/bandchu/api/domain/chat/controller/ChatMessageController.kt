@@ -5,14 +5,18 @@ import com.bandchu.api.domain.chat.dto.MessagePageResponse
 import com.bandchu.api.domain.chat.dto.SendMessageRequest
 import com.bandchu.api.domain.chat.service.ChatMessageService
 import com.bandchu.api.global.response.ApiResponse
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping(value = ["/api/chatrooms"])
+@Tag(name = "ChatMessage", description = "채팅 메세지 관련 API")
 class ChatMessageController(private val chatMessageService: ChatMessageService) {
 
+    @Operation(summary = "메세지 전송", description = "해당하는 roomId에 메세지를 전송합니다")
     @PostMapping("/{roomId}/messages")
     @ResponseStatus(HttpStatus.CREATED)
     fun sendMessage(
@@ -33,6 +37,7 @@ class ChatMessageController(private val chatMessageService: ChatMessageService) 
         return ApiResponse(success = true, data = message, message = "요청이 성공적으로 처리되었습니다.")
     }
 
+    @Operation(summary = "메세지 가져오기", description = "해당하는 roomId의 최신 메세지들을 가져옵니다. size: 30")
     @GetMapping("/{roomId}/messages")
     fun getMessages(
             @PathVariable roomId: Long,
