@@ -1,6 +1,7 @@
 package com.bandchu.api.domain.artists
 
 import com.bandchu.api.domain.artist.service.ArtistService
+import com.bandchu.api.domain.member.repository.MemberRepository
 import com.bandchu.api.domain.member.service.MemberService
 import com.bandchu.api.fixture.ArtistFixture
 import com.bandchu.api.fixture.AuthFixture
@@ -11,10 +12,10 @@ import org.springframework.context.annotation.Bean
 class ArtisTestConfig {
     @Bean
     fun authFixture(
-        memberService: MemberService
+        memberService: MemberService,
     ): AuthFixture {
         return AuthFixture(
-            memberService = memberService
+            memberService = memberService,
         )
     }
 

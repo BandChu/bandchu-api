@@ -1,29 +1,38 @@
 package com.bandchu.api.domain.posts.table
 
-import com.bandchu.api.domain.artist.table.ArtiProfileTable
 import com.bandchu.api.domain.member.table.MemberTable
-import com.bandchu.api.domain.posts.model.PostType
+import com.bandchu.api.domain.posts.dto.PostRow
+import org.jetbrains.exposed.v1.core.ReferenceOption
+import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.Table
-import org.jetbrains.exposed.v1.datetime.datetime
+import org.jetbrains.exposed.v1.datetime.timestampWithTimeZone
 
 object PostTable : Table("posts") {
 
     val id = long("post_id").autoIncrement()
 
-    val post_type = enumerationByName("post_type", 20, PostType::class)
+    val memberId = reference("member_id", MemberTable.id, onDelete = ReferenceOption.CASCADE)
 
-    val title = varchar("title", 20)
+    val postType = enumerationByName("post_type", 20, PostType::class) // FREE, MARKET, JOIN, REVIEW, ARTIST
 
-    val content = varchar("content", 100)
+    val title = varchar("title", length = 20)
+    val content = varchar("content", length = 100)
 
-    val createdAt = datetime("created_at")
+    val createdAt = timestampWithTimeZone("created_at")
+    val updatedAt = timestampWithTimeZone("updated_at")
 
-    val updatedAt = datetime("updated_at")
-
-    val artistProfileId = long("artiprofile_id").references(ArtiProfileTable.id)
-
-    val memberId = long("member_id")
-        .references(MemberTable.id)
 
     override val primaryKey = PrimaryKey(id)
+}
+
+fun PostTable.from(row: ResultRow): PostRow {
+    return PostRow(
+        id = row[id],
+        memberId = row[memberId].value,
+        type = row[postType],
+        title = row[title],
+        content = row[content],
+        createdAt = row[createdAt],
+        updatedAt = row[updatedAt]
+    )
 }

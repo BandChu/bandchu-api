@@ -10,6 +10,7 @@ import com.bandchu.api.domain.chat.table.ChatRoomTable
 import com.bandchu.api.domain.chat.table.MemberChatRoomTable
 import com.bandchu.api.domain.concert.table.ConcertScheduleTable
 import com.bandchu.api.domain.concert.table.ConcertTable
+import com.bandchu.api.domain.friend.table.FriendTable
 import com.bandchu.api.domain.member.table.MemberTable
 import com.bandchu.api.domain.posts.table.CommentTable
 import com.bandchu.api.domain.posts.table.MediaTable
@@ -59,7 +60,10 @@ class DatabaseConfig(
                 ConcertTable,
                 ConcertScheduleTable,
                 AlbumTable,
-                TrackTable
+                TrackTable,
+
+                // friends
+                FriendTable,
             )
         }
 

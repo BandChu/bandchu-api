@@ -93,16 +93,18 @@ class ChatMessageRepository {
      * @return 읽지 않은 메시지 개수
      */
     fun countUnreadMessages(roomId: Long, afterMessageId: Long, excludeSenderId: Long): Int {
-        return ChatMessageTable
-            .select(ChatMessageTable.id)
-            .where {
-                (ChatMessageTable.roomId eq roomId) and
-                (ChatMessageTable.id greater afterMessageId) and
-                (ChatMessageTable.senderId neq excludeSenderId)
-            }
-            .count()
-            .toInt()
+        return transaction { // transaction 추가!
+            ChatMessageTable.select(ChatMessageTable.id)
+                    .where {
+                        (ChatMessageTable.roomId eq roomId) and
+                                (ChatMessageTable.id greater afterMessageId) and
+                                (ChatMessageTable.senderId neq excludeSenderId)
+                    }
+                    .count()
+                    .toInt()
+        }
     }
+
 
     /**
      * 채팅방의 전체 메시지 개수 (본인 제외)

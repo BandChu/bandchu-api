@@ -19,7 +19,7 @@ data class ChatMessageResponse(
             return ChatMessageResponse(
                 messageId = row[ChatMessageTable.id],
                 roomId = row[ChatMessageTable.roomId],
-                senderId = row[ChatMessageTable.senderId],
+                senderId = row[ChatMessageTable.senderId].value,
                 messageType = row[ChatMessageTable.messageType],
                 content = row[ChatMessageTable.content],
                 fileUrl = row[ChatMessageTable.fileUrl],

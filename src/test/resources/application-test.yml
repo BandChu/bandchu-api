@@ -1,10 +1,13 @@
 spring:
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/bandchu_chat}
-    username: ${DB_USERNAME:jung-yoonsuh}
-    password: ${DB_PASSWORD:}
-    driver-class-name: org.postgresql.Driver
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
   sql:
     init:
-      mode: always
-      data-locations: classpath:test-data.sql
+      mode: never
+
+logging:
+  level:
+    root: warn

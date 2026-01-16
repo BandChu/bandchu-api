@@ -1,18 +1,16 @@
 package com.bandchu.api.domain.posts.table
 
 import org.jetbrains.exposed.v1.core.Table
-import org.jetbrains.exposed.v1.datetime.datetime
+import org.jetbrains.exposed.v1.datetime.timestampWithTimeZone
 
-object ReportTable : Table("reports") {
+object ReportTable : Table("report") {
+    val id = long("report_id").autoIncrement()
 
-val id = integer("report_id").autoIncrement()
+    val reportAt = timestampWithTimeZone("report_at")
+    val reason = varchar("reason", length = 20)
 
-    val reported_at = datetime("reported_at")
+    val postId = long("post_id")
+        .references(PostTable.id)
 
-    val reason = varchar("reason", 20)
-
-    val post_id = long("post_id").references(PostTable.id)
     override val primaryKey = PrimaryKey(id)
-
-
 }

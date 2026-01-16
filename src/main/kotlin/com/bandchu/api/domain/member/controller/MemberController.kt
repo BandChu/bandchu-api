@@ -8,10 +8,13 @@ import com.bandchu.api.domain.member.dto.OAuthLinkRequest
 import com.bandchu.api.domain.member.dto.OAuthLinkResponse
 import com.bandchu.api.domain.member.dto.OAuthVerifyRequest
 import com.bandchu.api.domain.member.dto.OAuthVerifyResponse
+import com.bandchu.api.domain.member.dto.MemberInfoResponse
 import com.bandchu.api.domain.member.dto.ProfileSetupRequest
 import com.bandchu.api.domain.member.dto.ProfileSetupResponse
 import com.bandchu.api.domain.member.dto.RefreshTokenRequest
 import com.bandchu.api.domain.member.dto.RefreshTokenResponse
+import com.bandchu.api.domain.member.dto.RoleUpdateRequest
+import com.bandchu.api.domain.member.dto.RoleUpdateResponse
 import com.bandchu.api.domain.member.dto.SignupRequest
 import com.bandchu.api.domain.member.dto.SignupResponse
 import com.bandchu.api.domain.member.service.MemberService
@@ -19,6 +22,8 @@ import com.bandchu.api.global.exception.BusinessException
 import com.bandchu.api.global.exception.ErrorCode
 import com.bandchu.api.global.response.ApiResponse
 import com.bandchu.api.global.util.toOffsetDateTime
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -31,11 +36,13 @@ import java.time.ZoneOffset
 
 @RestController
 @RequestMapping("/api/members")
+@Tag(name = "Member", description = "회원 관련 API")
 class MemberController(
     private val memberService: MemberService
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
+    @Operation(summary = "회원가입", description = "일반 회원가입 api입니다")
     @PostMapping("/signup")
     fun signup(@Valid @RequestBody request: SignupRequest): ResponseEntity<ApiResponse<SignupResponse>> {
         val savedMember = memberService.signup(request)
@@ -57,7 +64,7 @@ class MemberController(
             .status(HttpStatus.CREATED)
             .body(ApiResponse.success(response, "회원 가입이 완료되었습니다."))
     }
-
+    @Operation(summary = "로그인", description = "일반 로그인 기능입니다.")
     @PostMapping("/login")
     fun login(@Valid @RequestBody request: LoginRequest): ResponseEntity<ApiResponse<LoginResponse>> {
         val loginResult = memberService.login(request)
@@ -73,7 +80,7 @@ class MemberController(
             .status(HttpStatus.OK)
             .body(ApiResponse.success(response, "로그인 되었습니다."))
     }
-
+    @Operation(summary = "로그아웃", description = "로그아웃합니다.")
     @PostMapping("/logout")
     fun logout(): ResponseEntity<ApiResponse<Unit>> {
         // JWT 필터에서 이미 인증 검증을 완료했으므로, 여기서는 단순히 성공 응답만 반환
@@ -81,7 +88,7 @@ class MemberController(
             .status(HttpStatus.OK)
             .body(ApiResponse.success(Unit, "로그아웃되었습니다."))
     }
-
+    @Operation(summary = "토큰 리프레시", description = "리프레시 토큰 기반으로 access token을 재발급합니다.")
     @PostMapping("/token/refresh")
     fun refreshToken(@Valid @RequestBody request: RefreshTokenRequest): ResponseEntity<ApiResponse<RefreshTokenResponse>> {
         val tokenPair = memberService.refreshToken(request.refreshToken)
@@ -95,7 +102,7 @@ class MemberController(
             .status(HttpStatus.OK)
             .body(ApiResponse.success(response, "토큰이 성공적으로 재발급되었습니다."))
     }
-
+    @Operation(summary = "구글 로그인", description = "oauth로 구글로 가입합니다.")
     @PostMapping("/oauth/google")
     fun googleLogin(@Valid @RequestBody request: GoogleOAuthRequest): ResponseEntity<ApiResponse<GoogleOAuthResponse>> {
         val googleOAuthResult = memberService.googleLogin(request.idToken)
@@ -108,11 +115,18 @@ class MemberController(
             nickname = googleOAuthResult.nickname
         )
         
+        // 프로필 완료 상태에 따라 메시지 변경
+        val message = if (googleOAuthResult.isProfileCompleted) {
+            "구글 로그인에 성공했습니다."
+        } else {
+            "회원 유형을 선택해주세요."
+        }
+        
         return ResponseEntity
             .status(HttpStatus.OK)
-            .body(ApiResponse.success(response, "구글 로그인에 성공했습니다."))
+            .body(ApiResponse.success(response, message))
     }
-
+    @Operation(summary = "oauth verify", description = "oauth 맞는지 확인하는 것입니다. ")
     @PostMapping("/oauth/verify")
     fun verifyOAuth(@Valid @RequestBody request: OAuthVerifyRequest): ResponseEntity<ApiResponse<OAuthVerifyResponse>> {
         val oauthVerifyResult = memberService.verifyOAuth(request.provider, request.token)
@@ -127,7 +141,7 @@ class MemberController(
             .status(HttpStatus.OK)
             .body(ApiResponse.success(response, "소셜 인증 검증에 성공했습니다."))
     }
-
+    @Operation(summary = "앨범 일부 삭제", description = "앨범을 앨범 ID를 통해 삭제합니다")
     @PostMapping("/me/oauth/link")
     fun linkOAuth(@Valid @RequestBody request: OAuthLinkRequest): ResponseEntity<ApiResponse<OAuthLinkResponse>> {
         // SecurityContext에서 인증된 회원 ID 가져오기
@@ -145,7 +159,34 @@ class MemberController(
             .status(HttpStatus.OK)
             .body(ApiResponse.success(response, "소셜 계정이 연결되었습니다."))
     }
+    @Operation(summary = "앨범 일부 삭제", description = "앨범을 앨범 ID를 통해 삭제합니다")
+    @GetMapping("/me")
+    fun getMemberInfo(): ResponseEntity<ApiResponse<MemberInfoResponse>> {
+        // SecurityContext에서 인증된 회원 ID 가져오기
+        val authentication: Authentication = SecurityContextHolder.getContext().authentication
+            ?: throw BusinessException(ErrorCode.INVALID_TOKEN)
+        val memberId = authentication.principal as Long
 
+        val member = memberService.getMemberInfo(memberId)
+        
+        val memberIdValue = member.id ?: run {
+            log.error("Critical: Member ID is null. Email: ${member.email}")
+            throw IllegalStateException("회원 ID가 없습니다.")
+        }
+        
+        val response = MemberInfoResponse(
+            memberId = memberIdValue,
+            email = member.email,
+            nickname = member.nickname,
+            role = member.role,
+            profileImageUrl = member.profileImageUrl
+        )
+        
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(ApiResponse.success(response, "사용자 정보 조회에 성공했습니다."))
+    }
+    @Operation(summary = "회원 삭제", description = "회원을 ID 기반으로 삭제합니다.")
     @DeleteMapping("/me")
     fun deleteMember(): ResponseEntity<ApiResponse<Unit>> {
         // SecurityContext에서 인증된 회원 ID 가져오기
@@ -159,7 +200,7 @@ class MemberController(
             .status(HttpStatus.OK)
             .body(ApiResponse.success(Unit, "회원 탈퇴가 완료되었습니다."))
     }
-
+    @Operation(summary = "프로필 셋업하기", description = "프로필 초기에 어떤식으로 설정할지 정하는 api 입니다.")
     @PatchMapping("/me/profile/setup")
     fun setupProfile(@Valid @RequestBody request: ProfileSetupRequest): ResponseEntity<ApiResponse<ProfileSetupResponse>> {
         // SecurityContext에서 인증된 회원 ID 가져오기
@@ -183,6 +224,30 @@ class MemberController(
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(ApiResponse.success(response, "프로필 초기 설정이 완료되었습니다."))
+    }
+    @Operation(summary = "역할 정하기", description = "FAN인지 ARTIST인지 정하는 api 인데 profile/setup과 합쳐질 수 있습니다.")
+    @PatchMapping("/me/role")
+    fun updateRole(@Valid @RequestBody request: RoleUpdateRequest): ResponseEntity<ApiResponse<RoleUpdateResponse>> {
+        // SecurityContext에서 인증된 회원 ID 가져오기
+        val authentication: Authentication = SecurityContextHolder.getContext().authentication
+            ?: throw BusinessException(ErrorCode.INVALID_TOKEN)
+        val memberId = authentication.principal as Long
+
+        val updatedMember = memberService.updateRole(memberId, request.role)
+        
+        val memberIdValue = updatedMember.id ?: run {
+            log.error("Critical: Member ID is null after role update. Email: ${updatedMember.email}")
+            throw IllegalStateException("회원 ID가 없습니다.")
+        }
+        
+        val response = RoleUpdateResponse(
+            memberId = memberIdValue,
+            role = updatedMember.role
+        )
+        
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(ApiResponse.success(response, "역할이 업데이트되었습니다."))
     }
 }
 

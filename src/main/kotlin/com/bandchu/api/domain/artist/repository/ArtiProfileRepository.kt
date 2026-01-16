@@ -61,7 +61,8 @@ class ArtiProfileRepository {
     }
 
     fun searchArtistsAndConcerts(keyword: String): Pair<List<ArtiProfile>, List<Concert>> = transaction {
-        val pattern = "%$keyword%"
+        val lowerCaseKeyword = keyword.lowercase()
+        val pattern = "%$lowerCaseKeyword%"
 
         val artists = ArtiProfileTable
             .selectAll()
@@ -196,6 +197,26 @@ class ArtiProfileRepository {
         val snsLinks = SnsLinkTable
             .selectAll()
             .where { SnsLinkTable.artiProfile eq command.artistId }
+            .map { it.toSnsLinkDomain() }
+
+        artistRow.toDomain(snsLinks = snsLinks)
+    }
+
+    fun findByMemberId(memberId: Long): ArtiProfile? = transaction {
+        val artistRow = ArtiProfileTable
+            .selectAll()
+            .where { ArtiProfileTable.member eq memberId }
+            .singleOrNull()
+
+        if (artistRow == null) {
+            return@transaction null
+        }
+
+        val artiProfileId = artistRow[ArtiProfileTable.id].value
+
+        val snsLinks = SnsLinkTable
+            .selectAll()
+            .where { SnsLinkTable.artiProfile eq artiProfileId }
             .map { it.toSnsLinkDomain() }
 
         artistRow.toDomain(snsLinks = snsLinks)

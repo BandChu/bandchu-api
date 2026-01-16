@@ -266,6 +266,96 @@ class MemberControllerTest(
         }
     }
 
+
+//    describe("POST /api/members/oauth/google") {
+//        context("유효한 구글 ID 토큰으로 로그인 요청이 들어오면") {
+//            it("200 OK와 함께 JWT 토큰과 회원 정보를 반환한다") {
+//                // given
+//                val request = com.bandchu.api.domain.member.dto.GoogleOAuthRequest(
+//                    idToken = "valid-google-id-token"
+//                )
+//
+//                val googleOAuthResult = com.bandchu.api.domain.member.service.GoogleOAuthResult(
+//                    accessToken = "jwt-token",
+//                    refreshToken = "refresh-token",
+//                    isNewMember = false,
+//                    memberId = 1L,
+//                    nickname = "GoogleUser"
+//                )
+//
+//                every { memberService.googleLogin(request.idToken) } returns googleOAuthResult
+//
+//                // when & then
+//                mockMvc.perform(
+//                    post("/api/members/oauth/google")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(request))
+//                )
+//                    .andExpect(status().isOk)
+//                    .andExpect(jsonPath("$.success").value(true))
+//                    .andExpect(jsonPath("$.data.accessToken").value("jwt-token"))
+//                    .andExpect(jsonPath("$.data.refreshToken").value("refresh-token"))
+//                    .andExpect(jsonPath("$.data.isNewMember").value(false))
+//                    .andExpect(jsonPath("$.data.memberId").value(1L))
+//                    .andExpect(jsonPath("$.message").value("구글 로그인에 성공했습니다."))
+//            }
+//        }
+//
+//        context("신규 회원인 경우") {
+//            it("isNewMember가 true로 반환된다") {
+//                // given
+//                val request = com.bandchu.api.domain.member.dto.GoogleOAuthRequest(
+//                    idToken = "valid-google-id-token-new-user"
+//                )
+//
+//                val googleOAuthResult = com.bandchu.api.domain.member.service.GoogleOAuthResult(
+//                    accessToken = "jwt-token",
+//                    refreshToken = "refresh-token",
+//                    isNewMember = true,
+//                    memberId = 2L,
+//                    nickname = "NewGoogleUser"
+//                )
+//
+//                every { memberService.googleLogin(request.idToken) } returns googleOAuthResult
+//
+//                // when & then
+//                mockMvc.perform(
+//                    post("/api/members/oauth/google")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(request))
+//                )
+//                    .andExpect(status().isOk)
+//                    .andExpect(jsonPath("$.success").value(true))
+//                    .andExpect(jsonPath("$.data.isNewMember").value(true))
+//                    .andExpect(jsonPath("$.data.memberId").value(2L))
+//            }
+//        }
+//
+//        context("유효하지 않은 구글 ID 토큰으로 로그인 요청이 들어오면") {
+//            it("401 Unauthorized와 함께 에러를 반환한다") {
+//                // given
+//                val request = com.bandchu.api.domain.member.dto.GoogleOAuthRequest(
+//                    idToken = "invalid-google-id-token"
+//                )
+//
+//                every { memberService.googleLogin(request.idToken) } throws com.bandchu.api.global.exception.BusinessException(
+//                    com.bandchu.api.global.exception.ErrorCode.GOOGLE_AUTH_INVALID
+//                )
+//
+//                // when & then
+//                mockMvc.perform(
+//                    post("/api/members/oauth/google")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(request))
+//                )
+//                    .andExpect(status().isUnauthorized)
+//                    .andExpect(jsonPath("$.status").value(401))
+//                    .andExpect(jsonPath("$.code").value("GOOGLE_AUTH_INVALID"))
+//                    .andExpect(jsonPath("$.detail").value("구글 인증이 유효하지 않습니다."))
+//            }
+//        }
+//    }
+
     describe("POST /api/members/oauth/google") {
         context("유효한 구글 ID 토큰으로 로그인 요청이 들어오면") {
             it("200 OK와 함께 JWT 토큰과 회원 정보를 반환한다") {
@@ -279,7 +369,8 @@ class MemberControllerTest(
                     refreshToken = "refresh-token",
                     isNewMember = false,
                     memberId = 1L,
-                    nickname = "GoogleUser"
+                    nickname = "GoogleUser",
+                    isProfileCompleted = true
                 )
 
                 every { memberService.googleLogin(request.idToken) } returns googleOAuthResult
@@ -312,7 +403,8 @@ class MemberControllerTest(
                     refreshToken = "refresh-token",
                     isNewMember = true,
                     memberId = 2L,
-                    nickname = "NewGoogleUser"
+                    nickname = "NewGoogleUser",
+                    isProfileCompleted = false
                 )
 
                 every { memberService.googleLogin(request.idToken) } returns googleOAuthResult
@@ -354,6 +446,7 @@ class MemberControllerTest(
             }
         }
     }
+
 
     describe("POST /api/members/oauth/verify") {
         context("유효한 소셜 인증 토큰으로 검증 요청이 들어오면") {

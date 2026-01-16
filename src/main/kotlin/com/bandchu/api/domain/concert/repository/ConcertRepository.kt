@@ -17,6 +17,7 @@ import org.jetbrains.exposed.v1.core.JoinType
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.jdbc.batchInsert
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insertAndGetId
@@ -91,6 +92,7 @@ class ConcertRepository {
             it[place] = command.place
             it[posterImageUrl] = command.posterImageUrl?.toString()
             it[information] = command.information
+            it[bookingSchedule] = command.bookingSchedule
             it[bookingUrl] = command.bookingUrl?.toString()
             it[createdAt] = OffsetDateTime.now(ZoneOffset.UTC)
             it[arti_profile] = artiProfileId
@@ -136,6 +138,7 @@ class ConcertRepository {
             it[place] = command.place
             it[posterImageUrl] = command.posterImageUrl?.toString()
             it[information] = command.information
+            it[bookingSchedule] = command.bookingSchedule
             it[bookingUrl] = command.bookingUrl?.toString()
         }
 
@@ -201,7 +204,7 @@ class ConcertRepository {
             )
             .join(
                 ConcertTable,
-                JoinType.INNER,
+                JoinType.LEFT,
                 onColumn = ArtiProfileTable.id,
                 otherColumn = ConcertTable.arti_profile
             )
@@ -222,15 +225,27 @@ class ConcertRepository {
 
         return@transaction groupedByArtist.map { (_, rows) ->
 
-            val profile = rows.first().toArtiProfileDomain()
-            val subscribedAt = rows.first()[SubscriptionTable.createdAt]
-            val concertId = rows.first()[ConcertTable.id].value
-            val groupedByConcert = rows.groupBy { it[ConcertTable.id] }
-            val concerts = groupedByConcert.map { (_, concertRows) ->
+            val firstRow = rows.first()
+            val profile = firstRow.toArtiProfileDomain()
+            val subscribedAt = firstRow[SubscriptionTable.createdAt]
+
+            val groupedByConcert = rows.groupBy { it.getOrNull(ConcertTable.id) }
+
+            val concerts = groupedByConcert.mapNotNull { (concertIdEntity, concertRows) ->
+
+                if (concertIdEntity == null) {
+                    return@mapNotNull null
+                }
+
+                val concertId = concertIdEntity.value
 
                 val schedules = concertRows
                     .mapNotNull { row ->
-                        if (row.hasValue(ConcertScheduleTable.date)) row.toConcertScheduleDomain(concertId) else null
+                        if (row.hasValue(ConcertScheduleTable.date)) {
+                            row.toConcertScheduleDomain(concertId)
+                        } else {
+                            null
+                        }
                     }
                     .distinct()
 
@@ -242,6 +257,29 @@ class ConcertRepository {
                 subscribedAt = subscribedAt,
                 concerts = concerts
             )
+        }
+    }
+
+    fun getAllByArtist(artistId: Long): List<Concert> = transaction {
+        val concertRows = ConcertTable
+            .selectAll()
+            .where { ConcertTable.arti_profile eq artistId }
+            .orderBy(ConcertTable.createdAt, SortOrder.DESC)
+            .toList()
+
+        val concertIds = concertRows.map { it[ConcertTable.id].value }
+
+        val allSchedules = ConcertScheduleTable
+            .selectAll()
+            .where { ConcertScheduleTable.concert inList concertIds }
+            .map { row -> row.toConcertScheduleDomain(row[ConcertScheduleTable.concert].value) }
+            .groupBy { it.concertId }
+
+        return@transaction concertRows.map { concertRow ->
+            val concertId = concertRow[ConcertTable.id].value
+            val schedules = allSchedules[concertId] ?: emptyList()
+
+            concertRow.toDomain(schedules)
         }
     }
 }

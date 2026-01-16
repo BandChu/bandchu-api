@@ -119,4 +119,15 @@ class AlbumRepository {
 
         AlbumTable.deleteWhere { AlbumTable.id eq albumId }
     }
+
+    fun getAllSummaryByArtist(artistId: Long): List<Album> = transaction {
+        val albumRows = AlbumTable
+            .selectAll()
+            .where { AlbumTable.artiProfile eq artistId }
+            .toList()
+
+        albumRows.map { albumRow ->
+            albumRow.toDomain(emptyList())
+        }
+    }
 }

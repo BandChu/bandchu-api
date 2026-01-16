@@ -2,6 +2,7 @@ package com.bandchu.api.domain.album
 
 import com.bandchu.api.domain.album.service.AlbumService
 import com.bandchu.api.domain.artist.service.ArtistService
+import com.bandchu.api.domain.member.repository.MemberRepository
 import com.bandchu.api.domain.member.service.MemberService
 import com.bandchu.api.fixture.AlbumFixture
 import com.bandchu.api.fixture.ArtistFixture
@@ -13,10 +14,10 @@ import org.springframework.context.annotation.Bean
 class AlbumTestConfig {
     @Bean
     fun authFixture(
-        memberService: MemberService
+        memberservice: MemberService,
     ): AuthFixture {
         return AuthFixture(
-            memberService = memberService
+            memberService = memberservice,
         )
     }
 

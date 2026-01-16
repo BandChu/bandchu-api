@@ -2,6 +2,8 @@ package com.bandchu.api.domain.member.repository
 
 import com.bandchu.api.domain.member.model.Member
 import com.bandchu.api.domain.member.table.MemberTable
+import com.bandchu.api.global.exception.BusinessException
+import com.bandchu.api.global.exception.ErrorCode
 import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.jdbc.*
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
@@ -22,6 +24,7 @@ class MemberRepository {
                 it[role] = member.role
                 it[googleId] = member.googleId
                 it[profileImageUrl] = member.profileImageUrl
+                it[isProfileCompleted] = member.isProfileCompleted
                 it[createdAt] = OffsetDateTime.now(ZoneOffset.UTC)
             }
 
@@ -97,6 +100,21 @@ class MemberRepository {
             MemberTable.update({ MemberTable.id eq memberId }) {
                 it[MemberTable.nickname] = nickname
                 it[MemberTable.profileImageUrl] = profileImageUrl
+                it[MemberTable.isProfileCompleted] = true
+            }
+            
+            MemberTable
+                .selectAll()
+                .where { MemberTable.id eq memberId }
+                .single()
+                .let { toMember(it) }
+        }
+    }
+
+    fun updateRole(memberId: Long, role: com.bandchu.api.domain.member.model.Role): Member {
+        return transaction {
+            MemberTable.update({ MemberTable.id eq memberId }) {
+                it[MemberTable.role] = role
             }
             
             MemberTable
@@ -119,8 +137,17 @@ class MemberRepository {
             role = row[MemberTable.role],
             googleId = row[MemberTable.googleId],
             profileImageUrl = row[MemberTable.profileImageUrl],
+            isProfileCompleted = row[MemberTable.isProfileCompleted],
             createdAt = localDateTime
         )
+    }
+
+    fun findMemberNameById(memberId: Long): String = transaction{
+        MemberTable
+            .selectAll()
+            .where{ MemberTable.id eq memberId }
+            .map { it[MemberTable.nickname] }
+            .single()
     }
 }
 

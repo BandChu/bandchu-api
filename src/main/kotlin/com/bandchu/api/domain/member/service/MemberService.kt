@@ -27,12 +27,13 @@ class MemberService(
             throw BusinessException(ErrorCode.USER_EMAIL_DUPLICATED)
         }
 
-        // 회원 생성
+        // 회원 생성 (일반 회원가입은 프로필 정보를 이미 받으므로 완료 상태로 설정)
         val member = Member(
             email = request.email,
             password = request.password, // TODO: 비밀번호 암호화 추가 필요
             nickname = request.nickname,
-            role = request.role
+            role = request.role,
+            isProfileCompleted = true
         )
 
         return memberRepository.save(member)
@@ -89,26 +90,20 @@ class MemberService(
             throw BusinessException(ErrorCode.INVALID_REFRESH_TOKEN)
         }
 
-        // 회원 ID와 역할 추출
+        // 회원 ID 추출
         val memberId = try {
             jwtService.getMemberIdFromToken(refreshToken)
         } catch (e: Exception) {
             throw BusinessException(ErrorCode.INVALID_REFRESH_TOKEN)
         }
 
-        val role = try {
-            jwtService.getRoleFromToken(refreshToken)
-        } catch (e: Exception) {
-            throw BusinessException(ErrorCode.INVALID_REFRESH_TOKEN)
-        }
-
-        // 회원 존재 확인
-        memberRepository.findById(memberId)
+        // 회원 존재 확인 및 최신 역할 정보 조회
+        val member = memberRepository.findById(memberId)
             ?: throw BusinessException(ErrorCode.INVALID_REFRESH_TOKEN)
 
-        // 새로운 토큰 발급
-        val newAccessToken = jwtService.generateAccessToken(memberId, role)
-        val newRefreshToken = jwtService.generateRefreshToken(memberId, role)
+        // 새로운 토큰 발급 (DB에서 조회한 최신 역할 사용)
+        val newAccessToken = jwtService.generateAccessToken(memberId, member.role)
+        val newRefreshToken = jwtService.generateRefreshToken(memberId, member.role)
 
         return TokenPair(
             accessToken = newAccessToken,
@@ -144,13 +139,14 @@ class MemberService(
                 existingMember
             }
         } else {
-            // 신규 회원인 경우 자동 가입
+            // 신규 회원인 경우 자동 가입 (프로필 미완료 상태로 생성)
             val newMember = Member(
                 email = googleUserInfo.email,
                 password = "", // OAuth 회원은 비밀번호 없음
                 nickname = googleUserInfo.name,
                 role = Role.FAN, // 기본 역할은 FAN
-                googleId = googleUserInfo.googleId
+                googleId = googleUserInfo.googleId,
+                isProfileCompleted = false // 구글 OAuth 회원가입은 프로필 설정 전까지 미완료 상태
             )
             memberRepository.save(newMember)
         }
@@ -169,7 +165,8 @@ class MemberService(
             refreshToken = refreshToken,
             isNewMember = isNewMember,
             memberId = memberId,
-            nickname = member.nickname
+            nickname = member.nickname,
+            isProfileCompleted = member.isProfileCompleted
         )
     }
 
@@ -270,6 +267,26 @@ class MemberService(
 
         // 프로필 업데이트
         return memberRepository.updateProfile(memberId, nickname, profileImageUrl)
+    }
+
+    fun updateRole(memberId: Long, role: Role): Member {
+        // 회원 존재 확인
+        memberRepository.findById(memberId)
+            ?: run {
+                log.error("Critical: Member not found by ID. MemberId: $memberId")
+                throw IllegalStateException("회원을 찾을 수 없습니다.")
+            }
+
+        // 역할 업데이트
+        return memberRepository.updateRole(memberId, role)
+    }
+
+    fun getMemberInfo(memberId: Long): Member {
+        return memberRepository.findById(memberId)
+            ?: run {
+                log.error("Critical: Member not found by ID. MemberId: $memberId")
+                throw IllegalStateException("회원을 찾을 수 없습니다.")
+            }
     }
 }
 
