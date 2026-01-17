@@ -27,13 +27,12 @@ class MemberService(
             throw BusinessException(ErrorCode.USER_EMAIL_DUPLICATED)
         }
 
-        // 회원 생성 (일반 회원가입은 프로필 정보를 이미 받으므로 완료 상태로 설정)
-        val member = Member(
+        // 회원 생성 (도메인 factory 메서드 사용)
+        val member = Member.createForSignup(
             email = request.email,
             password = request.password, // TODO: 비밀번호 암호화 추가 필요
             nickname = request.nickname,
-            role = request.role,
-            isProfileCompleted = true
+            role = request.role
         )
 
         return memberRepository.save(member)
@@ -44,11 +43,8 @@ class MemberService(
         val member = memberRepository.findByEmail(request.email)
             ?: throw BusinessException(ErrorCode.USER_INVALID_CREDENTIAL)
 
-        // 비밀번호 검증
-        // TODO: 비밀번호 암호화 추가 후 BCrypt 등으로 비교
-        if (member.password != request.password) {
-            throw BusinessException(ErrorCode.USER_INVALID_CREDENTIAL)
-        }
+        // 비밀번호 검증 (도메인 메서드 사용)
+        member.verifyPassword(request.password)
 
         val memberId = member.id ?: run {
             log.error("Critical: Member ID is null after login. Email: ${member.email}")
@@ -139,14 +135,11 @@ class MemberService(
                 existingMember
             }
         } else {
-            // 신규 회원인 경우 자동 가입 (프로필 미완료 상태로 생성)
-            val newMember = Member(
+            // 신규 회원인 경우 자동 가입 (도메인 factory 메서드 사용)
+            val newMember = Member.createForOAuth(
                 email = googleUserInfo.email,
-                password = "", // OAuth 회원은 비밀번호 없음
                 nickname = googleUserInfo.name,
-                role = Role.FAN, // 기본 역할은 FAN
-                googleId = googleUserInfo.googleId,
-                isProfileCompleted = false // 구글 OAuth 회원가입은 프로필 설정 전까지 미완료 상태
+                googleId = googleUserInfo.googleId
             )
             memberRepository.save(newMember)
         }
