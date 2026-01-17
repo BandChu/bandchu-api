@@ -7,10 +7,10 @@ import com.bandchu.api.domain.chat.dto.UpdateReadStatusRequest
 import com.bandchu.api.domain.chat.dto.UpdateReadStatusResponse
 import com.bandchu.api.domain.chat.service.ChatRoomService
 import com.bandchu.api.global.response.ApiResponse
+import com.bandchu.api.global.util.getCurrentUserId
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -23,9 +23,7 @@ class ChatRoomController(private val chatRoomService: ChatRoomService) {
     fun createChatRoom(
             @RequestBody request: CreateChatRoomRequest
     ): ApiResponse<CreateChatRoomResponse> {
-        // SecurityContext에서 memberId 가져오기
-        val authentication = SecurityContextHolder.getContext().authentication
-        val currentUserId = authentication.principal as Long
+        val currentUserId = getCurrentUserId()
 
         val chatRoom = chatRoomService.createChatRoom(request, currentUserId)
 
@@ -34,9 +32,7 @@ class ChatRoomController(private val chatRoomService: ChatRoomService) {
     @Operation(summary = "내 채팅방 리스트들 가져오기", description = "내가 속해 있는 채팅방들의 아이디를 가져옵니다. 이거로 내가 하고 있는 채팅들을 보게 하기 위해서입니다.")
     @GetMapping
     fun getChatRoomList(): ApiResponse<ChatRoomListResponse> {
-        // SecurityContext에서 memberId 가져오기
-        val authentication = SecurityContextHolder.getContext().authentication
-        val currentUserId = authentication.principal as Long
+        val currentUserId = getCurrentUserId()
 
         val chatRooms = chatRoomService.getChatRoomList(currentUserId)
 
@@ -48,9 +44,7 @@ class ChatRoomController(private val chatRoomService: ChatRoomService) {
             @PathVariable roomId: Long,
             @RequestBody request: UpdateReadStatusRequest
     ): ApiResponse<UpdateReadStatusResponse> {
-        // SecurityContext에서 memberId 가져오기
-        val authentication = SecurityContextHolder.getContext().authentication
-        val currentUserId = authentication.principal as Long
+        val currentUserId = getCurrentUserId()
 
         val response = chatRoomService.updateReadStatus(roomId, request, currentUserId)
 
