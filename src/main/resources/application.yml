@@ -14,6 +14,11 @@ spring:
         provider:
           google:
             jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
+    bcrypt:
+      # BCrypt 워크 팩터 설정 (4-31, 기본값: 10)
+      # 값이 높을수록 해시 계산 시간이 길어져 보안이 강화되지만, 응답 시간도 증가
+      # 권장값: 10 (일반), 12-14 (높은 보안), 4-9 (개발/테스트)
+      strength: 10
 
   servlet:
     multipart:
