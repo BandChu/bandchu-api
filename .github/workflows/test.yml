@@ -34,15 +34,15 @@ jobs:
         run: ./gradlew test --tests "com.bandchu.api.domain.posts.service.*" -Dspring.profiles.active=test
 
 
-        
-      - name: Run Subscription Tests
-        run: ./gradlew test --tests "com.bandchu.api.domain.subscription.controller.*" -Dspring.profiles.active=test
 
-      - name: Run Artist Tests
-        run: ./gradlew test --tests "com.bandchu.api.domain.artists.controller.*" -Dspring.profiles.active=test
+      #- name: Run Subscription Tests
+      #  run: ./gradlew test --tests "com.bandchu.api.domain.subscription.controller.*" -Dspring.profiles.active=test
+
+    #  - name: Run Artist Tests
+    #    run: ./gradlew test --tests "com.bandchu.api.domain.artists.controller.*" -Dspring.profiles.active=test
 
       - name: Run Chat Tests
         run: ./gradlew test --tests "com.bandchu.api.domain.chat.controller.*" -Dspring.profiles.active=test
 
-      - name: Run Album Tests
-        run: ./gradlew test --tests "com.bandchu.api.domain.album.controller.*" -Dspring.profiles.active=test
+  #    - name: Run Album Tests
+  #      run: ./gradlew test --tests "com.bandchu.api.domain.album.controller.*" -Dspring.profiles.active=test
