@@ -6,10 +6,14 @@ import com.bandchu.api.domain.concert.service.dto.CreateConcertCommand
 import com.bandchu.api.domain.concert.service.dto.UpdateConcertCommand
 import com.bandchu.api.domain.member.model.Member
 import com.bandchu.api.domain.member.model.Role
+import com.bandchu.api.domain.member.service.GoogleOAuthService
 import com.bandchu.api.fixture.ArtistFixture
 import com.bandchu.api.fixture.AuthFixture
 import com.bandchu.api.fixture.ConcertFixture
+import com.bandchu.api.global.config.ConfigController
+import com.bandchu.api.global.config.S3Uploader
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.ninjasquad.springmockk.MockkBean
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -52,7 +56,14 @@ class ConcertApiTest(
     private val NON_EXISTENT_ID = 99999L
     private val ARTIST_ROLE = Role.ARTIST.name
     private val FAN_ROLE = Role.FAN.name
+    @MockkBean(relaxed = true)
+    lateinit var s3Uploader: S3Uploader
 
+    @MockkBean(relaxed = true)
+    lateinit var googleOAuthService: GoogleOAuthService
+
+    @MockkBean(relaxed = true)
+    lateinit var configController: ConfigController
     init {
         beforeSpec {
             val suffix = System.currentTimeMillis()
