@@ -5,10 +5,10 @@ import com.bandchu.api.domain.chat.dto.MessagePageResponse
 import com.bandchu.api.domain.chat.dto.SendMessageRequest
 import com.bandchu.api.domain.chat.service.ChatMessageService
 import com.bandchu.api.global.response.ApiResponse
+import com.bandchu.api.global.util.getCurrentUserId
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -23,9 +23,7 @@ class ChatMessageController(private val chatMessageService: ChatMessageService) 
             @PathVariable roomId: Long,
             @RequestBody chatMessageRequest: SendMessageRequest
     ): ApiResponse<ChatMessageResponse> {
-        // SecurityContext에서 memberId 가져오기
-        val authentication = SecurityContextHolder.getContext().authentication
-        val senderId = authentication.principal as Long
+        val senderId = getCurrentUserId()
 
         val message =
                 chatMessageService.sendMessage(

@@ -3,6 +3,7 @@ plugins {
     kotlin("plugin.spring") version "2.2.21"
     id("org.springframework.boot") version "3.5.7"
     id("io.spring.dependency-management") version "1.1.7"
+    jacoco
 }
 
 group = "com.bandchu"
@@ -60,13 +61,17 @@ dependencies {
 
 kotlin {
     compilerOptions {
-        freeCompilerArgs.addAll("-Xjsr305=strict")
+        freeCompilerArgs.addAll(
+            "-Xjsr305=strict",
+            "-Xjvm-default=all"
+        )
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
     }
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
+
 }
 
 
@@ -76,4 +81,55 @@ tasks.test {
 
     // 또는 병렬 실행을 꺼서 하나씩 순차적으로 실행되게 보장
     maxParallelForks = 1
+
+    systemProperty("kotest.framework.classpath.scanning.autoscan.disable", "true")
+    // JUnit HTML 리포트는 기본적으로 생성됩니다
+    reports {
+        html.required.set(true)
+        junitXml.required.set(true)
+    }
+    finalizedBy(tasks.jacocoTestReport) // 테스트 실행 후 JaCoCo 리포트 생성
+}
+
+// JaCoCo 설정
+jacoco {
+    toolVersion = "0.8.11"
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test) // test 작업 후 실행
+    reports {
+        xml.required.set(true)
+        csv.required.set(false)
+        html.required.set(true)
+        html.outputLocation.set(layout.buildDirectory.dir("reports/jacoco/test/html"))
+    }
+    // 리포트에 포함할 소스 파일 지정
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                exclude(
+                    "**/config/**",
+                    "**/dto/**",
+                    "**/exception/**",
+                    "**/global/**",
+                    "**/domain/**/dto/**",
+                    "**/Application*"
+                )
+            }
+        })
+    )
+}
+
+// 테스트 커버리지 검증 작업 (선택사항)
+tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.jacocoTestReport)
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.80".toBigDecimal() // 최소 80% 커버리지 요구
+            }
+        }
+    }
+
 }
