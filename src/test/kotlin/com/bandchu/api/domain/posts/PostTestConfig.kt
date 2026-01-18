@@ -16,6 +16,8 @@ import com.bandchu.api.global.security.JwtService
 import io.mockk.mockk
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 
 
 @TestConfiguration
@@ -77,15 +79,22 @@ class PostTestConfig {
         )
     }
     @Bean
+    fun passwordEncoder(): PasswordEncoder {
+        return BCryptPasswordEncoder()
+    }
+
+    @Bean
     fun memberService(
         memberRepository: MemberRepository,
         jwtService: JwtService,
-        googleOAuthService: GoogleOAuthService
+        googleOAuthService: GoogleOAuthService,
+        passwordEncoder: PasswordEncoder
     ): MemberService {
         return MemberService(
             memberRepository,
             jwtService,
-            googleOAuthService
+            googleOAuthService,
+            passwordEncoder
         )
     }
 

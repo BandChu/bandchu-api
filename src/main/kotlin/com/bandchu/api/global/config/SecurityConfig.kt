@@ -1,11 +1,14 @@
 package com.bandchu.api.global.config
 
 import com.bandchu.api.global.security.JwtAuthenticationFilter
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.web.cors.CorsConfiguration
@@ -16,8 +19,17 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 @Configuration
 @EnableWebSecurity
 class SecurityConfig(
-    private val jwtAuthenticationFilter: JwtAuthenticationFilter
+    private val jwtAuthenticationFilter: JwtAuthenticationFilter,
+    @Value("\${spring.security.bcrypt.strength:10}")
+    private val bcryptStrength: Int
 ) {
+    @Bean
+    fun passwordEncoder(): PasswordEncoder {
+        // BCrypt 워크 팩터 설정 (4-31, 기본값: 10)
+        // 값이 높을수록 해시 계산 시간이 길어져 보안이 강화되지만, 응답 시간도 증가
+        return BCryptPasswordEncoder(bcryptStrength)
+    }
+
     @Bean // CORS 설정 - 채팅 및 프론트엔드와의 통신을 위해 추가했음. 
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration()

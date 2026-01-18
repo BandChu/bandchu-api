@@ -14,6 +14,7 @@
 - [API 명세](./docs/API_SPEC.md)
 - [협업 가이드](./docs/TEAM_GUIDE.md)
 - [도메인 모델 설계](./docs/DOMAIN_MODEL.md)
+- [테스트 가이드](./docs/TEST_GUIDE.md)
 
 <br>
 

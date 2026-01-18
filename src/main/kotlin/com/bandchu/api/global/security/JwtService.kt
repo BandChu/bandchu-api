@@ -11,11 +11,11 @@ import javax.crypto.SecretKey
 
 @Service
 class JwtService(
-    @Value("\${jwt.secret:bandchu-secret-key-for-jwt-token-generation-minimum-256-bits}")
+    @get:Value("\${jwt.secret:bandchu-secret-key-for-jwt-token-generation-minimum-256-bits}")
     private val secret: String,
-    @Value("\${jwt.access-token-expiration:3600000}") // 1시간
+    @get:Value("\${jwt.access-token-expiration:3600000}") // 1시간
     private val accessTokenExpiration: Long,
-    @Value("\${jwt.refresh-token-expiration:604800000}") // 7일
+    @get:Value("\${jwt.refresh-token-expiration:604800000}") // 7일
     private val refreshTokenExpiration: Long
 ) {
     private val secretKey: SecretKey = Keys.hmacShaKeyFor(secret.toByteArray())

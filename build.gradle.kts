@@ -52,82 +52,72 @@ dependencies {
     testImplementation("io.mockk:mockk:1.13.5")
     testImplementation("com.h2database:h2:2.2.224")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+// Flyway 핵심 라이브러리
+    implementation("org.flywaydb:flyway-core")
+    // PostgreSQL 전용 의존성
+    implementation("org.flywaydb:flyway-database-postgresql")
 }
 
 kotlin {
     compilerOptions {
-        freeCompilerArgs.addAll("-Xjsr305=strict")
+        freeCompilerArgs.addAll(
+            "-Xjsr305=strict",
+            "-Xjvm-default=all"
+        )
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
     }
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
-    finalizedBy(tasks.jacocoTestReport)
+    systemProperty("kotest.framework.classpath.scanning.autoscan.disable", "true")
+    // JUnit HTML 리포트는 기본적으로 생성됩니다
+    reports {
+        html.required.set(true)
+        junitXml.required.set(true)
+    }
+    finalizedBy(tasks.jacocoTestReport) // 테스트 실행 후 JaCoCo 리포트 생성
+}
+
+// JaCoCo 설정
+jacoco {
+    toolVersion = "0.8.11"
 }
 
 tasks.jacocoTestReport {
-    dependsOn(tasks.test)
-
+    dependsOn(tasks.test) // test 작업 후 실행
     reports {
         xml.required.set(true)
-        html.required.set(true)
         csv.required.set(false)
+        html.required.set(true)
+        html.outputLocation.set(layout.buildDirectory.dir("reports/jacoco/test/html"))
     }
-
+    // 리포트에 포함할 소스 파일 지정
     classDirectories.setFrom(
         files(classDirectories.files.map {
             fileTree(it) {
                 exclude(
                     "**/config/**",
                     "**/dto/**",
-                    "**/table/**",
-                    "**/model/**",
-                    "**/*Application*",
-                    "**/*Config*"
+                    "**/exception/**",
+                    "**/global/**",
+                    "**/domain/**/dto/**",
+                    "**/Application*"
                 )
             }
         })
     )
 }
 
+// 테스트 커버리지 검증 작업 (선택사항)
 tasks.jacocoTestCoverageVerification {
     dependsOn(tasks.jacocoTestReport)
-
     violationRules {
         rule {
-            element = "CLASS"
-
             limit {
-                counter = "LINE"
-                value = "COVEREDRATIO"
-                minimum = "0.70".toBigDecimal()
-            }
-
-            limit {
-                counter = "BRANCH"
-                value = "COVEREDRATIO"
-                minimum = "0.60".toBigDecimal()
+                minimum = "0.80".toBigDecimal() // 최소 80% 커버리지 요구
             }
         }
     }
-
-    classDirectories.setFrom(
-        files(classDirectories.files.map {
-            fileTree(it) {
-                exclude(
-                    "**/config/**",
-                    "**/dto/**",
-                    "**/table/**",
-                    "**/model/**",
-                    "**/*Application*",
-                    "**/*Config*"
-                )
-            }
-        })
-    )
-}
-
-jacoco {
-    toolVersion = "0.8.12"
 }
