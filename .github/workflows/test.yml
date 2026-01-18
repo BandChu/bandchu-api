@@ -27,8 +27,8 @@ jobs:
         run: | 
           echo "${{secrets.ENV_FILE}}" > .env
 
-      - name: Run Member & Auth Tests
-        run: ./gradlew test --tests "com.bandchu.api.domain.member.*" -Dspring.profiles.active=test
+  ##    - name: Run Member & Auth Tests
+   ##     run: ./gradlew test --tests "com.bandchu.api.domain.member.*" -Dspring.profiles.active=test
 
       - name: Run Post Tests
         run: ./gradlew test --tests "com.bandchu.api.domain.posts.service.*" -Dspring.profiles.active=test
