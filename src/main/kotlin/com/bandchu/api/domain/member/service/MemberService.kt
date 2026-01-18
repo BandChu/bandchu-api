@@ -9,6 +9,7 @@ import com.bandchu.api.global.exception.BusinessException
 import com.bandchu.api.global.exception.ErrorCode
 import com.bandchu.api.global.security.JwtService
 import org.slf4j.LoggerFactory
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -17,7 +18,8 @@ import org.springframework.transaction.annotation.Transactional
 class MemberService(
     private val memberRepository: MemberRepository,
     private val jwtService: JwtService,
-    private val googleOAuthService: GoogleOAuthService
+    private val googleOAuthService: GoogleOAuthService,
+    private val passwordEncoder: PasswordEncoder
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -27,10 +29,13 @@ class MemberService(
             throw BusinessException(ErrorCode.USER_EMAIL_DUPLICATED)
         }
 
+        // 비밀번호 해시화
+        val hashedPassword = passwordEncoder.encode(request.password)
+
         // 회원 생성 (도메인 factory 메서드 사용)
         val member = Member.createForSignup(
             email = request.email,
-            password = request.password, // TODO: 비밀번호 암호화 추가 필요
+            password = hashedPassword,
             nickname = request.nickname,
             role = request.role
         )
@@ -43,8 +48,8 @@ class MemberService(
         val member = memberRepository.findByEmail(request.email)
             ?: throw BusinessException(ErrorCode.USER_INVALID_CREDENTIAL)
 
-        // 비밀번호 검증 (도메인 메서드 사용)
-        member.verifyPassword(request.password)
+        // 비밀번호 검증 (BCrypt를 사용한 검증)
+        member.verifyPassword(request.password, passwordEncoder)
 
         val memberId = member.id ?: run {
             log.error("Critical: Member ID is null after login. Email: ${member.email}")

@@ -3,6 +3,7 @@ package com.bandchu.api.domain.member.model
 import com.bandchu.api.global.exception.BusinessException
 import com.bandchu.api.global.exception.ErrorCode
 import kotlinx.datetime.LocalDateTime
+import org.springframework.security.crypto.password.PasswordEncoder
 
 data class Member(
     val id: Long? = null,
@@ -18,11 +19,11 @@ data class Member(
     /**
      * 비밀번호 검증
      * @param rawPassword 입력된 비밀번호 (평문)
+     * @param passwordEncoder 비밀번호 인코더 (BCrypt 사용)
      * @throws BusinessException 비밀번호가 일치하지 않으면 USER_INVALID_CREDENTIAL 예외 발생
-     * TODO: 비밀번호 암호화 추가 후 BCrypt 등으로 비교하도록 변경 필요
      */
-    fun verifyPassword(rawPassword: String) {
-        if (this.password != rawPassword) {
+    fun verifyPassword(rawPassword: String, passwordEncoder: PasswordEncoder) {
+        if (!passwordEncoder.matches(rawPassword, this.password)) {
             throw BusinessException(ErrorCode.USER_INVALID_CREDENTIAL)
         }
     }
@@ -40,7 +41,7 @@ data class Member(
         ): Member {
             return Member(
                 email = email,
-                password = password, // TODO: 비밀번호 암호화 추가 필요
+                password = password,
                 nickname = nickname,
                 role = role,
                 isProfileCompleted = true

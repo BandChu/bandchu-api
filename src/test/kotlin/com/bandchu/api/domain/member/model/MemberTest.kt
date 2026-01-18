@@ -3,39 +3,50 @@ package com.bandchu.api.domain.member.model
 import com.bandchu.api.global.exception.BusinessException
 import com.bandchu.api.global.exception.ErrorCode
 import org.junit.jupiter.api.Test
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class MemberTest {
 
+    private val passwordEncoder: PasswordEncoder = BCryptPasswordEncoder()
+
     @Test
     fun `올바른 비밀번호로 검증하면 예외가 발생하지 않는다`() {
         // given
+        val rawPassword = "password123"
+        val hashedPassword = passwordEncoder.encode(rawPassword)
+        
         val member = Member(
             email = "test@example.com",
-            password = "password123",
+            password = hashedPassword,
             nickname = "테스트유저",
             role = Role.FAN
         )
 
         // when & then
-        member.verifyPassword("password123") // 예외 발생하지 않음
+        member.verifyPassword(rawPassword, passwordEncoder) // 예외 발생하지 않음
     }
 
     @Test
     fun `잘못된 비밀번호로 검증하면 USER_INVALID_CREDENTIAL 예외를 발생시킨다`() {
         // given
+        val correctPassword = "password123"
+        val wrongPassword = "wrongpassword"
+        val hashedPassword = passwordEncoder.encode(correctPassword)
+        
         val member = Member(
             email = "test@example.com",
-            password = "password123",
+            password = hashedPassword,
             nickname = "테스트유저",
             role = Role.FAN
         )
 
         // when & then
         try {
-            member.verifyPassword("wrongpassword")
+            member.verifyPassword(wrongPassword, passwordEncoder)
             assert(false) { "Expected BusinessException to be thrown" }
         } catch (e: BusinessException) {
             assertEquals(ErrorCode.USER_INVALID_CREDENTIAL, e.errorCode)

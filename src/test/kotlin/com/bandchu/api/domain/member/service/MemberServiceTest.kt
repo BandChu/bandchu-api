@@ -12,6 +12,8 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.Month
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
@@ -21,7 +23,8 @@ class MemberServiceTest {
     private val memberRepository = mockk<MemberRepository>()
     private val jwtService = mockk<JwtService>()
     private val googleOAuthService = mockk<GoogleOAuthService>()
-    private val memberService = MemberService(memberRepository, jwtService, googleOAuthService)
+    private val passwordEncoder: PasswordEncoder = BCryptPasswordEncoder()
+    private val memberService = MemberService(memberRepository, jwtService, googleOAuthService, passwordEncoder)
 
     @AfterEach
     fun tearDown() {
@@ -55,10 +58,14 @@ class MemberServiceTest {
             password = "wrongpassword"
         )
 
+        // BCrypt로 해시화된 비밀번호 생성 (잘못된 비밀번호와 다른 해시)
+        val correctPassword = "correctpassword"
+        val hashedPassword = passwordEncoder.encode(correctPassword)
+        
         val existingMember = Member(
             id = 1L,
             email = "test@example.com",
-            password = "hashedPassword123",
+            password = hashedPassword,
             nickname = "테스트유저",
             role = Role.FAN,
             createdAt = LocalDateTime(2024, Month.JANUARY, 1, 0, 0, 0)
