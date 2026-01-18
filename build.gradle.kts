@@ -68,3 +68,12 @@ kotlin {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+
+tasks.test {
+    // 테스트 클래스 1개당 새로운 JVM 프로세스를 띄움 (완전 격리)
+    forkEvery = 1
+
+    // 또는 병렬 실행을 꺼서 하나씩 순차적으로 실행되게 보장
+    maxParallelForks = 1
+}

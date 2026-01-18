@@ -26,6 +26,23 @@ jobs:
       - name: Create .env file
         run: | 
           echo "${{secrets.ENV_FILE}}" > .env
-          
-      - name: Run tests
-        run: ./gradlew test -Dspring.profiles.active=test
+
+      - name: Run Member & Auth Tests
+        run: ./gradlew test --tests "com.bandchu.api.domain.member.*" -Dspring.profiles.active=test
+
+      - name: Run Post Tests
+        run: ./gradlew test --tests "com.bandchu.api.domain.posts.service.*" -Dspring.profiles.active=test
+
+      - name: Run Concert Tests
+        run: ./gradlew test --tests "com.bandchu.api.domain.concert.controller.*" -Dspring.profiles.active=test
+      - name: Run Member & Auth Tests
+        run: ./gradlew test --tests "com.bandchu.api.domain.subscription.controller.*" -Dspring.profiles.active=test
+
+      - name: Run Post Tests
+        run: ./gradlew test --tests "com.bandchu.api.domain.artists.controller.*" -Dspring.profiles.active=test
+
+      - name: Run Concert Tests
+        run: ./gradlew test --tests "com.bandchu.api.domain.chat.controller.*" -Dspring.profiles.active=test
+
+      - name: Run Concert Tests
+        run: ./gradlew test --tests "com.bandchu.api.domain.album.controller.*" -Dspring.profiles.active=test
