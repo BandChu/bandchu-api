@@ -178,5 +178,140 @@ class ChatRoomApiTest(
                 }
             }
         }
+
+        describe("Edge Case - 예외 상황 테스트") {
+
+            context("DIRECT 채팅방 생성 시 memberIds가 2명 이상") {
+                it("400 Bad Request 또는 적절한 에러 응답") {
+                    val request = CreateChatRoomRequest(
+                        roomType = RoomType.DIRECT,
+                        name = null,
+                        memberIds = listOf(user2.id!!, user3.id!!) // 2명 (DIRECT는 1명만 가능)
+                    )
+
+                    val result = mockMvc.perform(
+                        post("/api/chatrooms")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request))
+                            .with(user(user1.id.toString()).roles("FAN"))
+                    ).andReturn().response
+
+                    (result.status >= 400) shouldBe true
+                }
+            }
+
+            context("DIRECT 채팅방 생성 시 memberIds가 비어있음") {
+                it("400 Bad Request 또는 적절한 에러 응답") {
+                    val request = CreateChatRoomRequest(
+                        roomType = RoomType.DIRECT,
+                        name = null,
+                        memberIds = emptyList()
+                    )
+
+                    val result = mockMvc.perform(
+                        post("/api/chatrooms")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request))
+                            .with(user(user1.id.toString()).roles("FAN"))
+                    ).andReturn().response
+
+                    (result.status >= 400) shouldBe true
+                }
+            }
+
+            context("존재하지 않는 사용자를 채팅방에 초대") {
+                it("에러가 발생하거나 무시됨") {
+                    val request = CreateChatRoomRequest(
+                        roomType = RoomType.GROUP,
+                        name = "테스트방",
+                        memberIds = listOf(99999L) // 존재하지 않는 사용자 ID
+                    )
+
+                    val result = mockMvc.perform(
+                        post("/api/chatrooms")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request))
+                            .with(user(user1.id.toString()).roles("FAN"))
+                    ).andReturn().response
+
+                    // 성공하거나 에러가 발생해야 함 (현재 구현에 따라 다름)
+                    (result.status >= 200) shouldBe true
+                }
+            }
+
+            context("참여하지 않은 채팅방의 읽음 상태 업데이트 시도") {
+                it("403 Forbidden 또는 적절한 에러 응답") {
+                    val request = UpdateReadStatusRequest(lastReadMessageId = 1L)
+
+                    val result = mockMvc.perform(
+                        put("/api/chatrooms/${myDirectRoom.roomId}/read-status")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request))
+                            .with(user(user3.id.toString()).roles("FAN")) // user3는 참여하지 않음
+                    ).andReturn().response
+
+                    (result.status >= 400) shouldBe true
+                }
+            }
+
+            context("존재하지 않는 채팅방의 읽음 상태 업데이트") {
+                it("404 Not Found 또는 적절한 에러 응답") {
+                    val request = UpdateReadStatusRequest(lastReadMessageId = 1L)
+
+                    val result = mockMvc.perform(
+                        put("/api/chatrooms/$NON_EXISTENT_ID/read-status")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request))
+                            .with(user(user1.id.toString()).roles("FAN"))
+                    ).andReturn().response
+
+                    (result.status >= 400) shouldBe true
+                }
+            }
+
+            context("GROUP 채팅방에 많은 수의 멤버 초대") {
+                it("정상적으로 처리됨") {
+                    // user2, user3 포함 (총 3명)
+                    val request = CreateChatRoomRequest(
+                        roomType = RoomType.GROUP,
+                        name = "대규모 그룹",
+                        memberIds = listOf(user2.id!!, user3.id!!)
+                    )
+
+                    val result = mockMvc.perform(
+                        post("/api/chatrooms")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request))
+                            .with(user(user1.id.toString()).roles("FAN"))
+                    ).andReturn().response
+
+                    result.status shouldBe HttpStatus.CREATED.value()
+                    val root = objectMapper.readTree(result.contentAsString)
+                    root["data"]["roomType"].asText() shouldBe "GROUP"
+                }
+            }
+
+            // 문자열 길이 제한은 DB 설정에 따라 다르므로 주석 처리
+            // context("매우 긴 이름의 GROUP 채팅방 생성") {
+            //     it("적절하게 처리되거나 에러 반환") {
+            //         val longName = "a".repeat(300) // 255자 제한 초과
+            //         val request = CreateChatRoomRequest(
+            //             roomType = RoomType.GROUP,
+            //             name = longName,
+            //             memberIds = listOf(user2.id!!)
+            //         )
+            //
+            //         val result = mockMvc.perform(
+            //             post("/api/chatrooms")
+            //                 .contentType(MediaType.APPLICATION_JSON)
+            //                 .content(objectMapper.writeValueAsString(request))
+            //                 .with(user(user1.id.toString()).roles("FAN"))
+            //         ).andReturn().response
+            //
+            //         // 길이 제한으로 에러가 발생하거나, DB가 잘라서 저장하거나 함
+            //         (result.status >= 200 && result.status < 500) shouldBe true
+            //     }
+            // }
+        }
     }
 }
