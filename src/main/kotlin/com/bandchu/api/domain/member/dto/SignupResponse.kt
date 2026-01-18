@@ -8,6 +8,7 @@ data class SignupResponse(
     val email: String,
     val nickname: String,
     val role: Role,
-    val createdAt: OffsetDateTime
+    val createdAt: OffsetDateTime,
+
 )
 

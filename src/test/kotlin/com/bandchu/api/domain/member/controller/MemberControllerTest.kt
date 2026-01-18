@@ -5,6 +5,7 @@ import com.bandchu.api.domain.member.model.Member
 import com.bandchu.api.domain.member.model.Role
 import com.bandchu.api.domain.member.service.LoginResult
 import com.bandchu.api.domain.member.service.MemberService
+import com.bandchu.api.domain.member.service.SignupResult
 import com.bandchu.api.domain.member.service.TokenPair
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.kotest.core.spec.style.DescribeSpec
@@ -68,8 +69,14 @@ class MemberControllerTest(
                         nanosecond = 0
                     )
                 )
+                // 🔴 이 부분을 Member가 아닌 SignupResult를 반환하도록 수정합니다.
+                val signupResult = SignupResult(
+                    member = savedMember,
+                    accessToken = "test-access-token",
+                    refreshToken = "test-refersh-token"
+                )
 
-                every { memberService.signup(request) } returns savedMember
+                every { memberService.signup(request) } returns SignupResult(savedMember,"test-access-token","test-refersh-token")
 
                 // when & then
                 mockMvc.perform(
@@ -279,7 +286,8 @@ class MemberControllerTest(
                     refreshToken = "refresh-token",
                     isNewMember = false,
                     memberId = 1L,
-                    nickname = "GoogleUser"
+                    nickname = "GoogleUser",
+                    isProfileCompleted = true
                 )
 
                 every { memberService.googleLogin(request.idToken) } returns googleOAuthResult
@@ -312,7 +320,8 @@ class MemberControllerTest(
                     refreshToken = "refresh-token",
                     isNewMember = true,
                     memberId = 2L,
-                    nickname = "NewGoogleUser"
+                    nickname = "NewGoogleUser",
+                    isProfileCompleted = true
                 )
 
                 every { memberService.googleLogin(request.idToken) } returns googleOAuthResult
