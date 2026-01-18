@@ -26,7 +26,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.Month
-
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 @TestConfiguration
 class SubscriptionControllerTestConfig {
     @Bean
@@ -70,6 +71,7 @@ class SubscriptionControllerTest(
                 mockMvc.perform(
                     post("/api/subscriptions")
                         .with(authentication(authentication))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                 )
@@ -105,11 +107,13 @@ class SubscriptionControllerTest(
                 mockMvc.perform(
                     post("/api/subscriptions")
                         .with(authentication(authentication))
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
-                )
+                ).andDo(print())
                     .andExpect(status().isConflict)
                     .andExpect(jsonPath("$.status").value(409))
+                    .andExpect(jsonPath("$.title").value("Conflict"))
                     .andExpect(jsonPath("$.code").value("SUBSCRIPTION_DUPLICATED"))
                     .andExpect(jsonPath("$.detail").value("이미 구독 중인 아티스트입니다."))
             }
@@ -140,9 +144,11 @@ class SubscriptionControllerTest(
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                 )
+                    .andDo(print())
                     .andExpect(status().isForbidden)
                     .andExpect(jsonPath("$.status").value(403))
                     .andExpect(jsonPath("$.code").value("SUBSCRIPTION_INSUFFICIENT_ROLE"))
+                    .andExpect(jsonPath("$.detail").value("팬만 구독할 수 있습니다."))
             }
         }
 

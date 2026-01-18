@@ -320,7 +320,9 @@ class MemberControllerTest(
                     isNewMember = true,
                     memberId = 2L,
                     nickname = "NewGoogleUser",
+
                     isProfileCompleted = false
+
                 )
 
                 every { memberService.googleLogin(request.idToken) } returns googleOAuthResult

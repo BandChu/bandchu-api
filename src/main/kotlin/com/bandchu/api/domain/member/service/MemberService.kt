@@ -10,6 +10,7 @@ import com.bandchu.api.global.exception.BusinessException
 import com.bandchu.api.global.exception.ErrorCode
 import com.bandchu.api.global.security.JwtService
 import org.slf4j.LoggerFactory
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -18,7 +19,8 @@ import org.springframework.transaction.annotation.Transactional
 class MemberService(
     private val memberRepository: MemberRepository,
     private val jwtService: JwtService,
-    private val googleOAuthService: GoogleOAuthService
+    private val googleOAuthService: GoogleOAuthService,
+    private val passwordEncoder: PasswordEncoder
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -28,13 +30,15 @@ class MemberService(
             throw BusinessException(ErrorCode.USER_EMAIL_DUPLICATED)
         }
 
-        // 회원 생성 (일반 회원가입은 프로필 정보를 이미 받으므로 완료 상태로 설정)
-        val member = Member(
+        // 비밀번호 해시화
+        val hashedPassword = passwordEncoder.encode(request.password)
+
+        // 회원 생성 (도메인 factory 메서드 사용)
+        val member = Member.createForSignup(
             email = request.email,
-            password = request.password, // TODO: 비밀번호 암호화 추가 필요
+            password = hashedPassword,
             nickname = request.nickname,
-            role = request.role,
-            isProfileCompleted = true
+            role = request.role
         )
 
         val savedMember = memberRepository.save(member)
@@ -60,11 +64,8 @@ class MemberService(
         val member = memberRepository.findByEmail(request.email)
             ?: throw BusinessException(ErrorCode.USER_INVALID_CREDENTIAL)
 
-        // 비밀번호 검증
-        // TODO: 비밀번호 암호화 추가 후 BCrypt 등으로 비교
-        if (member.password != request.password) {
-            throw BusinessException(ErrorCode.USER_INVALID_CREDENTIAL)
-        }
+        // 비밀번호 검증 (BCrypt를 사용한 검증)
+        member.verifyPassword(request.password, passwordEncoder)
 
         val memberId = member.id ?: run {
             log.error("Critical: Member ID is null after login. Email: ${member.email}")
@@ -106,26 +107,20 @@ class MemberService(
             throw BusinessException(ErrorCode.INVALID_REFRESH_TOKEN)
         }
 
-        // 회원 ID와 역할 추출
+        // 회원 ID 추출
         val memberId = try {
             jwtService.getMemberIdFromToken(refreshToken)
         } catch (e: Exception) {
             throw BusinessException(ErrorCode.INVALID_REFRESH_TOKEN)
         }
 
-        val role = try {
-            jwtService.getRoleFromToken(refreshToken)
-        } catch (e: Exception) {
-            throw BusinessException(ErrorCode.INVALID_REFRESH_TOKEN)
-        }
-
-        // 회원 존재 확인
-        memberRepository.findById(memberId)
+        // 회원 존재 확인 및 최신 역할 정보 조회
+        val member = memberRepository.findById(memberId)
             ?: throw BusinessException(ErrorCode.INVALID_REFRESH_TOKEN)
 
-        // 새로운 토큰 발급
-        val newAccessToken = jwtService.generateAccessToken(memberId, role)
-        val newRefreshToken = jwtService.generateRefreshToken(memberId, role)
+        // 새로운 토큰 발급 (DB에서 조회한 최신 역할 사용)
+        val newAccessToken = jwtService.generateAccessToken(memberId, member.role)
+        val newRefreshToken = jwtService.generateRefreshToken(memberId, member.role)
 
         return TokenPair(
             accessToken = newAccessToken,
@@ -161,14 +156,11 @@ class MemberService(
                 existingMember
             }
         } else {
-            // 신규 회원인 경우 자동 가입 (프로필 미완료 상태로 생성)
-            val newMember = Member(
+            // 신규 회원인 경우 자동 가입 (도메인 factory 메서드 사용)
+            val newMember = Member.createForOAuth(
                 email = googleUserInfo.email,
-                password = "", // OAuth 회원은 비밀번호 없음
                 nickname = googleUserInfo.name,
-                role = Role.FAN, // 기본 역할은 FAN
-                googleId = googleUserInfo.googleId,
-                isProfileCompleted = false // 구글 OAuth 회원가입은 프로필 설정 전까지 미완료 상태
+                googleId = googleUserInfo.googleId
             )
             memberRepository.save(newMember)
         }

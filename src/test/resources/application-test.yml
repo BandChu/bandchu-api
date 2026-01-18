@@ -1,5 +1,22 @@
-#spring:
-#  sql:
-#    init:
-#      mode: always
-#      data-locations: classpath:test-data.sql
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  datasource:
+    # 🔴 중요: ${DB_URL}을 쓰지 말고 아래처럼 직접 적으세요.
+    # 그래야 .env에 있는 PostgreSQL 주소를 무시합니다.
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  # 🔴 테스트 시에는 Flyway가 H2에서 돌 수 있게 하거나 잠시 끕니다.
+  flyway:
+    enabled: false
+
+  sql:
+    init:
+      mode: never
+
+logging:
+  level:
+    root: warn

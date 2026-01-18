@@ -1,15 +1,23 @@
 package com.bandchu.api.domain.concert.controller
 
+import com.bandchu.api.domain.artist.repository.ArtiProfileRepository
 import com.bandchu.api.domain.concert.ConcertTestConfig
 import com.bandchu.api.domain.concert.model.Concert
+import com.bandchu.api.domain.concert.repository.ConcertRepository
 import com.bandchu.api.domain.concert.service.dto.CreateConcertCommand
 import com.bandchu.api.domain.concert.service.dto.UpdateConcertCommand
 import com.bandchu.api.domain.member.model.Member
 import com.bandchu.api.domain.member.model.Role
+import com.bandchu.api.domain.member.repository.MemberRepository
+import com.bandchu.api.domain.member.service.GoogleOAuthService
 import com.bandchu.api.fixture.ArtistFixture
 import com.bandchu.api.fixture.AuthFixture
 import com.bandchu.api.fixture.ConcertFixture
+import com.bandchu.api.global.config.ConfigController
+import com.bandchu.api.global.config.S3Uploader
+import com.bandchu.api.global.security.JwtService
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.ninjasquad.springmockk.MockkBean
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -52,7 +60,23 @@ class ConcertApiTest(
     private val NON_EXISTENT_ID = 99999L
     private val ARTIST_ROLE = Role.ARTIST.name
     private val FAN_ROLE = Role.FAN.name
+    @MockkBean(relaxed = true)
+    lateinit var s3Uploader: S3Uploader
 
+    @MockkBean(relaxed = true)
+    lateinit var googleOAuthService: GoogleOAuthService
+
+    @MockkBean(relaxed = true)
+    lateinit var configController: ConfigController
+
+    @MockkBean(relaxed = true)
+    lateinit var jwtService: JwtService
+
+    @MockkBean(relaxed = true)
+    lateinit var memberRepository: MemberRepository
+    // 3. 만약 에러가 지속되면 이것도 추가하세요
+    @MockkBean(relaxed = true) lateinit var artistRepository: ArtiProfileRepository
+    @MockkBean(relaxed = true) lateinit var concertRepository: ConcertRepository
     init {
         beforeSpec {
             val suffix = System.currentTimeMillis()

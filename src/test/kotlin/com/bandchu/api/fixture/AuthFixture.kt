@@ -3,6 +3,7 @@ package com.bandchu.api.fixture
 import com.bandchu.api.domain.member.dto.SignupRequest
 import com.bandchu.api.domain.member.model.Member
 import com.bandchu.api.domain.member.model.Role
+import com.bandchu.api.domain.member.repository.MemberRepository
 import com.bandchu.api.domain.member.service.MemberService
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
@@ -10,7 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 
 class AuthFixture(
-    private val memberService: MemberService
+    private val memberService: MemberService,
 ) {
     /**
      * 외부 환경에 대한 의존을 줄이고, 재사용 가능한 코드를 만들기 위한 테스트 객체 생성 Fixture입니다.
@@ -31,7 +32,7 @@ class AuthFixture(
                 nickname = credentials.nickname,
                 role = credentials.role
             )
-        )
+        ).member
     }
 
     fun authenticateAs(member: Member) {
