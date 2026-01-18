@@ -5,9 +5,13 @@ import com.bandchu.api.domain.artist.model.ArtiProfile
 import com.bandchu.api.domain.artists.ArtisTestConfig
 import com.bandchu.api.domain.member.model.Member
 import com.bandchu.api.domain.member.model.Role
+import com.bandchu.api.domain.member.service.GoogleOAuthService
 import com.bandchu.api.fixture.ArtistFixture
 import com.bandchu.api.fixture.AuthFixture
+import com.bandchu.api.global.config.ConfigController
+import com.bandchu.api.global.config.S3Uploader
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.ninjasquad.springmockk.MockkBean
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -43,7 +47,14 @@ class ArtistApiTest (
     private lateinit var member2: Member
     private lateinit var artiProfile1: ArtiProfile
     private lateinit var artiProfile2: ArtiProfile
+    @MockkBean(relaxed = true)
+    lateinit var s3Uploader: S3Uploader
 
+    @MockkBean(relaxed = true)
+    lateinit var googleOAuthService: GoogleOAuthService
+
+    @MockkBean(relaxed = true)
+    lateinit var configController: ConfigController
     init {
         beforeSpec {
             // 현재 테스트로 생성된 데이터 롤백 x, DB 자동 롤백 방법 생각해보기

@@ -35,14 +35,14 @@ jobs:
 
       - name: Run Concert Tests
         run: ./gradlew test --tests "com.bandchu.api.domain.concert.controller.*" -Dspring.profiles.active=test
-      - name: Run Member & Auth Tests
+      - name: Run Subscription Tests
         run: ./gradlew test --tests "com.bandchu.api.domain.subscription.controller.*" -Dspring.profiles.active=test
 
-      - name: Run Post Tests
+      - name: Run Artist Tests
         run: ./gradlew test --tests "com.bandchu.api.domain.artists.controller.*" -Dspring.profiles.active=test
 
-      - name: Run Concert Tests
+      - name: Run Chat Tests
         run: ./gradlew test --tests "com.bandchu.api.domain.chat.controller.*" -Dspring.profiles.active=test
 
-      - name: Run Concert Tests
+      - name: Run Album Tests
         run: ./gradlew test --tests "com.bandchu.api.domain.album.controller.*" -Dspring.profiles.active=test
