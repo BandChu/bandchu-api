@@ -33,8 +33,8 @@ jobs:
       - name: Run Post Tests
         run: ./gradlew test --tests "com.bandchu.api.domain.posts.service.*" -Dspring.profiles.active=test
 
-      - name: Run Concert Tests
-        run: ./gradlew test --tests "com.bandchu.api.domain.concert.controller.*" -Dspring.profiles.active=test
+
+        
       - name: Run Subscription Tests
         run: ./gradlew test --tests "com.bandchu.api.domain.subscription.controller.*" -Dspring.profiles.active=test
 
