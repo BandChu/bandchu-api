@@ -1,0 +1,164 @@
+@startuml Member 도메인 테스트 코드 동작 방식 (시퀀스 다이어그램)
+
+!theme plain
+skinparam sequenceMessageAlign center
+
+title Member 도메인 테스트 코드 실행 시퀀스
+
+== MemberServiceTest - 로그인 실패 테스트 ==
+
+participant "테스트 메서드\n@Test" as Test
+participant "MemberServiceTest" as TestClass
+participant "Mock\nMemberRepository" as MockRepo
+participant "MemberService\n(테스트 대상)" as Service
+participant "Mock\nJwtService" as MockJwt
+
+activate TestClass
+
+Test -> TestClass: **Given (준비)**
+note right
+  val request = LoginRequest(...)
+  every { memberRepository.findByEmail(...) } returns null
+end note
+
+TestClass -> MockRepo: Mock 동작 정의\n(every { } returns null)
+
+Test -> TestClass: **When (실행)**
+TestClass -> Service: login(request)
+activate Service
+
+Service -> MockRepo: findByEmail("notfound@example.com")
+activate MockRepo
+MockRepo --> Service: returns null
+deactivate MockRepo
+
+Service --> TestClass: throws BusinessException\n(USER_INVALID_CREDENTIAL)
+deactivate Service
+
+Test -> TestClass: **Then (검증)**
+note right
+  try-catch로 예외 캐치
+  assertEquals(ErrorCode.USER_INVALID_CREDENTIAL)
+end note
+
+TestClass -> TestClass: assertEquals(...)\n검증 수행
+
+deactivate TestClass
+
+== MemberServiceTest - 리프레시 토큰 성공 테스트 ==
+
+participant "테스트 메서드\n@Test" as Test2
+participant "MemberServiceTest" as TestClass2
+participant "Mock\nMemberRepository" as MockRepo2
+participant "MemberService\n(테스트 대상)" as Service2
+participant "Mock\nJwtService" as MockJwt2
+
+activate TestClass2
+
+Test2 -> TestClass2: **Given (준비)**
+note right
+  every { jwtService.validateToken(...) } returns true
+  every { jwtService.getTokenTypeFromToken(...) } returns "refresh"
+  every { memberRepository.findById(...) } returns member
+  every { jwtService.generateAccessToken(...) } returns "new.access.token"
+end note
+
+TestClass2 -> MockJwt2: Mock 동작 정의\n(여러 개)
+TestClass2 -> MockRepo2: Mock 동작 정의
+
+Test2 -> TestClass2: **When (실행)**
+TestClass2 -> Service2: refreshToken(refreshToken)
+activate Service2
+
+Service2 -> MockJwt2: validateToken(refreshToken)
+activate MockJwt2
+MockJwt2 --> Service2: returns true
+deactivate MockJwt2
+
+Service2 -> MockJwt2: getTokenTypeFromToken(refreshToken)
+activate MockJwt2
+MockJwt2 --> Service2: returns "refresh"
+deactivate MockJwt2
+
+Service2 -> MockJwt2: getMemberIdFromToken(refreshToken)
+activate MockJwt2
+MockJwt2 --> Service2: returns memberId
+deactivate MockJwt2
+
+Service2 -> MockRepo2: findById(memberId)
+activate MockRepo2
+MockRepo2 --> Service2: returns member
+deactivate MockRepo2
+
+Service2 -> MockJwt2: generateAccessToken(memberId, role)
+activate MockJwt2
+MockJwt2 --> Service2: returns "new.access.token"
+deactivate MockJwt2
+
+Service2 -> MockJwt2: generateRefreshToken(memberId, role)
+activate MockJwt2
+MockJwt2 --> Service2: returns "new.refresh.token"
+deactivate MockJwt2
+
+Service2 --> TestClass2: returns TokenPair\n(accessToken, refreshToken)
+deactivate Service2
+
+Test2 -> TestClass2: **Then (검증)**
+note right
+  assertNotNull(result)
+  assertEquals("new.access.token", result.accessToken)
+  assertEquals("new.refresh.token", result.refreshToken)
+end note
+
+TestClass2 -> TestClass2: assertNotNull(...)\nassertEquals(...)
+
+deactivate TestClass2
+
+== MemberControllerTest - 회원가입 테스트 ==
+
+participant "테스트 메서드\n@Test" as Test3
+participant "MemberControllerTest" as TestClass3
+participant "MockMvc" as MockMvc
+participant "MemberController\n(테스트 대상)" as Controller
+participant "Mock\nMemberService" as MockService
+
+activate TestClass3
+
+Test3 -> TestClass3: **Given (준비)**
+note right
+  val request = SignupRequest(...)
+  every { memberService.signup(request) } returns savedMember
+end note
+
+TestClass3 -> MockService: Mock 동작 정의
+
+Test3 -> TestClass3: **When (실행)**
+TestClass3 -> MockMvc: perform(POST /api/members/signup)
+activate MockMvc
+
+MockMvc -> Controller: POST /api/members/signup\n+ JSON Body
+activate Controller
+
+Controller -> MockService: signup(request)
+activate MockService
+MockService --> Controller: returns savedMember
+deactivate MockService
+
+Controller --> MockMvc: 201 Created\n+ JSON Response
+deactivate Controller
+
+MockMvc --> TestClass3: MockMvcResult
+deactivate MockMvc
+
+Test3 -> TestClass3: **Then (검증)**
+note right
+  .andExpect(status().isCreated)
+  .andExpect(jsonPath("$.data.email").value("..."))
+  .andExpect(jsonPath("$.data.nickname").value("..."))
+end note
+
+TestClass3 -> MockMvc: andExpect(...)\n응답 검증
+
+deactivate TestClass3
+
+@enduml
