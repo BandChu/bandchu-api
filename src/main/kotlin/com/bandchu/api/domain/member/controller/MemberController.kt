@@ -58,7 +58,8 @@ class MemberController(
             email = member.email,
             nickname = member.nickname,
             role = member.role,
-
+            accessToken = signupResult.accessToken,
+            refreshToken = signupResult.refreshToken,
             createdAt = member.createdAt?.toOffsetDateTime() ?: OffsetDateTime.now(ZoneOffset.UTC)
         )
         

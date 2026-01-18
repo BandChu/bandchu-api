@@ -26,6 +26,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.Month
 
 @TestConfiguration
@@ -60,23 +62,18 @@ class MemberControllerTest(
                     nickname = "홍길동",
                     role = Role.FAN,
                     createdAt = LocalDateTime(
-                        year = 2024,
-                        month = Month.JANUARY,
-                        dayOfMonth = 1,
-                        hour = 0,
-                        minute = 0,
-                        second = 0,
-                        nanosecond = 0
+                        date = LocalDate(2024, Month.JANUARY, 1),
+                        time = LocalTime(0, 0, 0, 0)
                     )
                 )
-                // 🔴 이 부분을 Member가 아닌 SignupResult를 반환하도록 수정합니다.
+
                 val signupResult = SignupResult(
                     member = savedMember,
-                    accessToken = "test-access-token",
-                    refreshToken = "test-refersh-token"
+                    accessToken = "access-token",
+                    refreshToken = "refresh-token"
                 )
 
-                every { memberService.signup(request) } returns SignupResult(savedMember,"test-access-token","test-refersh-token")
+                every { memberService.signup(request) } returns signupResult
 
                 // when & then
                 mockMvc.perform(
@@ -90,6 +87,8 @@ class MemberControllerTest(
                     .andExpect(jsonPath("$.data.email").value("example@domain.com"))
                     .andExpect(jsonPath("$.data.nickname").value("홍길동"))
                     .andExpect(jsonPath("$.data.role").value("FAN"))
+                    .andExpect(jsonPath("$.data.accessToken").value("access-token"))
+                    .andExpect(jsonPath("$.data.refreshToken").value("refresh-token"))
                     .andExpect(jsonPath("$.message").value("회원 가입이 완료되었습니다."))
             }
         }
@@ -321,7 +320,9 @@ class MemberControllerTest(
                     isNewMember = true,
                     memberId = 2L,
                     nickname = "NewGoogleUser",
-                    isProfileCompleted = true
+
+                    isProfileCompleted = false
+
                 )
 
                 every { memberService.googleLogin(request.idToken) } returns googleOAuthResult
