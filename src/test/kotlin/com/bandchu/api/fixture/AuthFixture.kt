@@ -32,7 +32,7 @@ class AuthFixture(
                 nickname = credentials.nickname,
                 role = credentials.role
             )
-        )
+        ).member
     }
 
     fun authenticateAs(member: Member) {
