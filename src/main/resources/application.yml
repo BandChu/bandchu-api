@@ -49,3 +49,17 @@ aws:
     accessKey: ${AWS_CREDENTIAL_ACCESS_KEY}
     secretKey: ${AWS_CREDENTIAL_SECRET_KEY}
     client-id: ${GOOGLE_CLIENT_ID}
+
+flyway:
+  enabled: true
+  # 기존에 테이블이 이미 있는 상태라면 true로 설정하여 시작점을 잡습니다.
+  baseline-on-migrate: true
+  # 마이그레이션 파일 위치 (기본값)
+  locations: classpath:db/migration
+  # 만약 특정 스키마를 지정하고 싶다면 (기본값은 public)
+  schemas: public
+
+  jpa:
+    hibernate:
+      # 중요: Flyway 사용 시에는 validate 또는 none을 권장합니다.
+      ddl-auto: validate

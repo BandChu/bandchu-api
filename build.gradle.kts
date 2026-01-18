@@ -52,6 +52,11 @@ dependencies {
     testImplementation("io.mockk:mockk:1.13.5")
     testImplementation("com.h2database:h2:2.2.224")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+// Flyway 핵심 라이브러리
+    implementation("org.flywaydb:flyway-core")
+    // PostgreSQL 전용 의존성
+    implementation("org.flywaydb:flyway-database-postgresql")
 }
 
 kotlin {
