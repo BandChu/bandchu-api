@@ -48,6 +48,9 @@ DB_URL=jdbc:postgresql://localhost:5432/bandchu
 DB_USERNAME=your_db_username
 DB_PASSWORD=your_db_password
 
+# JWT 설정
+JWT_SECRET=your_jwt_secret_key_minimum_32_bytes
+
 # Google OAuth 설정
 GOOGLE_CLIENT_ID=your_google_client_id
 ```
@@ -57,6 +60,7 @@ GOOGLE_CLIENT_ID=your_google_client_id
 - **DB_URL**: PostgreSQL 데이터베이스 연결 URL
 - **DB_USERNAME**: 데이터베이스 사용자 이름
 - **DB_PASSWORD**: 데이터베이스 비밀번호
+- **JWT_SECRET**: JWT 토큰 서명에 사용되는 시크릿 키 (최소 32바이트, 256비트 이상 권장)
 - **GOOGLE_CLIENT_ID**: Google OAuth 2.0 클라이언트 ID (Google Cloud Console에서 발급)
 
 <!--
