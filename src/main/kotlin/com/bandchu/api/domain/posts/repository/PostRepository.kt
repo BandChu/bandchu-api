@@ -1,6 +1,5 @@
 package com.bandchu.api.domain.posts.repository
 
-import com.bandchu.api.domain.album.table.AlbumTable
 import com.bandchu.api.domain.artist.table.ArtiProfileTable
 import com.bandchu.api.domain.member.table.MemberTable
 import com.bandchu.api.domain.posts.dto.PostWithMember
@@ -82,7 +81,7 @@ class PostRepository {
             if (type == PostType.ARTIST) {
                 val isArtist = ArtiProfileTable
                     .selectAll()
-                    .where{ ArtiProfileTable.id eq memberId }
+                    .where{ ArtiProfileTable.member eq memberId }
                     .empty()
                     .not()
 
@@ -203,9 +202,12 @@ class PostRepository {
         // ARTIST 게시판일 때만 필터링 적용
         val artistIds: List<Long> = if (type == PostType.ARTIST && currentMemberId != null) {
             (SubscriptionTable innerJoin ArtiProfileTable)
-                .select(ArtiProfileTable.id)
-                .where{ SubscriptionTable.member eq currentMemberId }
-                .map { it[ArtiProfileTable.id].value }
+                .select(ArtiProfileTable.member)
+                .where{ 
+                    (SubscriptionTable.member eq currentMemberId) and
+                    (ArtiProfileTable.member.isNotNull())
+                }
+                .map { it[ArtiProfileTable.member]!!.value }
         } else {
             emptyList()
         }
@@ -291,7 +293,7 @@ class PostRepository {
     //구독한 아티스트의 게시물 하나 조회
     fun findLatestSubArtistPost(currentMemberId: Long): PostWithMember? = transaction {
         val row = SubscriptionTable
-            .innerJoin(ArtiProfileTable, { AlbumTable.artiProfile }, { id })
+            .innerJoin(ArtiProfileTable, { SubscriptionTable.artiProfile }, { id })
             .innerJoin(PostTable, { ArtiProfileTable.member }, { memberId })
             .innerJoin(MemberTable, { PostTable.memberId }, { id })
             .select(

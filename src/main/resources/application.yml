@@ -8,6 +8,17 @@ spring:
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
+  # 🔴 아래 flyway와 jpa 설정이 spring 하위로 정확히 정렬되어야 합니다.
+  flyway:
+    enabled: true
+    baseline-on-migrate: true # 기존 DB가 있어도 기준점을 잡고 시작함
+    locations: classpath:db/migration
+    schemas: public
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
   security:
     oauth2:
       client:
@@ -15,16 +26,13 @@ spring:
           google:
             jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
     bcrypt:
-      # BCrypt 워크 팩터 설정 (4-31, 기본값: 10)
-      # 값이 높을수록 해시 계산 시간이 길어져 보안이 강화되지만, 응답 시간도 증가
-      # 권장값: 10 (일반), 12-14 (높은 보안), 4-9 (개발/테스트)
       strength: 10
 
   servlet:
     multipart:
       max-file-size: 50MB
       max-request-size: 50MB
-  # JSON 요청 크기 제한 (base64 데이터 URL 저장을 위해 증가)
+
   http:
     encoding:
       enabled: true
@@ -32,7 +40,7 @@ spring:
       force: true
 
 server:
-  # HTTP 요청 크기 제한 (base64 데이터 URL 저장을 위해 증가)
+  port: 8080
   max-http-header-size: 1MB
   max-http-post-size: 10MB
 
@@ -52,4 +60,7 @@ aws:
   credentials:
     accessKey: ${AWS_CREDENTIAL_ACCESS_KEY}
     secretKey: ${AWS_CREDENTIAL_SECRET_KEY}
-    client-id: ${GOOGLE_CLIENT_ID}
+
+# 🔴 JWT 설정은 최상위에 두어도 JwtService에서 @Value로 읽어갑니다.
+jwt:
+  secret: ${JWT_SECRET}

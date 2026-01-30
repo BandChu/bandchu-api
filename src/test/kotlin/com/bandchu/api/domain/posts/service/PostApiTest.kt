@@ -1,5 +1,6 @@
 package com.bandchu.api.domain.posts.service
 
+import com.bandchu.api.ApiApplicationTests
 import com.bandchu.api.domain.concert.ConcertTestConfig
 import com.bandchu.api.domain.member.model.Member
 import com.bandchu.api.domain.member.model.Role
@@ -30,7 +31,6 @@ import io.mockk.mockk
 import org.springframework.http.HttpStatus
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.FilterType
 
@@ -57,12 +57,8 @@ class PostApiTest(
     private val objectMapper: ObjectMapper,
     private val authFixture: AuthFixture,
     private val postFixture: PostFixture
-) : DescribeSpec() {
+) :DescribeSpec() {
 
-    @MockBean
-    lateinit var configController: ConfigController
-    @MockBean
-    lateinit var s3Uploader: S3Uploader  // s3Uploader 충돌도 방지
 
     private lateinit var writer: Member
     private lateinit var otherUser: Member

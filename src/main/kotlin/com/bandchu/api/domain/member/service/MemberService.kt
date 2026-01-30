@@ -5,6 +5,7 @@ import com.bandchu.api.domain.member.dto.SignupRequest
 import com.bandchu.api.domain.member.model.Member
 import com.bandchu.api.domain.member.model.Role
 import com.bandchu.api.domain.member.repository.MemberRepository
+import com.bandchu.api.domain.member.service.SignupResult
 import com.bandchu.api.global.exception.BusinessException
 import com.bandchu.api.global.exception.ErrorCode
 import com.bandchu.api.global.security.JwtService
@@ -23,7 +24,7 @@ class MemberService(
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
-    fun signup(request: SignupRequest): Member {
+    fun signup(request: SignupRequest): SignupResult {
         // 이메일 중복 체크
         if (memberRepository.existsByEmail(request.email)) {
             throw BusinessException(ErrorCode.USER_EMAIL_DUPLICATED)
@@ -40,7 +41,22 @@ class MemberService(
             role = request.role
         )
 
-        return memberRepository.save(member)
+        val savedMember = memberRepository.save(member)
+        
+        val memberId = savedMember.id ?: run {
+            log.error("Critical: Member ID is null after save. Email: ${savedMember.email}")
+            throw IllegalStateException("회원 저장 후 ID가 없습니다.")
+        }
+
+        // JWT 토큰 생성 (회원가입 후 자동 로그인)
+        val accessToken = jwtService.generateAccessToken(memberId, savedMember.role)
+        val refreshToken = jwtService.generateRefreshToken(memberId, savedMember.role)
+
+        return SignupResult(
+            member = savedMember,
+            accessToken = accessToken,
+            refreshToken = refreshToken
+        )
     }
 
     fun login(request: LoginRequest): LoginResult {
