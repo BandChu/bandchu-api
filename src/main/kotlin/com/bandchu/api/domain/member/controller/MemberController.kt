@@ -17,6 +17,8 @@ import com.bandchu.api.domain.member.dto.RoleUpdateRequest
 import com.bandchu.api.domain.member.dto.RoleUpdateResponse
 import com.bandchu.api.domain.member.dto.SignupRequest
 import com.bandchu.api.domain.member.dto.SignupResponse
+import com.bandchu.api.domain.member.dto.SocialLoginResponse
+import com.bandchu.api.domain.member.dto.SocialOAuthRequest
 import com.bandchu.api.domain.member.service.MemberService
 import com.bandchu.api.global.exception.BusinessException
 import com.bandchu.api.global.exception.ErrorCode
@@ -105,31 +107,35 @@ class MemberController(
             .status(HttpStatus.OK)
             .body(ApiResponse.success(response, "토큰이 성공적으로 재발급되었습니다."))
     }
-    @Operation(summary = "구글 로그인", description = "oauth로 구글로 가입합니다.")
-    @PostMapping("/oauth/google")
-    fun googleLogin(@Valid @RequestBody request: GoogleOAuthRequest): ResponseEntity<ApiResponse<GoogleOAuthResponse>> {
-        val googleOAuthResult = memberService.googleLogin(request.idToken)
-        
-        val response = GoogleOAuthResponse(
-            accessToken = googleOAuthResult.accessToken,
-            refreshToken = googleOAuthResult.refreshToken,
-            isNewMember = googleOAuthResult.isNewMember,
-            memberId = googleOAuthResult.memberId,
-            nickname = googleOAuthResult.nickname
+
+
+    @Operation(summary = "소셜 로그인", description = "OAuth(Google, Naver, Kakao)를 통해 로그인/가입합니다.")
+    @PostMapping("/oauth/{provider}")
+    fun socialLogin(
+        @PathVariable provider: String,
+        @Valid @RequestBody request: SocialOAuthRequest // 통합 DTO 사용
+    ): ResponseEntity<ApiResponse<SocialLoginResponse>> {
+
+        // 서비스 호출 (통합된 socialLogin 메서드 활용)
+        val result = memberService.socialLogin(provider, request.token)
+
+        val response = SocialLoginResponse(
+            accessToken = result.accessToken,
+            refreshToken = result.refreshToken,
+            isNewMember = result.isNewMember,
+            memberId = result.memberId,
+            nickname = result.nickname
         )
-        
-        // 프로필 완료 상태에 따라 메시지 변경
-        val message = if (googleOAuthResult.isProfileCompleted) {
-            "구글 로그인에 성공했습니다."
-        } else {
-            "회원 유형을 선택해주세요."
-        }
-        
+
+        val message = if (result.isNewMember) "회원 유형을 선택해주세요." else "${provider.uppercase()} 로그인에 성공했습니다."
+
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(ApiResponse.success(response, message))
     }
-    @Operation(summary = "oauth verify", description = "oauth 맞는지 확인하는 것입니다. ")
+
+
+        @Operation(summary = "oauth verify", description = "oauth 맞는지 확인하는 것입니다. ")
     @PostMapping("/oauth/verify")
     fun verifyOAuth(@Valid @RequestBody request: OAuthVerifyRequest): ResponseEntity<ApiResponse<OAuthVerifyResponse>> {
         val oauthVerifyResult = memberService.verifyOAuth(request.provider, request.token)

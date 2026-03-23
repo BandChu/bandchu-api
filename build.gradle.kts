@@ -57,6 +57,11 @@ dependencies {
     implementation("org.flywaydb:flyway-core")
     // PostgreSQL 전용 의존성
     implementation("org.flywaydb:flyway-database-postgresql")
+
+    // Testcontainers 핵심 라이브러리
+    testImplementation("org.testcontainers:junit-jupiter:1.19.0")
+    // PostgreSQL 전용 모듈
+    testImplementation("org.testcontainers:postgresql:1.19.0")
 }
 
 kotlin {

@@ -12,6 +12,9 @@ data class Member(
     val nickname: String,
     val role: Role,
     val googleId: String? = null,
+    val naverId: String? = null,
+    val kakaoId: String? = null,
+    val provider: String = "LOCAL",
     val profileImageUrl: String? = null,
     val isProfileCompleted: Boolean = false,
     val createdAt: LocalDateTime? = null
@@ -55,14 +58,19 @@ data class Member(
         fun createForOAuth(
             email: String,
             nickname: String,
-            googleId: String
+            naverId : String? = null,
+            kakaoId : String? = null,
+            googleId: String? = null,
+            provider: String,
         ): Member {
             return Member(
                 email = email,
-                password = "", // OAuth 회원은 비밀번호 없음
+                password = "OAUTH_USER", // OAuth 회원은 비밀번호 없음
                 nickname = nickname,
                 role = Role.FAN, // 기본 역할은 FAN
                 googleId = googleId,
+                naverId = naverId,
+                kakaoId = kakaoId,
                 isProfileCompleted = false // OAuth 회원가입은 프로필 설정 전까지 미완료 상태
             )
         }

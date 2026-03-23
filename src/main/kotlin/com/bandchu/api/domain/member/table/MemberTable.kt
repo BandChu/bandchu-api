@@ -13,4 +13,8 @@ object MemberTable : LongIdTable("members") {
     val profileImageUrl = text("profile_image_url").nullable() // base64 데이터 URL 저장을 위해 TEXT로 변경
     val isProfileCompleted = bool("is_profile_completed").default(false)
     val createdAt = timestampWithTimeZone("created_at")
+
+    val kakaoId = varchar("kakao_id", 255).nullable().uniqueIndex()
+    val naverId = varchar("naver_id", 255).nullable().uniqueIndex()
+    val provider = varchar("provider", 20).default("LOCAL") // GOOGLE, KAKAO, NAVER
 }

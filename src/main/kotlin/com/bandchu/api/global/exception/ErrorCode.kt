@@ -23,7 +23,8 @@ enum class ErrorCode(
 
     // user
     USER_INVALID_CREDENTIAL("user-invalid-credential", HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다."),
-
+    KAKAO_AUTH_INVALID("kakao-auth-invalid", HttpStatus.UNAUTHORIZED, "카카오 인증에서 문제가 발생하였습니다"),
+    NAVER_AUTH_INVALID("naver-auth-invalid", HttpStatus.UNAUTHORIZED,"네이버 인증에서 문제가 발생하였습니다."),
     // ===== post =====
     POST_NOT_FOUND("post-not-found", HttpStatus.NOT_FOUND, "해당 게시글을 찾을 수 없습니다."),
     POST_FORBIDDEN("post-forbidden", HttpStatus.FORBIDDEN, "해당 게시글의 작성자가 아닙니다."),
