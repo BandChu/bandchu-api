@@ -86,8 +86,11 @@ enum class ErrorCode(
     FRIEND_SELF_REQUEST("friend-self-request", HttpStatus.BAD_REQUEST, "자기 자신에게는 친구 요청을 보낼 수 없습니다."),
     FRIEND_REQUEST_DUPLICATED("friend-request-duplicated", HttpStatus.CONFLICT, "이미 존재하는 친구 요청입니다."),
     FRIEND_REQUEST_ACCEPT_FAIL("friend-request-accept-fail", HttpStatus.BAD_REQUEST, "친구 요청을 수락할 수 없습니다."),
-    FRIEND_REQUEST_REJECT_FAIL("friend-request-reject-fail", HttpStatus.BAD_REQUEST, "친구 요청을 거절할 수 없습니다.")
+    FRIEND_REQUEST_REJECT_FAIL("friend-request-reject-fail", HttpStatus.BAD_REQUEST, "친구 요청을 거절할 수 없습니다."),
 
+    // ==== shorts ====
+    COMMENT_DELETE_NOT_ALLOWED("no-auth-delete-comment", HttpStatus.UNAUTHORIZED,"자기자신 이외에는 쇼츠의 댓글을 못 지웁니다."),
+    INVALID_PARAMETER("invalid-paramter-shorts-count", HttpStatus.BAD_REQUEST, "쇼츠 조회수 증가하기에서 파라미터 값이 잘못되었습니다.")
     ;
 
     val code: String
