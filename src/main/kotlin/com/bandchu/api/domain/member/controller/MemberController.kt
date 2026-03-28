@@ -19,7 +19,9 @@ import com.bandchu.api.domain.member.dto.SignupRequest
 import com.bandchu.api.domain.member.dto.SignupResponse
 import com.bandchu.api.domain.member.dto.SocialLoginResponse
 import com.bandchu.api.domain.member.dto.SocialOAuthRequest
+import com.bandchu.api.domain.member.service.KakaoOAuthService
 import com.bandchu.api.domain.member.service.MemberService
+import com.bandchu.api.domain.member.service.NaverOAuthService
 import com.bandchu.api.global.exception.BusinessException
 import com.bandchu.api.global.exception.ErrorCode
 import com.bandchu.api.global.response.ApiResponse
@@ -40,7 +42,9 @@ import java.time.ZoneOffset
 @RequestMapping("/api/members")
 @Tag(name = "Member", description = "회원 관련 API")
 class MemberController(
-    private val memberService: MemberService
+    private val memberService: MemberService,
+    private val naverOAuthService: NaverOAuthService,
+    private val kakaoOAuthService: KakaoOAuthService
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -106,6 +110,54 @@ class MemberController(
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(ApiResponse.success(response, "토큰이 성공적으로 재발급되었습니다."))
+    }
+
+    @GetMapping("/oauth/kakao/callback")
+    fun kakaoCallback(
+        @RequestParam code: String
+    ): ResponseEntity<ApiResponse<SocialLoginResponse>> {
+        // 1. 카카오로부터 진짜 신분증(AccessToken) 받아오기
+        val accessToken = kakaoOAuthService.getAccessToken(code)
+
+        // 2. 그 신분증으로 우리 서비스 로그인 처리
+        val result = memberService.socialLogin("KAKAO", accessToken)
+
+        val response = SocialLoginResponse(
+            accessToken = result.accessToken,
+            refreshToken = result.refreshToken,
+            isNewMember = result.isNewMember,
+            memberId = result.memberId,
+            nickname = result.nickname
+        )
+
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(ApiResponse.success(response, "카카오 로그인 성공"))
+    }
+
+    @GetMapping("/oauth/naver/callback")
+    fun naverCallback(
+        @RequestParam code: String,
+        @RequestParam state: String
+    ): ResponseEntity<ApiResponse<SocialLoginResponse>> {
+        // 1. 받은 code로 네이버에 Access Token 요청 (보통 서비스에서 처리)
+        // 2. 받은 Access Token으로 socialLogin(provider = "NAVER", token = accessToken) 호출
+        // 3. 최종 결과 반환
+        // 1. 응답용 DTO 생성
+        val accessToken = naverOAuthService.getAccessToken(code, state)
+        val result = memberService.socialLogin("NAVER", accessToken)
+        val response = SocialLoginResponse(
+            accessToken = result.accessToken,
+            refreshToken = result.refreshToken,
+            isNewMember = result.isNewMember,
+            memberId = result.memberId,
+            nickname = result.nickname
+        )
+
+        // 2. data 자리에 response를 넣어줍니다!
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(ApiResponse.success(response, "네이버 로그인 성공"))
     }
 
 
@@ -234,6 +286,8 @@ class MemberController(
             .status(HttpStatus.OK)
             .body(ApiResponse.success(response, "프로필 초기 설정이 완료되었습니다."))
     }
+
+
     @Operation(summary = "역할 정하기", description = "FAN인지 ARTIST인지 정하는 api 인데 profile/setup과 합쳐질 수 있습니다.")
     @PatchMapping("/me/role")
     fun updateRole(@Valid @RequestBody request: RoleUpdateRequest): ResponseEntity<ApiResponse<RoleUpdateResponse>> {
