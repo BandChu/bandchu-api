@@ -13,11 +13,17 @@ import com.bandchu.api.domain.concert.table.ConcertTable
 import com.bandchu.api.domain.subscription.table.SubscriptionTable
 import com.bandchu.api.global.exception.BusinessException
 import com.bandchu.api.global.exception.ErrorCode
+import org.jetbrains.exposed.v1.core.DoubleColumnType
+import org.jetbrains.exposed.v1.datetime.KotlinOffsetDateTimeColumnType
 import org.jetbrains.exposed.v1.core.JoinType
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.SortOrder
+import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.greaterEq
 import org.jetbrains.exposed.v1.core.inList
+import org.jetbrains.exposed.v1.core.less
+import org.jetbrains.exposed.v1.core.plus
 import org.jetbrains.exposed.v1.jdbc.batchInsert
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insertAndGetId
@@ -27,7 +33,9 @@ import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
 import org.springframework.stereotype.Repository
 import java.net.URI
+import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 
 @Repository
@@ -38,12 +46,15 @@ class ConcertRepository {
             id = this[ConcertTable.id].value,
             title = this[ConcertTable.title],
             place = this[ConcertTable.place],
+            latitude = this[ConcertTable.latitude],
+            longitude = this[ConcertTable.longitude],
             posterImageUrl = this[ConcertTable.posterImageUrl]?.let { URI(it) },
             information = this[ConcertTable.information],
             bookingUrl = this[ConcertTable.bookingUrl]?.let { URI(it) },
             bookingSchedule = this[ConcertTable.bookingSchedule],
             createdAt = this[ConcertTable.createdAt],
             artiProfileId = this[ConcertTable.arti_profile].value,
+            viewCount = this[ConcertTable.viewCount],
             schedules = schedules
         )
 
@@ -67,7 +78,7 @@ class ConcertRepository {
             memberId = this[ArtiProfileTable.member]?.value
         )
 
-    private fun findSchedulesByConcertId(concertId: Long): List<ConcertSchedule> = transaction {
+    private fun findSchedulesByConcertId(concertId: Long): List<ConcertSchedule> =
         ConcertScheduleTable
             .selectAll()
             .where { ConcertScheduleTable.concert eq concertId }
@@ -76,7 +87,6 @@ class ConcertRepository {
                 row.toConcertScheduleDomain(concertId)
             }
             .toList()
-    }
 
     fun createProcess(command: CreateConcertCommand, userId: Long): Concert = transaction {
         val artiProfileId = ArtiProfileTable
@@ -90,11 +100,14 @@ class ConcertRepository {
         val concertId = ConcertTable.insertAndGetId {
             it[title] = command.title
             it[place] = command.place
+            it[latitude] = command.latitude
+            it[longitude] = command.longitude
             it[posterImageUrl] = command.posterImageUrl?.toString()
             it[information] = command.information
             it[bookingSchedule] = command.bookingSchedule
             it[bookingUrl] = command.bookingUrl?.toString()
             it[createdAt] = OffsetDateTime.now(ZoneOffset.UTC)
+            it[viewCount] = 0L
             it[arti_profile] = artiProfileId
         }
 
@@ -137,6 +150,8 @@ class ConcertRepository {
             it[title] = command.title
             it[place] = command.place
             it[posterImageUrl] = command.posterImageUrl?.toString()
+            it[latitude] = command.latitude
+            it[longitude] = command.longitude
             it[information] = command.information
             it[bookingSchedule] = command.bookingSchedule
             it[bookingUrl] = command.bookingUrl?.toString()
@@ -179,6 +194,12 @@ class ConcertRepository {
         if (ownerProfileId != artiProfileId) throw BusinessException(ErrorCode.ARTIST_FORBIDDEN)
 
         ConcertTable.deleteWhere { ConcertTable.id eq concertId }
+    }
+
+    fun incrementViewCount(concertId: Long): Int = transaction {
+        ConcertTable.update({ ConcertTable.id eq concertId }) {
+            it[viewCount] = ConcertTable.viewCount + 1L
+        }
     }
 
     fun getDetail(concertId: Long): Concert = transaction {
@@ -257,6 +278,85 @@ class ConcertRepository {
                 subscribedAt = subscribedAt,
                 concerts = concerts
             )
+        }
+    }
+
+    fun findNearbyConcerts(lat: Double, lng: Double): List<Concert> = transaction {
+        val kst = ZoneId.of("Asia/Seoul")
+        val today = LocalDate.now(kst)
+        val todayStart = today.atStartOfDay(kst).toOffsetDateTime()
+        val tomorrowStart = today.plusDays(1).atStartOfDay(kst).toOffsetDateTime()
+
+        val sql = """
+            SELECT c.id, c.title, c.place, c.latitude, c.longitude,
+                   c.poster_image_url, c.information, c.booking_url, c.booking_date,
+                   c.created_at, c.view_count, c.arti_profile
+            FROM concerts c
+            JOIN (
+                SELECT concert, MIN(date) AS earliest_today
+                FROM concert_schedule
+                WHERE date >= ?
+                  AND date < ?
+                GROUP BY concert
+            ) cs_today ON cs_today.concert = c.id
+            WHERE c.latitude IS NOT NULL
+              AND c.longitude IS NOT NULL
+              AND earth_box(ll_to_earth(?, ?), 10000) @> ll_to_earth(c.latitude::float8, c.longitude::float8)
+              AND earth_distance(ll_to_earth(c.latitude::float8, c.longitude::float8), ll_to_earth(?, ?)) <= 10000
+            ORDER BY cs_today.earliest_today ASC, c.view_count DESC
+        """.trimIndent()
+
+        val doubleType = DoubleColumnType()
+        val tsType = KotlinOffsetDateTimeColumnType()
+        val concerts = exec(
+            sql,
+            args = listOf(
+                tsType to todayStart,
+                tsType to tomorrowStart,
+                doubleType to lat,
+                doubleType to lng,
+                doubleType to lat,
+                doubleType to lng,
+            )
+        ) { rs ->
+            val result = mutableListOf<Concert>()
+            while (rs.next()) {
+                result.add(
+                    Concert(
+                        id = rs.getLong("id"),
+                        title = rs.getString("title"),
+                        place = rs.getString("place"),
+                        latitude = rs.getBigDecimal("latitude"),
+                        longitude = rs.getBigDecimal("longitude"),
+                        posterImageUrl = rs.getString("poster_image_url")?.let { URI(it) },
+                        information = rs.getString("information"),
+                        bookingUrl = rs.getString("booking_url")?.let { URI(it) },
+                        bookingSchedule = rs.getObject("booking_date", OffsetDateTime::class.java),
+                        createdAt = rs.getObject("created_at", OffsetDateTime::class.java),
+                        artiProfileId = rs.getLong("arti_profile"),
+                        viewCount = rs.getLong("view_count"),
+                        schedules = emptyList()
+                    )
+                )
+            }
+            result
+        } ?: emptyList()
+
+        if (concerts.isEmpty()) return@transaction emptyList()
+
+        val concertIds = concerts.map { it.id }
+        val todaySchedules = ConcertScheduleTable
+            .selectAll()
+            .where {
+                ConcertScheduleTable.concert.inList(concertIds)
+                    .and(ConcertScheduleTable.date greaterEq todayStart)
+                    .and(ConcertScheduleTable.date less tomorrowStart)
+            }
+            .map { row -> row.toConcertScheduleDomain(row[ConcertScheduleTable.concert].value) }
+            .groupBy { it.concertId }
+
+        concerts.map { concert ->
+            concert.copy(schedules = todaySchedules[concert.id] ?: emptyList())
         }
     }
 

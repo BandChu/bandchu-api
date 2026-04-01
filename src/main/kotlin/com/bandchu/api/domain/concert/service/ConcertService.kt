@@ -14,14 +14,22 @@ import org.springframework.stereotype.Service
 
 @Service
 class ConcertService(
-    private val concertRepository: ConcertRepository
+    private val concertRepository: ConcertRepository,
 ) {
+
+    fun getNearbyConcerts(lat: Double, lng: Double): List<Concert> {
+        return concertRepository.findNearbyConcerts(lat, lng)
+    }
 
     fun getAllByArtist(artistId: Long): List<Concert> {
         return concertRepository.getAllByArtist(artistId)
     }
 
     fun getDetail(concertId: Long): Concert {
+        val updated = concertRepository.incrementViewCount(concertId)
+        if (updated == 0) {
+            throw BusinessException(ErrorCode.CONCERT_NOT_FOUND)
+        }
         return concertRepository.getDetail(concertId)
     }
 
