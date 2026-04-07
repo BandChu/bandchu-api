@@ -56,6 +56,17 @@ class SecurityConfig(
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
             .authorizeHttpRequests { auth ->
 
+                // ===== Actuator (내부 전용) =====
+                auth.requestMatchers("/actuator/**").permitAll()
+
+                // ===== Swagger (Basic Auth 필터에서 별도 처리) =====
+                auth.requestMatchers(
+                    "/swagger-ui/**",
+                    "/swagger-ui.html",
+                    "/v3/api-docs/**",
+                    "/swagger-resources/**"
+                ).permitAll()
+
                 // ===== 공개 엔드포인트 =====
                 auth.requestMatchers(
                     "/api/members/signup",
