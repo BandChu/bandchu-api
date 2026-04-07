@@ -17,5 +17,8 @@ object CommentTable : Table("comment") {
 
     val memberId = reference("member_id", MemberTable.id, onDelete = ReferenceOption.CASCADE)
 
+    // 대댓글을 위한 부모 참조 (null이면 최상위 댓글)
+    val parentId = long("parent_id").references(id, onDelete = ReferenceOption.CASCADE).nullable()
+
     override val primaryKey = PrimaryKey(id)
 }

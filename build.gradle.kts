@@ -53,6 +53,7 @@ dependencies {
     testImplementation("com.h2database:h2:2.2.224")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
+
     kotlin {
         compilerOptions {
             freeCompilerArgs.addAll(
@@ -61,7 +62,15 @@ dependencies {
             )
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
         }
-    }
+
+
+    // Testcontainers 핵심 라이브러리
+    testImplementation("org.testcontainers:junit-jupiter:1.19.0")
+    // PostgreSQL 전용 모듈
+    testImplementation("org.testcontainers:postgresql:1.19.0")
+}
+
+
 
     tasks.withType<Test> {
         useJUnitPlatform()

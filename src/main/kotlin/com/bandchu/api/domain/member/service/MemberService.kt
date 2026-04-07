@@ -2,6 +2,7 @@ package com.bandchu.api.domain.member.service
 
 import com.bandchu.api.domain.member.dto.LoginRequest
 import com.bandchu.api.domain.member.dto.SignupRequest
+import com.bandchu.api.domain.member.dto.SocialLoginResult
 import com.bandchu.api.domain.member.model.Member
 import com.bandchu.api.domain.member.model.Role
 import com.bandchu.api.domain.member.repository.MemberRepository
@@ -20,7 +21,9 @@ class MemberService(
     private val memberRepository: MemberRepository,
     private val jwtService: JwtService,
     private val googleOAuthService: GoogleOAuthService,
-    private val passwordEncoder: PasswordEncoder
+    private val passwordEncoder: PasswordEncoder,
+    private val naverOAuthService: NaverOAuthService, // 추가
+    private val kakaoOAuthService: KakaoOAuthService, // 추가
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -128,53 +131,58 @@ class MemberService(
         )
     }
 
-    fun googleLogin(idToken: String): GoogleOAuthResult {
-        // Google ID Token 검증
-        val googleUserInfo = try {
-            googleOAuthService.verifyIdToken(idToken)
-        } catch (e: BusinessException) {
-            throw e
-        } catch (e: Exception) {
-            throw BusinessException(ErrorCode.GOOGLE_AUTH_INVALID)
+
+// 3개의 소셜 로그인에 따른 소셜 로그인 코드 수정
+
+    fun socialLogin(provider: String, token: String): SocialLoginResult {
+        // 1. 프로바이더별 유저 정보 추출 (임시 DTO 사용 권장)
+        // 1. Triple 타입 강제 맞추기 (it.googleId 등이 String? 일 수 있으므로 toString() 활용)
+        val userInfo = when (provider.uppercase()) {
+            "GOOGLE" -> googleOAuthService.verifyIdToken(token).let {
+                Triple(it.email, it.name, it.googleId)
+            }
+            "NAVER" -> naverOAuthService.verifyToken(token).let {
+                Triple(it.email, it.nickname ?: "NaverUser", it.naverId)
+            }
+            "KAKAO" -> kakaoOAuthService.verifyToken(token).let {
+                Triple(it.email, it.nickname ?: "KakaoUser", it.kakaoId)
+            }
+            else -> throw BusinessException(ErrorCode.OAUTH_TOKEN_INVALID)
         }
 
-        // 이메일로 기존 회원 조회
-        val existingMember = memberRepository.findByEmail(googleUserInfo.email)
+        // Triple 구조 분해 할당 (타입 명시로 에러 방지)
+        val email: String = userInfo.first
+        val nickname: String = userInfo.second
+        val socialId: String = userInfo.third
+
+        // 2. 이메일로 기존 회원 조회
+        val existingMember = memberRepository.findByEmail(email)
         val isNewMember = existingMember == null
-        
+
         val member = if (existingMember != null) {
-            // 기존 회원인 경우
-            // Google ID가 아직 연결되지 않은 경우 자동으로 연결
-            if (existingMember.googleId == null) {
-                val memberId = existingMember.id ?: run {
-                    log.error("Critical: Member ID is null when updating Google ID. Email: ${existingMember.email}")
-                    throw IllegalStateException("회원 ID가 없습니다.")
-                }
-                memberRepository.updateGoogleId(memberId, googleUserInfo.googleId)
-                existingMember.copy(googleId = googleUserInfo.googleId)
-            } else {
-                existingMember
-            }
+            // 기존 회원인 경우 (DB 컬럼 추가 전이라 일단 그대로 반환)
+            existingMember
         } else {
-            // 신규 회원인 경우 자동 가입 (도메인 factory 메서드 사용)
+            // ✅ 신규 회원인 경우 가입 (Member.createForOAuth 수정 필요!)
+            // 2. 신규 가입 로직 호출
             val newMember = Member.createForOAuth(
-                email = googleUserInfo.email,
-                nickname = googleUserInfo.name,
-                googleId = googleUserInfo.googleId
+                email = email,
+                nickname = nickname,
+                googleId = if (provider.uppercase() == "GOOGLE") socialId else null,
+                naverId = if (provider.uppercase() == "NAVER") socialId else null,
+                kakaoId = if (provider.uppercase() == "KAKAO") socialId else null,
+                provider = provider.uppercase() // 이제 에러 안 날 겁니다!
             )
             memberRepository.save(newMember)
         }
 
-        val memberId = member.id ?: run {
-            log.error("Critical: Member ID is null after login. Email: ${member.email}")
-            throw IllegalStateException("회원 ID가 없습니다.")
-        }
-
-        // JWT 토큰 생성
+        // 3. 토큰 발급 (기존 로직 동일)
+        val memberId = member.id ?: throw IllegalStateException("회원 ID가 없습니다.")
         val accessToken = jwtService.generateAccessToken(memberId, member.role)
         val refreshToken = jwtService.generateRefreshToken(memberId, member.role)
 
-        return GoogleOAuthResult(
+        // ✅ 정의한 통합 DTO 반환
+        return SocialLoginResult(
             accessToken = accessToken,
             refreshToken = refreshToken,
             isNewMember = isNewMember,
@@ -183,6 +191,9 @@ class MemberService(
             isProfileCompleted = member.isProfileCompleted
         )
     }
+
+
+
 
     fun verifyOAuth(provider: String, token: String): OAuthVerifyResult {
         // 프로바이더별 토큰 검증 및 사용자 정보 추출
