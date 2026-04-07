@@ -64,7 +64,6 @@ class JwtService(
         return try {
             Jwts.parser()
                 .verifyWith(secretKey)
-                .requireAlgorithm(Jwts.SIG.HS256)
                 .build()
                 .parseSignedClaims(token)
             true
@@ -94,7 +93,6 @@ class JwtService(
     private fun getClaims(token: String): Claims {
         return Jwts.parser()
             .verifyWith(secretKey)
-            .requireAlgorithm(Jwts.SIG.HS256)
             .build()
             .parseSignedClaims(token)
             .payload
