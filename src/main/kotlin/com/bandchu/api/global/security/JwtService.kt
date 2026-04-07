@@ -4,6 +4,7 @@ import com.bandchu.api.domain.member.model.Role
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
+import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.util.*
@@ -11,7 +12,6 @@ import javax.crypto.SecretKey
 
 @Service
 class JwtService(
-  //  @get:Value("\${jwt.secret:bandchu-secret-key-for-jwt-token-generation-minimum-256-bits}")
     @Value("\${jwt.secret}")
     private val secret: String,
     @Value("\${jwt.access-token-expiration:3600000}") // 1시간
@@ -19,8 +19,18 @@ class JwtService(
     @Value("\${jwt.refresh-token-expiration:604800000}") // 7일
     private val refreshTokenExpiration: Long
 ) {
+    private lateinit var secretKey: SecretKey
 
-    private val secretKey: SecretKey = Keys.hmacShaKeyFor(secret.toByteArray())
+    @PostConstruct
+    fun init() {
+        require(secret.isNotBlank()) {
+            "JWT secret key must not be blank. Please set JWT_SECRET environment variable."
+        }
+        require(secret.toByteArray().size >= 32) {
+            "JWT secret key must be at least 32 bytes (256 bits) for HS256 algorithm. Current length: ${secret.toByteArray().size} bytes."
+        }
+        secretKey = Keys.hmacShaKeyFor(secret.toByteArray())
+    }
 
     fun generateAccessToken(memberId: Long, role: Role): String {
         val now = Date()
@@ -32,7 +42,7 @@ class JwtService(
             .claim("tokenType", "access")
             .issuedAt(now)
             .expiration(expiryDate)
-            .signWith(secretKey)
+            .signWith(secretKey, Jwts.SIG.HS256)
             .compact()
     }
 
@@ -46,7 +56,7 @@ class JwtService(
             .claim("tokenType", "refresh")
             .issuedAt(now)
             .expiration(expiryDate)
-            .signWith(secretKey)
+            .signWith(secretKey, Jwts.SIG.HS256)
             .compact()
     }
 
@@ -54,6 +64,7 @@ class JwtService(
         return try {
             Jwts.parser()
                 .verifyWith(secretKey)
+                .requireAlgorithm(Jwts.SIG.HS256)
                 .build()
                 .parseSignedClaims(token)
             true
@@ -83,6 +94,7 @@ class JwtService(
     private fun getClaims(token: String): Claims {
         return Jwts.parser()
             .verifyWith(secretKey)
+            .requireAlgorithm(Jwts.SIG.HS256)
             .build()
             .parseSignedClaims(token)
             .payload
