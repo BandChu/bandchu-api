@@ -39,12 +39,15 @@ class ArtiProfileRepository {
             id = this[ConcertTable.id].value,
             title = this[ConcertTable.title],
             place = this[ConcertTable.place],
+            latitude = this[ConcertTable.latitude],
+            longitude = this[ConcertTable.longitude],
             posterImageUrl = this[ConcertTable.posterImageUrl]?.let { URI(it) },
             information = this[ConcertTable.information],
             bookingUrl = this[ConcertTable.bookingUrl]?.let { URI(it) },
             bookingSchedule = this[ConcertTable.bookingSchedule],
             createdAt = this[ConcertTable.createdAt],
-            artiProfileId = this[ConcertTable.arti_profile].value
+            artiProfileId = this[ConcertTable.arti_profile].value,
+            viewCount = this[ConcertTable.viewCount]
         )
 
     private fun ResultRow.toSnsLinkDomain(): SnsLink =

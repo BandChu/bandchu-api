@@ -24,6 +24,19 @@ import org.springframework.web.bind.annotation.*
 class ConcertController(
     private val concertService: ConcertService
 ) {
+    @Operation(summary = "근처 공연 조회", description = "현재 위치 기준 10km 이내, 오늘 스케줄이 있는 공연을 공연 시각 순으로 반환")
+    @GetMapping("/nearby")
+    fun getNearby(
+        @RequestParam lat: Double,
+        @RequestParam lng: Double
+    ): ResponseEntity<ApiResponse<ConcertListResponse>> {
+        val concerts = concertService.getNearbyConcerts(lat, lng)
+
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(ApiResponse.success(concerts.toConcertListResponse()))
+    }
+
     @Operation(summary = "모든 콘서트 정보 가져오기", description = "한 artist에 대한 모든 콘서트 정보 가져오기")
     @GetMapping("")
     fun getAll(

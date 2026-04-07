@@ -9,9 +9,6 @@ spring:
     username: sa
     password: ""
 
-
-
-
   sql:
     init:
       mode: never

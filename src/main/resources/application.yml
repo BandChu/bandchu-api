@@ -8,8 +8,6 @@ spring:
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
-
-
   jpa:
     hibernate:
       ddl-auto: validate
@@ -50,6 +48,11 @@ server:
 oauth:
   google:
     client-id: ${GOOGLE_CLIENT_ID}
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiration: 3600000  # 1시간
+  refresh-token-expiration: 604800000  # 7일
 
 aws:
   region: ap-northeast-2

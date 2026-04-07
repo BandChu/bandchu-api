@@ -1,6 +1,7 @@
 package com.bandchu.api.domain.concert.dto.response
 
 import io.swagger.v3.oas.annotations.media.Schema
+import java.math.BigDecimal
 
 
 @Schema(description = "콘서트 세부 사항 응답")
@@ -11,6 +12,10 @@ data class ConcertDetailResponse(
     val title: String,
     @get:Schema(description = "콘서트 장소", example = "인천 인스파이어 아레나")
     val place: String,
+    @get:Schema(description = "위도 (클라이언트가 등록 시 전달)", example = "37.5665")
+    val latitude: BigDecimal?,
+    @get:Schema(description = "경도 (클라이언트가 등록 시 전달)", example = "126.9780")
+    val longitude: BigDecimal?,
     @get:Schema(description = "포스터 이미지 url", example = "http://www.image.co,.kr")
     val posterImageUrl: String?,
     @get:Schema(description = "콘서트 관련 정보", example = "이번 콘서트는 올해 하반기 최대 규모 락 밴드 페스티벌입니다.")

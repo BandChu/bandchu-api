@@ -2,6 +2,7 @@ package com.bandchu.api.domain.concert.dto
 
 import com.bandchu.api.domain.concert.dto.response.ConcertScheduleResponse
 import io.swagger.v3.oas.annotations.media.Schema
+import java.math.BigDecimal
 
 @Schema(description = "구독 중인 콘서트 정보")
 data class SubscribedConcertDto(
@@ -11,6 +12,10 @@ data class SubscribedConcertDto(
     val title: String,
     @get:Schema(description = "콘서트 장소", example = "인천 인스파이어 아레나")
     val place: String,
+    @get:Schema(description = "위도")
+    val latitude: BigDecimal?,
+    @get:Schema(description = "경도")
+    val longitude: BigDecimal?,
     @get:Schema(description = "예매 url", example = "http://www.interpark.com")
     val bookingUrl: String?,
     @get:Schema(description = "콘서트 포스터 이미지 url", example = "http://www.concert.poster.com")
