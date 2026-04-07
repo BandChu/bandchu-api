@@ -1,6 +1,8 @@
 package com.bandchu.api.domain.artist.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
+import java.math.BigDecimal
+
 @Schema(description = "앨범 상세 정보")
 data class ConcertSearchResultDto(
     @get:Schema(description = "공연명 이름", example = "데이먼스이어 단독콘서트")
@@ -11,6 +13,12 @@ data class ConcertSearchResultDto(
 
     @get:Schema(description = "공연명 이름", example = "데이먼스이어 단독콘서트")
     val place: String,
+
+    @get:Schema(description = "위도")
+    val latitude: BigDecimal?,
+
+    @get:Schema(description = "경도")
+    val longitude: BigDecimal?,
 
     @get:Schema(description = "공연명 이름", example = "데이먼스이어 단독콘서트")
     val posterImageUrl: String?

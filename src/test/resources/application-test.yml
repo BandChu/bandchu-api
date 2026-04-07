@@ -9,10 +9,6 @@ spring:
     username: sa
     password: ""
 
-  # 🔴 테스트 시에는 Flyway가 H2에서 돌 수 있게 하거나 잠시 끕니다.
-  flyway:
-    enabled: false
-
   sql:
     init:
       mode: never

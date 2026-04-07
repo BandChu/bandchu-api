@@ -36,6 +36,9 @@ class DatabaseConfig(
 
         // 전체 테이블 생성
         transaction {
+            exec("CREATE EXTENSION IF NOT EXISTS cube")
+            exec("CREATE EXTENSION IF NOT EXISTS earthdistance")
+
             SchemaUtils.create(
                 // member & subscription
                 MemberTable,

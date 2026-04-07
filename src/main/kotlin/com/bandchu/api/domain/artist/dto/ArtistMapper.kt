@@ -60,6 +60,8 @@ fun Concert.toConcertSearchResultDto(): ConcertSearchResultDto =
         concertId = id,
         title = title,
         place = place,
+        latitude = latitude,
+        longitude = longitude,
         posterImageUrl = posterImageUrl?.toString()
     )
 

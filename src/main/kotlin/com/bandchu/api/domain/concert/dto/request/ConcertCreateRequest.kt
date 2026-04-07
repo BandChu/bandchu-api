@@ -3,6 +3,8 @@ package com.bandchu.api.domain.concert.dto.request
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
+import java.math.BigDecimal
+
 @Schema(description = "콘서트 생성 요청")
 data class ConcertCreateRequest(
     @get:Schema(description = "공연명 이름", example = "데이먼스이어 단독콘서트")
@@ -12,6 +14,12 @@ data class ConcertCreateRequest(
     @get:Schema(description = "콘서트 공연 장소", example = "인천 인스파이어 아레나")
     @field:NotBlank("공연 장소를 입력하세요.")
     val place: String,
+
+    @get:Schema(description = "위도 (프론트 주소/지도 검색 결과)", example = "37.5665")
+    val latitude: BigDecimal? = null,
+
+    @get:Schema(description = "경도 (프론트 주소/지도 검색 결과)", example = "126.9780")
+    val longitude: BigDecimal? = null,
 
     @get:Schema(description = "콘서트 포스터 이미지 url", example = "http://www.co.kr")
     val posterImageUrl: String?,
