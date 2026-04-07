@@ -23,7 +23,8 @@ enum class ErrorCode(
 
     // user
     USER_INVALID_CREDENTIAL("user-invalid-credential", HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다."),
-
+    KAKAO_AUTH_INVALID("kakao-auth-invalid", HttpStatus.UNAUTHORIZED, "카카오 인증에서 문제가 발생하였습니다"),
+    NAVER_AUTH_INVALID("naver-auth-invalid", HttpStatus.UNAUTHORIZED,"네이버 인증에서 문제가 발생하였습니다."),
     // ===== post =====
     POST_NOT_FOUND("post-not-found", HttpStatus.NOT_FOUND, "해당 게시글을 찾을 수 없습니다."),
     POST_FORBIDDEN("post-forbidden", HttpStatus.FORBIDDEN, "해당 게시글의 작성자가 아닙니다."),
@@ -85,8 +86,11 @@ enum class ErrorCode(
     FRIEND_SELF_REQUEST("friend-self-request", HttpStatus.BAD_REQUEST, "자기 자신에게는 친구 요청을 보낼 수 없습니다."),
     FRIEND_REQUEST_DUPLICATED("friend-request-duplicated", HttpStatus.CONFLICT, "이미 존재하는 친구 요청입니다."),
     FRIEND_REQUEST_ACCEPT_FAIL("friend-request-accept-fail", HttpStatus.BAD_REQUEST, "친구 요청을 수락할 수 없습니다."),
-    FRIEND_REQUEST_REJECT_FAIL("friend-request-reject-fail", HttpStatus.BAD_REQUEST, "친구 요청을 거절할 수 없습니다.")
+    FRIEND_REQUEST_REJECT_FAIL("friend-request-reject-fail", HttpStatus.BAD_REQUEST, "친구 요청을 거절할 수 없습니다."),
 
+    // ==== shorts ====
+    COMMENT_DELETE_NOT_ALLOWED("no-auth-delete-comment", HttpStatus.UNAUTHORIZED,"자기자신 이외에는 쇼츠의 댓글을 못 지웁니다."),
+    INVALID_PARAMETER("invalid-paramter-shorts-count", HttpStatus.BAD_REQUEST, "쇼츠 조회수 증가하기에서 파라미터 값이 잘못되었습니다.")
     ;
 
     val code: String

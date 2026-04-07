@@ -8,12 +8,7 @@ spring:
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
-  # 🔴 아래 flyway와 jpa 설정이 spring 하위로 정확히 정렬되어야 합니다.
-  flyway:
-    enabled: true
-    baseline-on-migrate: true # 기존 DB가 있어도 기준점을 잡고 시작함
-    locations: classpath:db/migration
-    schemas: public
+
 
   jpa:
     hibernate:
@@ -25,6 +20,14 @@ spring:
         provider:
           google:
             jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
+    oauth:
+      naver:
+        client-id: ${OAUTH_NAVER_CLIENT_ID}
+        client-secret: ${OAUTH_NAVER_CLIENT_SECRET}
+      kakao:
+        client-id: ${OAUTH_KAKAO_CLIENT_ID}
+        client-secret: ${OAUTH_KAKAO_CLIENT_SECRET}
+        redirect-uri: ${OAUTH_KAKAO_REDIRECT_URI}
     bcrypt:
       strength: 10
 

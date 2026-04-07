@@ -17,7 +17,11 @@ import com.bandchu.api.domain.member.dto.RoleUpdateRequest
 import com.bandchu.api.domain.member.dto.RoleUpdateResponse
 import com.bandchu.api.domain.member.dto.SignupRequest
 import com.bandchu.api.domain.member.dto.SignupResponse
+import com.bandchu.api.domain.member.dto.SocialLoginResponse
+import com.bandchu.api.domain.member.dto.SocialOAuthRequest
+import com.bandchu.api.domain.member.service.KakaoOAuthService
 import com.bandchu.api.domain.member.service.MemberService
+import com.bandchu.api.domain.member.service.NaverOAuthService
 import com.bandchu.api.global.exception.BusinessException
 import com.bandchu.api.global.exception.ErrorCode
 import com.bandchu.api.global.response.ApiResponse
@@ -38,7 +42,9 @@ import java.time.ZoneOffset
 @RequestMapping("/api/members")
 @Tag(name = "Member", description = "회원 관련 API")
 class MemberController(
-    private val memberService: MemberService
+    private val memberService: MemberService,
+    private val naverOAuthService: NaverOAuthService,
+    private val kakaoOAuthService: KakaoOAuthService
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -105,31 +111,83 @@ class MemberController(
             .status(HttpStatus.OK)
             .body(ApiResponse.success(response, "토큰이 성공적으로 재발급되었습니다."))
     }
-    @Operation(summary = "구글 로그인", description = "oauth로 구글로 가입합니다.")
-    @PostMapping("/oauth/google")
-    fun googleLogin(@Valid @RequestBody request: GoogleOAuthRequest): ResponseEntity<ApiResponse<GoogleOAuthResponse>> {
-        val googleOAuthResult = memberService.googleLogin(request.idToken)
-        
-        val response = GoogleOAuthResponse(
-            accessToken = googleOAuthResult.accessToken,
-            refreshToken = googleOAuthResult.refreshToken,
-            isNewMember = googleOAuthResult.isNewMember,
-            memberId = googleOAuthResult.memberId,
-            nickname = googleOAuthResult.nickname
+
+    @GetMapping("/oauth/kakao/callback")
+    fun kakaoCallback(
+        @RequestParam code: String
+    ): ResponseEntity<ApiResponse<SocialLoginResponse>> {
+        // 1. 카카오로부터 진짜 신분증(AccessToken) 받아오기
+        val accessToken = kakaoOAuthService.getAccessToken(code)
+
+        // 2. 그 신분증으로 우리 서비스 로그인 처리
+        val result = memberService.socialLogin("KAKAO", accessToken)
+
+        val response = SocialLoginResponse(
+            accessToken = result.accessToken,
+            refreshToken = result.refreshToken,
+            isNewMember = result.isNewMember,
+            memberId = result.memberId,
+            nickname = result.nickname
         )
-        
-        // 프로필 완료 상태에 따라 메시지 변경
-        val message = if (googleOAuthResult.isProfileCompleted) {
-            "구글 로그인에 성공했습니다."
-        } else {
-            "회원 유형을 선택해주세요."
-        }
-        
+
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(ApiResponse.success(response, "카카오 로그인 성공"))
+    }
+
+    @GetMapping("/oauth/naver/callback")
+    fun naverCallback(
+        @RequestParam code: String,
+        @RequestParam state: String
+    ): ResponseEntity<ApiResponse<SocialLoginResponse>> {
+        // 1. 받은 code로 네이버에 Access Token 요청 (보통 서비스에서 처리)
+        // 2. 받은 Access Token으로 socialLogin(provider = "NAVER", token = accessToken) 호출
+        // 3. 최종 결과 반환
+        // 1. 응답용 DTO 생성
+        val accessToken = naverOAuthService.getAccessToken(code, state)
+        val result = memberService.socialLogin("NAVER", accessToken)
+        val response = SocialLoginResponse(
+            accessToken = result.accessToken,
+            refreshToken = result.refreshToken,
+            isNewMember = result.isNewMember,
+            memberId = result.memberId,
+            nickname = result.nickname
+        )
+
+        // 2. data 자리에 response를 넣어줍니다!
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(ApiResponse.success(response, "네이버 로그인 성공"))
+    }
+
+
+    @Operation(summary = "소셜 로그인", description = "OAuth(Google, Naver, Kakao)를 통해 로그인/가입합니다.")
+    @PostMapping("/oauth/{provider}")
+    fun socialLogin(
+        @PathVariable provider: String,
+        @Valid @RequestBody request: SocialOAuthRequest // 통합 DTO 사용
+    ): ResponseEntity<ApiResponse<SocialLoginResponse>> {
+
+        // 서비스 호출 (통합된 socialLogin 메서드 활용)
+        val result = memberService.socialLogin(provider, request.token)
+
+        val response = SocialLoginResponse(
+            accessToken = result.accessToken,
+            refreshToken = result.refreshToken,
+            isNewMember = result.isNewMember,
+            memberId = result.memberId,
+            nickname = result.nickname
+        )
+
+        val message = if (result.isNewMember) "회원 유형을 선택해주세요." else "${provider.uppercase()} 로그인에 성공했습니다."
+
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(ApiResponse.success(response, message))
     }
-    @Operation(summary = "oauth verify", description = "oauth 맞는지 확인하는 것입니다. ")
+
+
+        @Operation(summary = "oauth verify", description = "oauth 맞는지 확인하는 것입니다. ")
     @PostMapping("/oauth/verify")
     fun verifyOAuth(@Valid @RequestBody request: OAuthVerifyRequest): ResponseEntity<ApiResponse<OAuthVerifyResponse>> {
         val oauthVerifyResult = memberService.verifyOAuth(request.provider, request.token)
@@ -228,6 +286,8 @@ class MemberController(
             .status(HttpStatus.OK)
             .body(ApiResponse.success(response, "프로필 초기 설정이 완료되었습니다."))
     }
+
+
     @Operation(summary = "역할 정하기", description = "FAN인지 ARTIST인지 정하는 api 인데 profile/setup과 합쳐질 수 있습니다.")
     @PatchMapping("/me/role")
     fun updateRole(@Valid @RequestBody request: RoleUpdateRequest): ResponseEntity<ApiResponse<RoleUpdateResponse>> {

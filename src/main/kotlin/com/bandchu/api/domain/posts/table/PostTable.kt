@@ -21,7 +21,8 @@ object PostTable : Table("posts") {
     val createdAt = timestampWithTimeZone("created_at")
     val updatedAt = timestampWithTimeZone("updated_at")
 
-
+    val viewCount = integer("view_count").default(0) // 조회수 추가
+    val likeCount = integer("like_count").default(0) // 좋아요 수(캐싱용) 추가
     override val primaryKey = PrimaryKey(id)
 }
 

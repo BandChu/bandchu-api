@@ -23,6 +23,9 @@ class MemberRepository {
                 it[nickname] = member.nickname
                 it[role] = member.role
                 it[googleId] = member.googleId
+                it[naverId] = member.naverId   // ✅ 추가
+                it[kakaoId] = member.kakaoId   // ✅ 추가
+                it[provider] = member.provider // ✅ 추가 (모델에 필드 있다면)
                 it[profileImageUrl] = member.profileImageUrl
                 it[isProfileCompleted] = member.isProfileCompleted
                 it[createdAt] = OffsetDateTime.now(ZoneOffset.UTC)
@@ -43,6 +46,33 @@ class MemberRepository {
                 .where { MemberTable.email eq email }
                 .any()
         }
+    }// 카카오 ID 업데이트
+    fun updateKakaoId(memberId: Long, kakaoId: String): Member {
+        return transaction {
+            MemberTable.update({ MemberTable.id eq memberId }) {
+                it[MemberTable.kakaoId] = kakaoId
+            }
+            findById(memberId)!!
+        }
+    }
+
+    // 네이버 ID 업데이트
+    fun updateNaverId(memberId: Long, naverId: String): Member {
+        return transaction {
+            MemberTable.update({ MemberTable.id eq memberId }) {
+                it[MemberTable.naverId] = naverId
+            }
+            findById(memberId)!!
+        }
+    }
+
+    // 소셜 ID로 회원 찾기 (linkOAuth 등에서 중복 체크용)
+    fun findByKakaoId(kakaoId: String): Member? = transaction {
+        MemberTable.selectAll().where { MemberTable.kakaoId eq kakaoId }.firstOrNull()?.let { toMember(it) }
+    }
+
+    fun findByNaverId(naverId: String): Member? = transaction {
+        MemberTable.selectAll().where { MemberTable.naverId eq naverId }.firstOrNull()?.let { toMember(it) }
     }
 
     fun findByEmail(email: String): Member? {
@@ -136,6 +166,9 @@ class MemberRepository {
             nickname = row[MemberTable.nickname],
             role = row[MemberTable.role],
             googleId = row[MemberTable.googleId],
+            naverId = row[MemberTable.naverId],   // ✅ 추가
+            kakaoId = row[MemberTable.kakaoId],   // ✅ 추가
+            provider = row[MemberTable.provider], // ✅ 추가
             profileImageUrl = row[MemberTable.profileImageUrl],
             isProfileCompleted = row[MemberTable.isProfileCompleted],
             createdAt = localDateTime
